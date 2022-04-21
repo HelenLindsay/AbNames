@@ -15,8 +15,11 @@ Imports:
     stringr
 Suggests:
     dplyr,
+    ontologyIndex,
+    ontoProc,
     readr,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    tidyr
 Config/testthat/edition: 3
 RoxygenNote: 7.1.2
 Depends: 

@@ -52,5 +52,20 @@ hgnc_groups <- dplyr::rename(hgnc_groups,
 
 hgnc <- dplyr::full_join(hgnc_proteins, hgnc_groups)
 hgnc <- unique(hgnc)
-hgnc <- data.frame(hgnc)
-usethis::use_data(hgnc, overwrite = TRUE)
+hgnc <- as.data.frame(hgnc)
+usethis::use_data(hgnc, overwrite = TRUE, compress = "bzip2")
+
+
+# Create and save long version of the HGNC table for querying ----
+
+hgnc_long <- dplyr::select(hgnc, -Chromosome) %>%
+    tidyr::pivot_longer(c("HGNC_SYMBOL",
+                          "HGNC_NAME",
+                          "alias_symbol",
+                          "prev_symbol"),
+                        names_to = "symbol_type") %>%
+    dplyr::filter(! is.na(value)) %>%
+    tidyr::unnest(value)
+
+hgnc_long <- as.data.frame(hgnc_long)
+usethis::use_data(hgnc_long, overwrite = TRUE, compress = "bzip2")
