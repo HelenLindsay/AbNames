@@ -1,3 +1,5 @@
+# Vectors for replacing Greek symbols or names ----
+
 # Rho?
 
 GREEKSYM_TO_NAME = c(α = "alpha", β = "beta", γ = "gamma", δ = "delta",
@@ -11,6 +13,18 @@ GREEKSYM_TO_LETTER =  c(α = "a", β = "b", γ = "g", δ = "d", ε = "e", ζ = "
 GREEKNAME_TO_LETTER = c(alpha = "a", beta = "b", gamma = "g", delta = "d",
                         epsilon = "e", zeta = "z", kappa = "k", lambda = "l")
 
+
+
+# Default transformation sequence for making query table ----
+
+
+
+
+
+
+
+
+# Delme ----
 
 #      η = "e", θ = "t", ι = "i", , μ = "m", ν = "n",
 #   ξ = "x", ο = "o", π = "p", ρ = "r", σ = "s", , υ = "u",
