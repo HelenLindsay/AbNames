@@ -17,6 +17,27 @@ makeQueryTable <- function(df, ab = "Antigen",
 }
 
 
+#'@importFrom pryr partial
+defaultQry <- function(){
+
+    # Default transformation sequence for making query table ----
+
+    # List of functions, column to act on and column to create?
+    # Check that all columns to act on are either in the table or created
+    # earlier in the pipeline
+    # function, ab, new_col, args?
+    qry = list(addID,
+               gsubAb(), # Remove A/anti
+               pryr::partial(gsubAb, pattern = "\\sRecombinant"),
+               splitUnnest(), # Brackets
+               splitUnnest(split = ", "),  # Commas
+               # / _ or . if at least 3 on each side and not TCR
+               pryr::partial(splitUnnest, exclude = "TCR",
+                        split = "(?<=[A-z0-9-]{3})[\\/_\\.](?=[A-z0-9-]{3,})")
+
+    )
+}
+
 
 # addID ----
 #'add ID column
@@ -93,11 +114,25 @@ addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",
 #'@param ab (character(1), default "Antigen) Name of the column to remove
 #'prefixes from
 #'@param pattern (character(1)) A regular expression for matching in column ab.
+#'@param replacement (character(1)) Replacement value, default "" (i.e. remove)
 #'@param new_col (character(1), default NA Name of the column to add to df.
 #'If NA, column ab is modified
-gsubAb <- function(df, ab = "Antigen", pattern = "[Aa]nti-", new_col = NA){
+#'
+gsubAb <- function(df, ab = "Antigen", pattern = "[Aa]nti-", replacement = "",
+                   exclude = NA, restrict = NA, new_col = NA){
     if (is.na(new_col)) new_col <- ab
-    return(dplyr::mutate(df, !!new_col :=  gsub(pattern, "", !!sym(ab))))
+    df <- dplyr::mutate(df, !!new_col :=  gsub(pattern, replacement, !!sym(ab)))
+
+    # Restrict would have to be a filter expression, e.g. a particular study
+    # Would need to use a temp column as in splitUnnest
+    # Is this actually important?
+
+    #@param exclude (character(1), default NA) a regex - do not split if ab
+    #matches.
+    #@param restrict (character(1), default NA) a regex replace only if restrict
+    # matches in column ab
+
+    return(df)
 }
 
 
@@ -115,7 +150,8 @@ gsubAb <- function(df, ab = "Antigen", pattern = "[Aa]nti-", new_col = NA){
 #'using with strsplit. The default expression splits at "(" or ")".
 #'@param new_col (character(1), default NA Name of the column to add to df.
 #'If NA, column ab is modified.
-#'@param exclude (character(1)) a regex - do not split if ab matches exclude.
+#'@param exclude (character(1), default NA) a regex - do not split if ab
+#'matches.
 #'
 #'@examples
 #'df <- data.frame(Antigen = c("CD279 (PD-1)", "Mac-2 (Galectin-3)"))
@@ -154,7 +190,40 @@ splitUnnest <- function(df, ab = "Antigen", split = "[\\(\\)]", new_col = NA,
 
 
 # separateSubunits ----
+#' Separate multi-subunit protein names
+#'
+#'@description
+#' Separate names of antibodies against multi-subunit proteins
+#' e.g. CD235ab, CD66ace into one subunit per rows,.  Assumes that a
+#' multi-subunit protein contains at least 2 capital letters or numbers followed
+#' by at least 2 lower case letters, where there may be a separator between the
+#' groups and/or between the lower case letters.
+#'
+#' At present, the between group separators are -, . and space, and the between
+#' subunit separator is /.  Subunits should be converted from Greek symbols
+#' before applying this function.
+#'
+#'
+#'@param df A data.frame or tibble
+#'@param ab (character(1), default "Antigen) Name of the column containing
+#'antibody names
+#'
 separateSubunits <- function(df, ab){
+    tmp_cn <- .tempColName(df, n = 2)
+
+    df <- df %>% mutate(
+        tmp_cn[1] :=  gsub("^[A-Z0-9]{2,}[-\\. ]?([abcdeg\\/]{2,})",
+                           "\\1", !!sym(ab)),
+        #
+        tmp_cn[2] := gsub("^[A-Z0-9]{2,}-([A-Z0-9\\/,]{2,})",
+                          "\\1", !!sym(ab)),
+
+        subunit_end = case_when(!!sym(tmp_cn[1]) == ab &
+                                !!sym(tmp_cn[2]) == ab ~ NA_character_,
+                                !!sym(tmp_cn[1]) != ab ~ !!sym(tmp_cn[1]),
+                                !!sym(tmp_cn[2]) != ab ~ !!sym(tmp_cn[2]),
+                                TRUE ~ "FIXME")
+    )
 
 }
 

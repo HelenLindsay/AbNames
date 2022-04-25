@@ -12,15 +12,16 @@ License: AGPL (>= 3)
 Encoding: UTF-8
 LazyData: true
 Imports:
-    magrittr,
-    stringr
-Suggests:
     dplyr,
+    magrittr,
+    stringr,
+    tidyr
+Suggests:
     ontologyIndex,
     ontoProc,
+    pryr,
     readr,
     testthat (>= 3.0.0),
-    tidyr
 Config/testthat/edition: 3
 RoxygenNote: 7.1.2
 Depends: 

@@ -18,16 +18,20 @@
 #'
 #' Returns a name that does not already exist in columns of a data.frame
 #'@param df A data.frame or tibble
-.tempColName <- function(df){
+#'@param n (default 1) How many temporary column names are needed?
+.tempColName <- function(df, n = 1){
     cn <- colnames(df)
     temp_col <- "TEMP"
-
     i <- 1
-    while(temp_col %in% cn){
-        temp_col <- sprintf("%s%s", temp_col, i)
+    res <- character()
+
+    while(length(res) < n){
+        if (! temp_col %in% cn) res <- c(res, temp_col)
+        temp_col <- sprintf("TEMP%s", i)
         i <- i + 1
     }
-    return(temp_col)
+
+    return(res)
 }
 
 

@@ -24,7 +24,8 @@ using with strsplit. The default expression splits at "(" or ")".}
 \item{new_col}{(character(1), default NA Name of the column to add to df.
 If NA, column ab is modified.}
 
-\item{exclude}{(character(1)) a regex - do not split if ab matches exclude.}
+\item{exclude}{(character(1), default NA) a regex - do not split if ab
+matches.}
 }
 \description{
 Convenience function for splitting a column at a delimiter,

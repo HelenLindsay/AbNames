@@ -16,13 +16,6 @@ GREEKNAME_TO_LETTER = c(alpha = "a", beta = "b", gamma = "g", delta = "d",
                         Epsilon = "e", zeta = "z", Kappa = "k", Lambda = "l")
 
 
-# Default transformation sequence for making query table ----
-
-
-
-
-
-
 
 
 # Delme ----

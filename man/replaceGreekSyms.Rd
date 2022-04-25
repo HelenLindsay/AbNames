@@ -2,7 +2,7 @@
 % Please edit documentation in R/replaceGreekSyms.R
 \name{replaceGreekSyms}
 \alias{replaceGreekSyms}
-\title{replaceGreekSyms}
+\title{Replace Greek symbols or symbol names}
 \usage{
 replaceGreekSyms(x, replace = c("sym2letter", "sym2word", "word2letter"))
 }
@@ -18,7 +18,7 @@ single lowercase letters e.g. "alpha" to "a")}
 Character vector (n) with Greek symbols or names replaced
 }
 \description{
-Replace Greek symbols with either single letter or word.  Note
-that this only replaces greek symbols I have encountered in antibody names to
+Replace Greek symbols with either single letter or word.  Note that this only
+replaces greek symbols I have encountered so far in antibody names to
 avoid introducing errors by e.g. replacing "mu" in "immunoglobin".
 }
