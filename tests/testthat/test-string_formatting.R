@@ -34,7 +34,19 @@ test_that("splitUnnest correctly splits at brackets", {
                  data.frame(Antigen = exp_res$Split))
 })
 
+
 test_that("splitUnnest works with exclude", {
-    df <- data.frame(Antigen = c("CD8a/CD8A", "TCR alpha/beta", "erbB2/HER-2"))
-    res <- data.frame()
+    ag <- c("CD8a/CD8A", "TCR alpha/beta", "erbB2/HER-2")
+    exp_res <- data.frame(Antigen = c(rep(ag[1], 2), ag[2], rep(ag[3], 2)),
+                      Split = c("CD8a", "CD8A", "TCR alpha/beta",
+                                "erbB2", "HER-2"))
+    res <- splitUnnest(data.frame(Antigen = ag), split = "\\/",
+                       exclude = "TCR", new_col = "Split")
+    expect_equal(data.frame(res), exp_res)
 })
+
+
+# gsubAb ----
+
+
+

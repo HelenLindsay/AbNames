@@ -31,3 +31,8 @@ Convenience function for splitting a column at a delimiter,
 unnesting (one row per value after splitting) and removing unnecessary
 whitespace.  Default is to split at brackets.  Returns a tibble tbl_df.
 }
+\examples{
+df <- data.frame(Antigen = c("CD279 (PD-1)", "Mac-2 (Galectin-3)"))
+splitUnnest(df, "Antigen", new_col = "Split")
+
+}

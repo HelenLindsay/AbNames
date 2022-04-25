@@ -4,7 +4,7 @@
 \alias{gsubAb}
 \title{Convenience function to remove a pattern from a column in a data.frame}
 \usage{
-gsubAb(df, ab = "Antigen", prefix = "[Aa]nti-", new_col = NA)
+gsubAb(df, ab = "Antigen", pattern = "[Aa]nti-", new_col = NA)
 }
 \arguments{
 \item{df}{A data.frame or tibble}
@@ -12,7 +12,7 @@ gsubAb(df, ab = "Antigen", prefix = "[Aa]nti-", new_col = NA)
 \item{ab}{(character(1), default "Antigen) Name of the column to remove
 prefixes from}
 
-\item{prefix}{(character(1)) A regular expression for matching prefixes}
+\item{pattern}{(character(1)) A regular expression for matching prefixes}
 
 \item{new_col}{(character(1), default NA Name of the column to add to df.
 If NA, column ab is modified}

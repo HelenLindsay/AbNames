@@ -92,12 +92,12 @@ addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",
 #'@param df A data.frame or tibble
 #'@param ab (character(1), default "Antigen) Name of the column to remove
 #'prefixes from
-#'@param prefix (character(1)) A regular expression for matching prefixes
+#'@param pattern (character(1)) A regular expression for matching in column ab.
 #'@param new_col (character(1), default NA Name of the column to add to df.
 #'If NA, column ab is modified
-gsubAb <- function(df, ab = "Antigen", prefix = "[Aa]nti-", new_col = NA){
+gsubAb <- function(df, ab = "Antigen", pattern = "[Aa]nti-", new_col = NA){
     if (is.na(new_col)) new_col <- ab
-    return(dplyr::mutate(df, !!new_col :=  gsub(prefix, "", !!sym(ab))))
+    return(dplyr::mutate(df, !!new_col :=  gsub(pattern, "", !!sym(ab))))
 }
 
 
@@ -117,7 +117,7 @@ gsubAb <- function(df, ab = "Antigen", prefix = "[Aa]nti-", new_col = NA){
 #'If NA, column ab is modified.
 #'@param exclude (character(1)) a regex - do not split if ab matches exclude.
 #'
-#'@example
+#'@examples
 #'df <- data.frame(Antigen = c("CD279 (PD-1)", "Mac-2 (Galectin-3)"))
 #'splitUnnest(df, "Antigen", new_col = "Split")
 #'
@@ -132,7 +132,7 @@ splitUnnest <- function(df, ab = "Antigen", split = "[\\(\\)]", new_col = NA,
     df <- mutate(df, !!temp_col := strsplit(!!sym(ab), split, perl = TRUE))
 
     if (! is.na(exclude)){
-        df <- mutate(df, temp_col = ifelse(grepl(exclude, !!sym(ab)),
+        df <- mutate(df, !!temp_col := ifelse(grepl(exclude, !!sym(ab)),
                                            !!sym(ab), !!sym(temp_col)))
     }
 
@@ -159,8 +159,4 @@ separateSubunits <- function(df, ab){
 }
 
 
-# replaceGreek ----
-replaceGreek <- function(df, ab){
-
-}
 

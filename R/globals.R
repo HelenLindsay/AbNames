@@ -11,8 +11,9 @@ GREEKSYM_TO_LETTER =  c(α = "a", β = "b", γ = "g", δ = "d", ε = "e", ζ = "
 
 # Tau is not included, is it necessary?
 GREEKNAME_TO_LETTER = c(alpha = "a", beta = "b", gamma = "g", delta = "d",
-                        epsilon = "e", zeta = "z", kappa = "k", lambda = "l")
-
+                        epsilon = "e", zeta = "z", kappa = "k", lambda = "l",
+                        Alpha = "a", Beta = "b", Gamma = "g", Delta = "d",
+                        Epsilon = "e", zeta = "z", Kappa = "k", Lambda = "l")
 
 
 # Default transformation sequence for making query table ----
