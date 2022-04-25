@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{.warnIfColExists}
 \alias{.warnIfColExists}
-\title{.warnIfColExists}
+\title{Warn if a column already exists in a data.frame}
 \usage{
 .warnIfColExists(df, new_col)
 }
@@ -12,5 +12,5 @@
 \item{new_col}{character(1) Name of a column to add to df}
 }
 \description{
-.warnIfColExists
+Warn if a column already exists in a data.frame
 }
