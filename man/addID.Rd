@@ -2,7 +2,7 @@
 % Please edit documentation in R/makeQueryTable.R
 \name{addID}
 \alias{addID}
-\title{addID}
+\title{add ID column}
 \usage{
 addID(df, id_cols = c("Antigen", "Study"), new_col = "ID", warn = TRUE)
 }

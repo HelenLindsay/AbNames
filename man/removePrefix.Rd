@@ -2,7 +2,7 @@
 % Please edit documentation in R/makeQueryTable.R
 \name{removePrefix}
 \alias{removePrefix}
-\title{removePrefix}
+\title{Remove a prefix from a column in a data.frame}
 \usage{
 removePrefix(df, ab = "Antigen", prefix = "[Aa]nti-", new_col = NA)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/makeQueryTable.R
 \name{makeQueryTable}
 \alias{makeQueryTable}
-\title{makeQueryTable}
+\title{Separate Antibody/Antigen names into component parts}
 \usage{
 makeQueryTable(df, ab = "Antigen", id_cols = c("Antigen", "Study"), funs)
 }

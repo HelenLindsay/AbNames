@@ -1,12 +1,15 @@
 # makeQueryTable ----
-#'@title makeQueryTable
-#'@description Given a data.frame containing Antigen/Antibody names, reformat
+#'Separate Antibody/Antigen names into component parts
+#'
+#'Given a data.frame containing Antigen/Antibody names, reformat
 #'the names into possible gene names and return the data.frame in long format.
+#'
 #'@param df A data.frame or tibble
 #'@param ab (character(1), default "Antigen") Name of the column in df
 #' containing Antigen/Antibody names
 #'@param id_cols (character(n)) Names of columns to paste to form ID column
 #'@param funs A vector of string formatting functions to
+#'
 #'@export
 makeQueryTable <- function(df, ab = "Antigen",
                            id_cols = c("Antigen", "Study"), funs){
@@ -16,13 +19,17 @@ makeQueryTable <- function(df, ab = "Antigen",
 
 
 # addID ----
-#'@title addID
-#'@description Adds an ID column to a data frame
+#'add ID column
+#'
+#'Adds an ID column to a data frame
+#'
 #'@param df A data.frame or tibble
 #'@param id_cols (character(n)) Names of columns to paste to form ID column
 #'@param new_col (character(1), default: "ID") Name of new ID column
 #'@param warn (TRUE/FALSE, default: TRUE) If TRUE, warn if IDs are not unique
+#'
 #'@return
+#'
 #'@importFrom dplyr mutate group_by pull sym
 addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",
                   warn = TRUE){
@@ -73,10 +80,12 @@ addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",
 
 
 # removePrefix ----
-#'@title removePrefix
-#'@description Create a new column by removing a prefix from an existing
+#'Remove a prefix from a column in a data.frame
+#'
+#'Create a new column by removing a prefix from an existing
 #'column.  The default prefix removes either "anti-" or "Anti-".  If prefix
 #'is not found, value will be NA.
+#'
 #'@param df A data.frame or tibble
 #'@param ab (character(1), default "Antigen) Name of the column to remove
 #'prefixes from
@@ -90,10 +99,12 @@ removePrefix <- function(df, ab = "Antigen", prefix = "[Aa]nti-", new_col = NA){
 
 
 # splitUnnest ----
-#'@title splitUnnest
-#'@description Convenience function for splitting a column at a delimiter,
+#'Split a column and create one row per entry
+#'
+#'Convenience function for splitting a column at a delimiter,
 #'unnesting (one row per value after splitting) and removing unnecessary
 #'whitespace
+#'
 #'@param df A data.frame or tibble
 #'@param ab (character(1), default "Antigen) Name of the column to remove
 #'prefixes from
@@ -101,16 +112,17 @@ removePrefix <- function(df, ab = "Antigen", prefix = "[Aa]nti-", new_col = NA){
 #'using with strsplit. The default expression splits at "(" or ")".
 #'@param new_col (character(1), default NA Name of the column to add to df.
 #'If NA, column ab is modified
+#'
 #'@importFrom tidyr unnest
 #'@importFrom stringr str_squish
-splitUnnest <- function(df, ab, pattern = "[\\(\\)]", new_col = NA){
-    if (is.na(new_col)) new_col <- ab
-
-    return(mutate(df, !!new_col :=
-                      strsplit(!!sym(ab), pattern, perl = TRUE)) %>%
-               unnest(cols = new_col) %>%
-               mutate(!!new_col = str_squish(new_col)))
-}
+#splitUnnest <- function(df, ab, pattern = "[\\(\\)]", new_col = NA){
+#    if (is.na(new_col)) new_col <- ab
+#
+#    return(mutate(df, !!new_col :=
+#                      strsplit(!!sym(ab), pattern, perl = TRUE)) %>%
+#               unnest(cols = new_col) %>%
+#               mutate(!!new_col = str_squish(new_col)))
+#}
 
 
 # separateComma ----
