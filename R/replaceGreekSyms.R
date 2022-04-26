@@ -23,7 +23,8 @@ replaceGreekSyms <- function(x,
                        "sym2word" = GREEKSYM_TO_NAME,
                        "word2letter" = GREEKNAME_TO_LETTER)
     replace_vec <- replace_to_vec[[replace]]
-    str_replace_all(x, replace_vec, names(replace_vec))
+
+    return(stringr::str_replace_all(x, replace_vec, names(replace_vec)))
 }
 
 

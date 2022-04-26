@@ -165,23 +165,25 @@ splitUnnest <- function(df, ab = "Antigen", split = "[\\(\\)]", new_col = NA,
 
     temp_col <- .tempColName(df)
 
-    df <- mutate(df, !!temp_col := strsplit(!!sym(ab), split, perl = TRUE))
+    df <- dplyr::mutate(df, !!temp_col :=
+                            strsplit(!!dplyr::sym(ab), split, perl = TRUE))
 
     if (! is.na(exclude)){
-        df <- mutate(df, !!temp_col := ifelse(grepl(exclude, !!sym(ab)),
-                                           !!sym(ab), !!sym(temp_col)))
+        df <- dplyr::mutate(df, !!temp_col :=
+                ifelse(grepl(exclude, !!dplyr::sym(ab)),
+                       !!dplyr::sym(ab), !!dplyr::sym(temp_col)))
     }
 
-    df <- unnest(df, cols = temp_col) %>%
-        mutate(!!temp_col := str_squish(!!sym(temp_col)))
+    df <- tidyr::unnest(df, cols = temp_col) %>%
+        dplyr::mutate(!!temp_col := str_squish(!!sym(temp_col)))
 
     # If temp_col should overwrite ab, remove ab and rename new_col
     if (is.na(new_col)){
-        df <- df %>% dplyr::select(-!!sym(ab))
+        df <- df %>% dplyr::select(-!!dplyr::sym(ab))
         new_col <- ab
     }
 
-    df <- df %>% rename(!!new_col := !!sym(temp_col))
+    df <- df %>% dplyr::rename(!!new_col := !!dplyr::sym(temp_col))
     return(df)
 }
 
@@ -211,14 +213,15 @@ splitUnnest <- function(df, ab = "Antigen", split = "[\\(\\)]", new_col = NA,
 separateSubunits <- function(df, ab){
     tmp_cn <- .tempColName(df, n = 2)
 
-    df <- df %>% mutate(
-        tmp_cn[1] :=  gsub("^[A-Z0-9]{2,}[-\\. ]?([abcdeg\\/]{2,})",
+    df <- df %>%
+        dplyr::mutate(
+            tmp_cn[1] :=  gsub("^[A-Z0-9]{2,}[-\\. ]?([abcdeg\\/]{2,})",
                            "\\1", !!sym(ab)),
-        #
-        tmp_cn[2] := gsub("^[A-Z0-9]{2,}-([A-Z0-9\\/,]{2,})",
+
+            tmp_cn[2] := gsub("^[A-Z0-9]{2,}-([A-Z0-9\\/,]{2,})",
                           "\\1", !!sym(ab)),
 
-        subunit_end = case_when(!!sym(tmp_cn[1]) == ab &
+            subunit_end = case_when(!!sym(tmp_cn[1]) == ab &
                                 !!sym(tmp_cn[2]) == ab ~ NA_character_,
                                 !!sym(tmp_cn[1]) != ab ~ !!sym(tmp_cn[1]),
                                 !!sym(tmp_cn[2]) != ab ~ !!sym(tmp_cn[2]),
