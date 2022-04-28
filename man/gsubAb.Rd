@@ -9,8 +9,9 @@ gsubAb(
   ab = "Antigen",
   pattern = "[Aa]nti-",
   replacement = "",
-  new_col = NA,
-  restrict = NA
+  exclude = NA,
+  restrict = NA,
+  new_col = NA
 )
 }
 \arguments{
@@ -25,9 +26,6 @@ prefixes from}
 
 \item{new_col}{(character(1), default NA Name of the column to add to df.
 If NA, column ab is modified}
-
-\item{restrict}{(character(1), default NA) a regex - replace only if restrict
-matches in column ab}
 }
 \description{
 Remove a pattern from a column, either modifying in place or creating a new

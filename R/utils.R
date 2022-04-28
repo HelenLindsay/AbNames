@@ -35,4 +35,19 @@
 }
 
 
+# firstGroups ----
+#' Return the first n groups of a grouped data.frame
+#'
+#' Useful for debugging, e.g. when trying to fill by but groups contain
+#' multiple values.  Group order is determined by dplyr::group_rows
+#'
+#'@param df A grouped data.frame
+#'@param n (Default: 1) How many groups should be returned?
+#'@importFrom dplyr group_rows
+.firstGroups <- function(df, n = 1){
+    row_idxs <- df %>% dplyr::group_rows()
+    row_idxs <- unlist(row_idxs[1:min(n, length(row_idxs))])
+    return(df[row_idxs, ])
+}
+
 
