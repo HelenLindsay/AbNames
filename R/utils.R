@@ -1,4 +1,5 @@
 # .warnIfColExists ----
+#'
 #' Warn if a column already exists in a data.frame
 #'
 #'@param df A data.frame or tibble
@@ -58,6 +59,19 @@
 .gsubNA <- function(pattern, replacement, x){
     res <- gsub(pattern, replacement, x)
     res[res == x] <- NA_character_
+    return(res)
 }
 
+
+# .printf ----
+#'
+#' Wrapper for sprintf, doesn't convert NA to character
+#'
+.printf <- function(pattern, ...){
+    dots <- list(...)
+    res <- sprintf(pattern, ...)
+    any_na <- apply(data.frame(dots), 1, function(y) any(is.na(y)))
+    res[any_na] <- NA
+    return(res)
+}
 

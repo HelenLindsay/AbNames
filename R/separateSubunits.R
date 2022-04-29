@@ -17,37 +17,35 @@
 #'
 #'Subunits should be converted from Greek symbols before applying this function.
 #'
+#'At present user-supplied regex patterns are not supported
 #'
 #'@param df A data.frame or tibble
 #'@param ab (character(1), default "Antigen) Name of the column containing
 #'antibody names
 #'@param new_col (default: subunit) Name of new column containing guesses for
 #'single subunit names
-#'@importFrom dplyr case_when
+#'@importFrom dplyr case_when coalesce
 separateSubunits <- function(df, ab, new_col = "subunit"){
-    tmp_cn <- .tempColName(df, n = 4)
+    tmp <- .tempColName(df, n = 4)
 
+    # Pattern 1: At least 2 capital letters/numbers, optional separator,
+    # then at least 2 lowercase with optional separator
+    p1 <- "^[A-Z0-9]{2,}[-\\. ]?([a-z\\/\\.]{2,})"
+
+    # Pattern 2: At least 2 capital letters/numbers, then -, then
+    # at least 2 uppercase letters or numbers with optional / or ,
+    p2 <- "^[A-Z0-9]{2,}-([A-Z0-9\\/,]{2,})"
+
+    df <- .separateSubunits(df, ab, tmp[3], p1, "%s%s", tmp[1], tmp[2])
+    df <- .separateSubunits(df, ab, tmp[4], p2, "%s-%s", tmp[1], tmp[2])
+
+    # Merge the two patterns
     df <- df %>%
-        dplyr::mutate(
-            # Select the subunit ends:
-            # Pattern 1: At least 2 capital letters/numbers, optional separator,
-            # then at least 2 lowercase with optional separator
-            tmp_cn[1] :=  gsub("^[A-Z0-9]{2,}[-\\. ]?([a-z\\/\\.]{2,})",
-                               "\\1", !!sym(ab)),
+        dplyr::mutate(!!new_col :=
+                          dplyr::coalesce(!!sym(tmp[3]), !!sym(tmp[4]))) %>%
+        dplyr::select(-!!sym(tmp[3]), -!!sym(tmp[4]))
 
-            # Pattern 2: At least 2 capital letters/numbers, then -, then
-            # at least 2 uppercase letters or numbers with optional / or ,
-            tmp_cn[2] := gsub("^[A-Z0-9]{2,}-([A-Z0-9\\/,]{2,})",
-                              "\\1", !!sym(ab)),
-
-            # Set to NA if neither pattern was matched, otherwise pick the match
-            tmp_cn[3] := case_when(!!sym(tmp_cn[1]) == ab &
-                                        !!sym(tmp_cn[2]) == ab ~ NA_character_,
-                                    !!sym(tmp_cn[1]) != ab ~ !!sym(tmp_cn[1]),
-                                    !!sym(tmp_cn[2]) != ab ~ !!sym(tmp_cn[2]),
-                                    TRUE ~ "FIXME")
-        )
-
+    return(df)
 }
 
 
@@ -60,15 +58,31 @@ separateSubunits <- function(df, ab, new_col = "subunit"){
 #'@param t1
 #'@param t2
 .separateSubunits <- function(df, ab, new_col, pattern, join_pattern, t1, t2){
+    #  If there are any duplicated characters, it's probably not a subunit
+    no_dup <- function(x){
+        n_char <- lengths(x)
+        n_unq <- sapply(x, function(y) length(unique(y)))
+        return(n_char == n_unq)
+    }
+
     df <- df %>%
-        dplyr::mutate(t2 := gsubNA(pattern, "\\1", !!sym(ab)),
-                      t1 := stringr::str_replace(!!sym(ab), !!sym(t2), ""),
-                      t1 := gsub("[- ]$", "", !!sym(t1)),
-                      t2 := strsplit(gsub("[,/\\.]", "", !!sym(t2)), "")) %>%
+        # Select the end pattern, remove end pattern and space to get start,
+        # split end pattern (subunits).  If any subunits repeated once split,
+        # set to NA because it's probably incorrect
+        dplyr::mutate(!!t2 := .gsubNA(pattern, "\\1", !!sym(ab)),
+                      !!t1 := stringr::str_replace(!!sym(ab), !!sym(t2), ""),
+                      !!t1 := gsub("[- ]$", "", !!sym(t1)),
+                      !!t2 := strsplit(gsub("[,/\\.]", "", !!sym(t2)), ""),
+                      !!t2 := ifelse(no_dup(!!sym(t2)), !!sym(t2), NA)) %>%
+
+        # Unnest to give one row per subunit
         tidyr::unnest(t2) %>%
+        # Join subunits
         dplyr::mutate(!!new_col :=
-                          sprintf(join_pattern, !!sym(t1), !!sym(t2))) %>%
+                          .printf(join_pattern, !!sym(t1), !!sym(t2))) %>%
+        # Remove temporary columns
         dplyr::select(-!!sym(t1), -!!sym(t2))
+    return(df)
 }
 
 
