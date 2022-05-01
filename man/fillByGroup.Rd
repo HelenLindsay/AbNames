@@ -4,12 +4,12 @@
 \alias{fillByGroup}
 \title{Fill NAs in data.frame by grouping}
 \usage{
-fillByGroup(df, groups, fill, multiple = c("stop", "majority"))
+fillByGroup(df, group, fill, multiple = c("stop", "majority"))
 }
 \arguments{
 \item{df}{A data.frame or tibble with missing (NA) values to be filled}
 
-\item{groups}{(character(n)) Names of column(s) to group by}
+\item{group}{(character(n)) Names of column(s) to group by}
 
 \item{fill}{(character(n)) Name(s) of column(s) to fill}
 

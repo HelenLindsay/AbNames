@@ -25,7 +25,8 @@
 #'@param new_col (default: subunit) Name of new column containing guesses for
 #'single subunit names
 #'@importFrom dplyr case_when coalesce
-separateSubunits <- function(df, ab, new_col = "subunit"){
+#'@export
+separateSubunits <- function(df, ab = "Antigen", new_col = "subunit"){
     tmp <- .tempColName(df, n = 4)
 
     # Pattern 1: At least 2 capital letters/numbers, optional separator,

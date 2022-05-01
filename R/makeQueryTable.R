@@ -160,6 +160,7 @@ gsubAb <- function(df, ab = "Antigen", pattern = "[Aa]nti-", replacement = "",
 #'@importFrom tidyr unnest
 #'@importFrom stringr str_squish
 #'@importFrom dplyr sym select rename
+#'@export
 splitUnnest <- function(df, ab = "Antigen", split = "[\\(\\)]", new_col = NA,
                         exclude = NA){
 
