@@ -54,11 +54,11 @@
 
 # gsubNA ----
 #'
-# Wrapper for gsub, returns NA if pattern was not matched
+# Wrapper for gsub, returns NA (or option provide) if pattern was not matched
 #'
-.gsubNA <- function(pattern, replacement, x){
+.gsubNA <- function(pattern, replacement, x, no_match = NA){
     res <- gsub(pattern, replacement, x)
-    res[res == x] <- NA_character_
+    res[res == x] <- no_match
     return(res)
 }
 

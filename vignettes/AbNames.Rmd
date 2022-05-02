@@ -93,25 +93,42 @@ the names of antibodies against the T-cell receptor to their gene IDs.  (An
 alternative method is to search for the gene symbol.)
 
 We will start with a data.frame of antibodies against the T-cell receptor from
-the CITE-seq data set. 
+the CITE-seq data set. We have already done some fomatting of these names, e.g. 
+for "TCR Va24-Ja18 (iNKT cell)" we have removed the section in brackets. We wish
+to create a query data.frame where each subunit of the TCR complex appears on a
+separate line. 
 
 ```{r}
 tcr <- data.frame(Antigen =
-                      c("TCR alpha/beta", "TCR alpha/beta (TRAC/TRBC)",
-                        "TCRab", "TCR gamma/delta", "TCRgd", "TCR g/d",
-                        "TCR Vgamma9", "TCR Vg9", "TCR Vd2", "TCR Vdelta2",
-                        "TCR Vα24-Jα18", "TCR Va24-Ja18 (iNKT cell)",
-                        "TCRVa24.Ja18", "TCR Va24-Ja18",
-                        "TCR Valpha24-Jalpha18 (iNKT cell)",
-                        "TCR Vα7.2", "TCR Va7.2", "TCRa7.2", "TCRVa7.2",
-                        "TCR Vbeta13.1", "TCR γ/δ", "TCR Vα24-Jα18 (iNKT cell)",
+                      c("TCR alpha/beta", "TCRab", "TCR gamma/delta", "TCRgd",
+                        "TCR g/d", "TCR Vgamma9", "TCR Vg9", "TCR Vd2",
+                        "TCR Vdelta2", "TCR Vα24-Jα18", "TCRVa24.Ja18", 
+                        "TCR Valpha24-Jalpha18", "TCR Vα7.2", "TCR Va7.2",
+                        "TCRa7.2", "TCRVa7.2", "TCR Vbeta13.1", "TCR γ/δ", 
                         "TCR Vβ13.1", "TCR Vγ9", "TCR Vδ2", "TCR α/β",
                         "TCRb", "TCRg"))
 
+
+# First, we convert the Greek symbols to letters.  
+# Note that as we are using replaceGreekSyms in a dplyr pipeline, we don't 
+# put quotes around the column name - Antigen not "Antigen".
+
+tcr <- tcr %>%
+    dplyr::mutate(query = 
+                    AbNames::replaceGreekSyms(Antigen, replace = "sym2letter"))
+ 
+# Print out a few rows to see the result
+tcr %>% 
+    dplyr::filter(Antigen %in% c("TCR Vβ13.1", "TCR Vδ2", "TCR α/β"))
+
 ```
 
-We wish to create a data.frame where each subunit of the TCR complex appears on
-a separate line.
+Now we use the function `formatTCR` to format the antibody names for querying
+the gene description field of the HGNC data set.
+
+```{r}
+
+```
 
 
 # Querying a dataset
