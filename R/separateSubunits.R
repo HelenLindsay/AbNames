@@ -52,12 +52,17 @@ separateSubunits <- function(df, ab = "Antigen", new_col = "subunit"){
 
 #.separateSubunits ----
 #'
-#'@param df
-#'@param ab
-#'@param pattern
+#'Separate multi-subunit protein names into one name per row
+#'
+#'Separates a column at a provided pattern, separates the second second into
+#'individual letters and joins segments with a provided joining pattern
+#'
+#'@param df A data.frame or tibble
+#'@param ab The name of the column containing names to split
+#'@param pattern The regex pattern to use for splitting
 #'@param join_pattern sprintf pattern for joining t1 (start) and t2 (end)
-#'@param t1
-#'@param t2
+#'@param t1 first temporary column name
+#'@param t2 second temporary column name
 .separateSubunits <- function(df, ab, new_col, pattern, join_pattern, t1, t2){
     #  If there are any duplicated characters, it's probably not a subunit
     no_dup <- function(x){

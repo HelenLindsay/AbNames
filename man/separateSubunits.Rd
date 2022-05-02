@@ -4,7 +4,7 @@
 \alias{separateSubunits}
 \title{Separate multi-subunit protein names}
 \usage{
-separateSubunits(df, ab, new_col = "subunit")
+separateSubunits(df, ab = "Antigen", new_col = "subunit")
 }
 \arguments{
 \item{df}{A data.frame or tibble}

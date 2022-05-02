@@ -52,7 +52,7 @@
 }
 
 
-# gsubNA ----
+# .gsubNA ----
 #'
 # Wrapper for gsub, returns NA (or option provide) if pattern was not matched
 #'

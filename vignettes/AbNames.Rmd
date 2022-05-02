@@ -111,7 +111,7 @@ tcr <- data.frame(Antigen =
 
 # First, we convert the Greek symbols to letters.  
 # Note that as we are using replaceGreekSyms in a dplyr pipeline, we don't 
-# put quotes around the column name - Antigen not "Antigen".
+# put quotes around the column name, i.e. Antigen not "Antigen".
 
 tcr <- tcr %>%
     dplyr::mutate(query = 
@@ -127,7 +127,13 @@ Now we use the function `formatTCR` to format the antibody names for querying
 the gene description field of the HGNC data set.
 
 ```{r}
+tcr_f <- AbNames::formatTCR(tcr, tcr = "query")
 
+# Print out the first few rows
+tcr_f %>%
+    head() 
+
+# TO DO: GET KABLE INSTALLED
 ```
 
 

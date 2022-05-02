@@ -13,10 +13,18 @@
 #'containing the TCR gene description query string
 #'@importFrom stringr str_replace_all
 #'@importFrom tidyr separate
+#'@importFrom dplyr rename
 #'@export
 formatTCR <- function(df, tcr = "TCR", new_col = "TCR_long"){
-    tcr_t <- formatTCRv(df[[tcr]], new_col)
+    .warnIfColExists(df, new_col)
 
+    # Operate on the column to avoid worrying about temporary column names
+    tcr_t <- formatTCRv(df[[tcr]], new_col) %>%
+        unique() %>%
+        dplyr::rename(!!tcr := TCR)
+
+    # Merge result into original data.frame
+    return(dplyr::full_join(df, tcr_t))
 
 }
 
