@@ -18,13 +18,17 @@ Imports:
     stringr,
     tidyr
 Suggests:
+    BiocStyle,
+    knitr,
     ontologyIndex,
     ontoProc,
     pryr,
     readr,
     rlang,
+    rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 RoxygenNote: 7.1.2
 Depends: 
     R (>= 2.10)
+VignetteBuilder: knitr

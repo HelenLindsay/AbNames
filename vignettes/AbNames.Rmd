@@ -1,0 +1,120 @@
+---
+title: "Introduction to AbNames"
+author: "Helen Lindsay"
+package: AbNames
+output:
+  BiocStyle::html_document
+vignette: >
+  %\VignetteIndexEntry{AbNames}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+# Overview
+
+AbNames performs two tasks:
+
+* Extracting potential gene names from antibody names, and
+
+* Matching human antibody names to gene names and IDs.
+
+Antibody names are not reported in a consistent format.  Antibodies are often
+named according to the antigen they target, which may not be the same as the
+name of the protein (complex) the antigen is part of.  Antibodies may target 
+multi-subunit protein complexes, and this can be reflected in the name, e.g. an
+antibody against the T-cell receptor alpha and beta subunits might be named
+TCRab. Antibody names may also include the name of the clone the antibody is
+derived from or the names of fluorophores or DNA-oligos the antibody is
+conjugated with.  For these reasons, it can be difficult to exactly match
+antibody names with gene or protein names.  As cell surface antigens often have
+very similar names, searching for partial matches to names in free-text gene descriptions is challenging and error-prone.
+
+# Antibody naming conventions
+
+## T-cell receptors
+
+## Immunoglobins
+
+## Major histocompatibility complex genes 
+
+## Isotype controls
+
+
+# Data
+
+AbNames contains several curated gene name data sets for matching to antibody
+names:
+
+## HGNC gene names
+
+AbNames contains a reformatted version of the protein-coding gene information
+downloaded from the Human Gene Names Consortium. This includes previous
+(obsolete) gene names and aliases, which in our experience have been useful for 
+matching to antibody names
+
+## CITE-seq antibodies
+
+This is a table matching antibody names to gene and protein IDs from >20 data
+sets with publicly available CITE-seq data.  The AbNames package collects the
+functions that were used to create this table.  This table includes manually
+curated matches between antibody names and gene IDs for cases where we were
+unable to find an exact match to the antibody name provided.
+
+## BioLegend antibodies
+
+TO DO: CHECK WITH BIOLEGEND IF GENE NAME DATA CAN BE INCLUDED IN THIS PACKAGE
+BioLegend is a major supplier of antibodies, and provides several antibody
+panels for CITE-seq analyses.  
+
+
+# Creating a query table
+
+```{r setup}
+library(AbNames)
+```
+
+## Default query table
+
+
+## Custom query table
+
+### Special case: T-cell receptors
+
+We found that querying the HGNC gene description was the easiest way to match
+the names of antibodies against the T-cell receptor to their gene IDs.  (An
+alternative method is to search for the gene symbol.)
+
+We will start with a data.frame of antibodies against the T-cell receptor from
+the CITE-seq data set. 
+
+```{r}
+tcr <- data.frame(Antigen =
+                      c("TCR alpha/beta", "TCR alpha/beta (TRAC/TRBC)",
+                        "TCRab", "TCR gamma/delta", "TCRgd", "TCR g/d",
+                        "TCR Vgamma9", "TCR Vg9", "TCR Vd2", "TCR Vdelta2",
+                        "TCR Vα24-Jα18", "TCR Va24-Ja18 (iNKT cell)",
+                        "TCRVa24.Ja18", "TCR Va24-Ja18",
+                        "TCR Valpha24-Jalpha18 (iNKT cell)",
+                        "TCR Vα7.2", "TCR Va7.2", "TCRa7.2", "TCRVa7.2",
+                        "TCR Vbeta13.1", "TCR γ/δ", "TCR Vα24-Jα18 (iNKT cell)",
+                        "TCR Vβ13.1", "TCR Vγ9", "TCR Vδ2", "TCR α/β",
+                        "TCRb", "TCRg"))
+
+```
+
+We wish to create a data.frame where each subunit of the TCR complex appears on
+a separate line.
+
+
+# Querying a dataset
+
+
+# Querying the protein ontology
