@@ -4,7 +4,7 @@
 \alias{fillByGroup}
 \title{Fill NAs in data.frame by grouping}
 \usage{
-fillByGroup(df, group, fill, multiple = c("stop", "majority"))
+fillByGroup(df, group, fill, multiple = c("stop", "mode"))
 }
 \arguments{
 \item{df}{A data.frame or tibble with missing (NA) values to be filled}
@@ -14,7 +14,7 @@ fillByGroup(df, group, fill, multiple = c("stop", "majority"))
 \item{fill}{(character(n)) Name(s) of column(s) to fill}
 
 \item{multiple}{(Default: "stop") How should multiple values in columns to
-be filled be handled?  Either "stop" (raise an error) or "majority" (select
+be filled be handled?  Either "stop" (raise an error) or "mode" (select
 the most common value)}
 }
 \description{

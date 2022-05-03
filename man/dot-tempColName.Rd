@@ -4,12 +4,14 @@
 \alias{.tempColName}
 \title{Create a name for a temporary column in a data.frame}
 \usage{
-.tempColName(df, n = 1)
+.tempColName(df, n = 1, nm = "TEMP")
 }
 \arguments{
 \item{df}{A data.frame or tibble}
 
 \item{n}{(default 1) How many temporary column names are needed?}
+
+\item{nm}{(character(1), default "TEMP") Prefix for temporary column names}
 }
 \description{
 Returns a name that does not already exist in columns of a data.frame

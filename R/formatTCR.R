@@ -45,8 +45,10 @@ formatTCRv <- function(tcr, new_col = "TCR_long"){
     var_join <- structure(c("variable", "joining", "constant"),
                           names = c("V", "J", "C"))
 
+    # Substitute . or _ with dash, remove prefix TCR with optional space or -
     res <- data.frame(TCR = tcr,
-                      end = gsub("TCR\\s?", "", gsub("\\.", "-", tcr))) %>%
+                      end = gsub("TCR[\\s-]?", "",
+                                 gsub("[\\._]", "-", tcr))) %>%
         splitUnnest("end", split = "\\/") %>%
         splitUnnest("end", split = "-(?=J)") %>% # - if followed by J
         splitUnnest("end", split = "(?<=a)(?=b)|(?<=g)(?=d)") %>% # ab or gd

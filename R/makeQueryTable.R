@@ -17,7 +17,6 @@ makeQueryTable <- function(df, ab = "Antigen",
 }
 
 
-#'@importFrom pryr partial
 defaultQry <- function(){
 
     # Default transformation sequence for making query table ----
@@ -26,6 +25,8 @@ defaultQry <- function(){
     # Check that all columns to act on are either in the table or created
     # earlier in the pipeline
     # function, ab, new_col, args?
+    stopifnot(requireNamespace("pryr"))
+
     qry = list(addID,
                gsubAb(), # Remove A/anti
                pryr::partial(gsubAb, pattern = "\\sRecombinant"),
@@ -159,7 +160,7 @@ gsubAb <- function(df, ab = "Antigen", pattern = "[Aa]nti-", replacement = "",
 #'
 #'@importFrom tidyr unnest
 #'@importFrom stringr str_squish
-#'@importFrom dplyr sym select rename
+#'@importFrom dplyr sym select rename all_of
 #'@export
 splitUnnest <- function(df, ab = "Antigen", split = "[\\(\\)]", new_col = NA,
                         exclude = NA){
@@ -175,7 +176,7 @@ splitUnnest <- function(df, ab = "Antigen", split = "[\\(\\)]", new_col = NA,
                        !!dplyr::sym(ab), !!dplyr::sym(temp_col)))
     }
 
-    df <- tidyr::unnest(df, cols = temp_col) %>%
+    df <- tidyr::unnest(df, cols = all_of(temp_col)) %>%
         dplyr::mutate(!!temp_col := str_squish(!!sym(temp_col)))
 
     # If temp_col should overwrite ab, remove ab and rename new_col

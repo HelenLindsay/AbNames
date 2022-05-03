@@ -20,15 +20,15 @@
 #' Returns a name that does not already exist in columns of a data.frame
 #'@param df A data.frame or tibble
 #'@param n (default 1) How many temporary column names are needed?
-.tempColName <- function(df, n = 1){
+#'@param nm (character(1), default "TEMP") Prefix for temporary column names
+.tempColName <- function(df, n = 1, nm = "TEMP"){
     cn <- colnames(df)
-    temp_col <- "TEMP"
     i <- 1
     res <- character()
 
     while(length(res) < n){
-        if (! temp_col %in% cn) res <- c(res, temp_col)
-        temp_col <- sprintf("TEMP%s", i)
+        if (! nm %in% cn) res <- c(res, nm)
+        nm <- sprintf("%s%s", nm, i)
         i <- i + 1
     }
 
@@ -75,3 +75,19 @@
     return(res)
 }
 
+# splitMerge ----
+
+#' Apply a function to a subset of a data.frame
+#'
+#' Subset a data.frame according to a condition, apply a function to the rows
+#' where the condition is TRUE, then rejoin with the rows where condition is
+#' FALSE.  A split-apply-combine where function is only applied to a subset of
+#' rows.
+#'
+#'@param df A data.frame or tibble
+#'@param ex An expression for filtering df.
+#'@param f  A function to apply to the rows where ex is TRUE
+#'@param ... Extra arguments for f
+.splitMerge <- function(df, ex, f, ...){
+
+}
