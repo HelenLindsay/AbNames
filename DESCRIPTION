@@ -14,6 +14,7 @@ LazyData: true
 Imports:
     dplyr,
     magrittr,
+    rlang,
     stats,
     stringr,
     tidyr,
@@ -25,7 +26,6 @@ Suggests:
     ontoProc,
     pryr,
     readr,
-    rlang,
     rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

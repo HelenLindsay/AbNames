@@ -6,7 +6,7 @@
 #'avoid introducing errors by e.g. replacing "mu" in "immunoglobin".
 #'
 #'@param x Character vector (n) containing Greek symbols to be replaced.
-#'@param replacement Either "sym2letter" (replace Greek symbols with single
+#'@param replace Either "sym2letter" (replace Greek symbols with single
 #'lowercase letter) or "sym2word" (replace Greek symbols with lowercase word,
 #'e.g. "alpha") or "word2letter" (replace lowercase Greek symbol names with
 #'single lowercase letters e.g. "alpha" to "a")

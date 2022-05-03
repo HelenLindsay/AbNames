@@ -4,16 +4,20 @@
 \alias{.splitMerge}
 \title{Apply a function to a subset of a data.frame}
 \usage{
-.splitMerge(df, ex, f, ...)
+.splitMerge(df, ex, f, warn = FALSE, ...)
 }
 \arguments{
 \item{df}{A data.frame or tibble}
 
-\item{ex}{An expression for filtering df.}
+\item{ex}{An expression for filtering df, using dplyr::filter}
 
-\item{f}{A function to apply to the rows where ex is TRUE}
+\item{f}{A function to apply to the rows where ex is TRUE and returns a
+data.frame}
 
 \item{...}{Extra arguments for f}
+}
+\value{
+df where function f has been applied only to the rows where ex is TRUE
 }
 \description{
 Subset a data.frame according to a condition, apply a function to the rows

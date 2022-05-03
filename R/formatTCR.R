@@ -35,6 +35,9 @@ formatTCR <- function(df, tcr = "TCR", new_col = "TCR_long"){
 #'
 #' Used by formatTCR, accepts a vector (one column from a data.frame),
 #' returns a long data.frame with a new column containing the TCR description
+#'
+#'@param tcr A vector of T cell receptor antibody names
+#'@param new_col The name of the new column containing the TCR description
 formatTCRv <- function(tcr, new_col = "TCR_long"){
 
     # Substitute Greek letters for Greek words for cases:

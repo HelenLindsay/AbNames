@@ -67,6 +67,8 @@
 #'
 #' Wrapper for sprintf, doesn't convert NA to character
 #'
+#'@param pattern A pattern to use with sprintf
+#'@param ... Extra arguments for sprintf
 .printf <- function(pattern, ...){
     dots <- list(...)
     res <- sprintf(pattern, ...)
@@ -85,9 +87,25 @@
 #' rows.
 #'
 #'@param df A data.frame or tibble
-#'@param ex An expression for filtering df.
-#'@param f  A function to apply to the rows where ex is TRUE
+#'@param ex An expression for filtering df, using dplyr::filter
+#'@param f  A function to apply to the rows where ex is TRUE and returns a
+#'data.frame
 #'@param ... Extra arguments for f
+#'@return df where function f has been applied only to the rows where ex is TRUE
+#'@importFrom rlang enquo
 .splitMerge <- function(df, ex, f, ...){
+    ex <- rlang::enquo(ex)
 
+    df_not_ex <- df %>%
+        dplyr::filter(! eval(x))
+
+    df <- df %>%
+        f(...)
+
+    result <- dplyr::full_join(df, df_not_ex)
+    if (! nrow(result) == nrow(df) + nrow(df_not_ex)){
+        warning("Rows were added when merging split data.frames")
+    }
+
+    return(result)
 }

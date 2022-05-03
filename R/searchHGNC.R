@@ -4,6 +4,6 @@
 #'to an value, assumed to be an antigen name or part of an antigen name.
 #'@param gd A data.frame (or similar object, e.g. a tibble)
 searchHGNC <- function(qd){
-    data(hgnc_long)
+    data("hgnc_long")
 
 }
