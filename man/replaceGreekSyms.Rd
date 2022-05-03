@@ -9,7 +9,7 @@ replaceGreekSyms(x, replace = c("sym2letter", "sym2word", "word2letter"))
 \arguments{
 \item{x}{Character vector (n) containing Greek symbols to be replaced.}
 
-\item{replacement}{Either "sym2letter" (replace Greek symbols with single
+\item{replace}{Either "sym2letter" (replace Greek symbols with single
 lowercase letter) or "sym2word" (replace Greek symbols with lowercase word,
 e.g. "alpha") or "word2letter" (replace lowercase Greek symbol names with
 single lowercase letters e.g. "alpha" to "a")}

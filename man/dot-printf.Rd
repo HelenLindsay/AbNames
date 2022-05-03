@@ -6,6 +6,11 @@
 \usage{
 .printf(pattern, ...)
 }
+\arguments{
+\item{pattern}{A pattern to use with sprintf}
+
+\item{...}{Extra arguments for sprintf}
+}
 \description{
 Wrapper for sprintf, doesn't convert NA to character
 }

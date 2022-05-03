@@ -6,6 +6,11 @@
 \usage{
 formatTCRv(tcr, new_col = "TCR_long")
 }
+\arguments{
+\item{tcr}{A vector of T cell receptor antibody names}
+
+\item{new_col}{The name of the new column containing the TCR description}
+}
 \description{
 Used by formatTCR, accepts a vector (one column from a data.frame),
 returns a long data.frame with a new column containing the TCR description

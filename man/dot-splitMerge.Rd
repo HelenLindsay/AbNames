@@ -4,7 +4,7 @@
 \alias{.splitMerge}
 \title{Apply a function to a subset of a data.frame}
 \usage{
-.splitMerge(df, ex, f, warn = FALSE, ...)
+.splitMerge(df, ex, f, ...)
 }
 \arguments{
 \item{df}{A data.frame or tibble}

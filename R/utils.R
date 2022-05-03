@@ -24,11 +24,12 @@
 .tempColName <- function(df, n = 1, nm = "TEMP"){
     cn <- colnames(df)
     i <- 1
+    temp_col <- nm
     res <- character()
 
     while(length(res) < n){
         if (! nm %in% cn) res <- c(res, nm)
-        nm <- sprintf("%s%s", nm, i)
+        nm <- sprintf("%s%s", temp_col, i)
         i <- i + 1
     }
 
@@ -97,9 +98,10 @@
     ex <- rlang::enquo(ex)
 
     df_not_ex <- df %>%
-        dplyr::filter(! eval(x))
+        dplyr::filter(! eval(ex))
 
     df <- df %>%
+        dplyr::filter(eval(ex)) %>%
         f(...)
 
     result <- dplyr::full_join(df, df_not_ex)

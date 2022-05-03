@@ -83,6 +83,17 @@ library(AbNames)
 
 ## Default query table
 
+We will demonstrate how to create a default query table using the raw CITE-seq
+data set.  This collects information from the reagents tables provided as supplementary material in the studies used.
+
+First, we load the unnannotated data table:
+
+```{r}
+citeseq_fname <- system.file("extdata", "citeseq.csv", package = "AbNames")
+citeseq <- read.csv(citeseq_fname, sep = ",")
+
+```
+
 
 ## Custom query table
 

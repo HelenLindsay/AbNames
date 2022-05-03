@@ -11,6 +11,8 @@
 
 \item{ab}{The name of the column containing names to split}
 
+\item{new_col}{The name of the new column containing split names}
+
 \item{pattern}{The regex pattern to use for splitting}
 
 \item{join_pattern}{sprintf pattern for joining t1 (start) and t2 (end)}

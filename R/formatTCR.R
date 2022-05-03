@@ -21,7 +21,7 @@ formatTCR <- function(df, tcr = "TCR", new_col = "TCR_long"){
     # Operate on the column to avoid worrying about temporary column names
     tcr_t <- formatTCRv(df[[tcr]], new_col) %>%
         unique() %>%
-        dplyr::rename(!!tcr := TCR)
+        dplyr::rename(!!tcr := .data$TCR)
 
     # Merge result into original data.frame
     return(dplyr::full_join(df, tcr_t))
@@ -55,18 +55,20 @@ formatTCRv <- function(tcr, new_col = "TCR_long"){
         splitUnnest("end", split = "\\/") %>%
         splitUnnest("end", split = "-(?=J)") %>% # - if followed by J
         splitUnnest("end", split = "(?<=a)(?=b)|(?<=g)(?=d)") %>% # ab or gd
-        tidyr::separate(end, c("end", "nm"),
+        tidyr::separate(.data$end, c("end", "nm"),
                         sep = "(?=[0-9])", fill = "right", extra = "merge") %>%
         # Create a column with the variable and joining prefixes
-        tidyr::separate(end, c("vj", "abgd"),
+        tidyr::separate(.data$end, c("vj", "abgd"),
                         sep = "(?=[abgd])", extra = "merge") %>%
-        dplyr::mutate(vj = stringr::str_replace_all(vj,
+        dplyr::mutate(vj = stringr::str_replace_all(.data$vj,
                                                     var_join, names(var_join)),
-                      vj = ifelse(vj == "", "locus", vj),
-                      abgd = stringr::str_replace_all(abgd, l2w, names(l2w)),
+                      vj = ifelse(.data$vj == "", "locus", .data$vj),
+                      abgd = stringr::str_replace_all(.data$abgd,
+                                                      l2w, names(l2w)),
                       !!new_col := gsub(" NA$", "",
-                          paste("T cell receptor", abgd, vj, nm))) %>%
-        dplyr::select(TCR, !!sym(new_col))
+                          paste("T cell receptor", .data$abgd,
+                                .data$vj, .data$nm))) %>%
+        dplyr::select(.data$TCR, !!sym(new_col))
 
     return(res)
 }
