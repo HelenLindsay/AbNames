@@ -14,7 +14,7 @@
 #'the most common value)
 #'@importFrom tidyr fill
 #'@importFrom stats complete.cases
-#'@importFrom dplyr group_by ungroup n_distinct coalesce
+#'@importFrom dplyr group_by ungroup n_distinct coalesce all_of
 #'@importFrom utils capture.output
 #'@export
 fillByGroup <- function(df, group, fill, multiple = c("stop", "mode")){
@@ -59,7 +59,7 @@ fillByGroup <- function(df, group, fill, multiple = c("stop", "mode")){
     }
 
     df <- df %>%
-        dplyr::select(-tmp) %>%
+        dplyr::select(-all_of(tmp)) %>%
         dplyr::full_join(na_rows)
 
     if (! nrow(df) == original_nrows){
