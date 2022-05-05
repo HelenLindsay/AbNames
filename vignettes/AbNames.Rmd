@@ -152,3 +152,12 @@ tcr_f %>%
 
 
 # Querying the protein ontology
+
+
+# Filling NAs from a reference
+
+When filling in information from a reference data set, it can be useful to look
+at entries where for example annotations are inconsistent.  `r showGroups` is
+a function that allows users to interactively print group(s) from a grouped
+data.frame.
+

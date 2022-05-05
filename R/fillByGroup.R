@@ -37,7 +37,7 @@ fillByGroup <- function(df, group, fill, multiple = c("stop", "mode")){
         msg <- "Some fill columns have multiple values per group, e.g. \n"
 
         multi_df <- df %>% dplyr::filter(!!sym(tmp) > 1)
-        first_group <- .firstGroups(multi_df)
+        first_group <- .getGroups(multi_df)
         fg <- paste(capture.output(print(first_group)), collapse = "\n")
         stop(msg, fg)
     }
