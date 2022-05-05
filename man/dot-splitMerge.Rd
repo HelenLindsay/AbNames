@@ -9,7 +9,8 @@
 \arguments{
 \item{df}{A data.frame or tibble}
 
-\item{ex}{An expression for filtering df, using dplyr::filter}
+\item{ex}{character(1) An character expression for filtering df using
+dplyr::filter, e.g. 'grepl("X", colname)'}
 
 \item{f}{A function to apply to the rows where ex is TRUE and returns a
 data.frame}

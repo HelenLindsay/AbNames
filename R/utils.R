@@ -111,15 +111,12 @@
 
     # Filter for positive case works:
     ex <- rlang::parse_expr(ex)
-    print(ex)
-
     df <- dplyr::filter(df, !!ex)
-    print(nrow(df))
 
-
+    # Apply f to filtered df and re-join
     df <- f(df, ...)
-
     result <- dplyr::full_join(df, df_not_ex)
+
     if (! nrow(result) == nrow(df) + nrow(df_not_ex)){
         warning("Rows were added when merging split data.frames")
     }
