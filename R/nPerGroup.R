@@ -10,19 +10,17 @@
 #'@param na.rm
 #'@importFrom dplyr n_distinct
 #'@importFrom stats complete.cases
-nPerGroup <- function(df, group, col){
+nPerGroup <- function(df, group, col, tmp){
 
-    # Remove rows with NAs in group, merge after filling
-    na_rows <- df %>%
-        dplyr::filter(!complete.cases(!!!syms(group)))
-
-    # Group data frame, check if there are multiple values per group
-    df <- df %>%
-        dplyr::filter(complete.cases(!!!syms(group))) %>%
-        dplyr::group_by(!!!syms(group)) %>%
-        dplyr::mutate(!!tmp := dplyr::n_distinct(!!!syms(fill), na.rm = TRUE))
-
-
+    df <- splitMerge(df, complete.cases(!!!syms(group)),
+                     .addNPerGroup, group = group, tmp = tmp, col = col)
+    return(df)
 }
 
 
+.addNPerGroup <- function(df, group, tmp, col){
+    df <- df %>%
+        dplyr::group_by(!!!syms(group)) %>%
+        dplyr::mutate(!!tmp := dplyr::n_distinct(!!!syms(col), na.rm = TRUE))
+    return(df)
+}

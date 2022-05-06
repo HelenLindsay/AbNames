@@ -26,15 +26,6 @@ fillByGroup <- function(df, group, fill, multiple = c("stop", "mode")){
     na_rows <- df %>%
         dplyr::filter(!complete.cases(!!!syms(group)))
 
-    # for split merge:
-    #print("flag")
-    #ex <- expr(complete.cases(!!!syms(group)))
-    #print(ex)
-    #ex <- expr(! (!!ex))
-    #print(ex)
-    #ex1 <- expr(!complete.cases(!!!syms(group)))
-    #print("end flag")
-
     # Group data frame, check if there are multiple values per group
     df <- df %>%
         dplyr::filter(complete.cases(!!!syms(group))) %>%

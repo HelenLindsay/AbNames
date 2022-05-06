@@ -2,10 +2,14 @@
 
 #' Apply a function to a subset of a data.frame
 #'
-#' Subset a data.frame according to a condition, apply a function to the rows
-#' where the condition is TRUE, then rejoin with the rows where condition is
-#' FALSE.  A split-apply-combine where function is only applied to a subset of
-#' rows.
+#'@descrption Subset a data.frame according to a condition, apply a function
+#' to the rows where the condition is TRUE, then rejoin with the rows where
+#' condition is FALSE.  A split-apply-combine where function is only applied
+#' to a subset of rows.
+#'
+#' Filtering expression can be either quoted or unquoted, e.g.
+#' complete.cases(x, y) (where x and y are column names) or
+#' "complete.cases(x, y)"
 #'
 #'@param df A data.frame or tibble
 #'@param ex character(1) An character expression for filtering df using
