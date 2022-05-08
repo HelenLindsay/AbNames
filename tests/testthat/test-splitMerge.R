@@ -9,3 +9,8 @@ test_that("splitMerge gives the same answer with quoted or unquoted filter", {
     expect_equal(res_quoted$D, c(rep(FALSE, 2), rep(TRUE, 2), rep(NA, 3)))
 })
 
+
+test_that("splitMerge works with multiple filters", {
+    f <- function(df, x) dplyr::mutate(df, D = {{ x }} + 1)
+    res <- splitMerge(df, "A < 3 & B == 4", f, x = C )
+})

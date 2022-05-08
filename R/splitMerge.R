@@ -9,7 +9,8 @@
 #'
 #' Filtering expression can be either quoted or unquoted, e.g.
 #' complete.cases(x, y) (where x and y are column names) or
-#' "complete.cases(x, y)"
+#' "complete.cases(x, y)".  To filter with multiple conditions use "&", e.g.
+#' "x == 1 & y == 2"
 #'
 #'@param df A data.frame or tibble
 #'@param ex character(1) An character expression for filtering df using
