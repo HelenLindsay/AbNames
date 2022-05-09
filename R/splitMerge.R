@@ -35,7 +35,7 @@ splitMerge <- function(df, ex, f, ...){
 
     tmp <- .tempColName(df)
     original_nrow = nrow(df)
-    df <- dplyr::mutate(df,  !!tmp := !! ex)
+    df <- dplyr::mutate(df, !!tmp := !! ex)
 
      # Remove negative cases
     df_not_ex <- dplyr::filter(df, ! (!!sym(tmp)) | is.na(!!sym(tmp)))

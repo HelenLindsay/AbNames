@@ -34,6 +34,7 @@ fillByGroup <- function(df, group, fill, multiple = c("stop", "mode")){
 }
 
 
+#' @importFrom dplyr across
 .fillByGroup <- function(df, group, tmp, fill, multiple){
     # Group data frame, check if there are multiple values per group
     df <- .addNPerGroup(df, group, tmp, fill)
@@ -58,10 +59,12 @@ fillByGroup <- function(df, group, fill, multiple = c("stop", "mode")){
                  "columns is not implemented")
         }
 
+        print("fill by group flag 2")
 
 
         df <- groupMode(df, cl = fill, gp = group)
     }
+
 
     df <- dplyr::select(df, -all_of(tmp))
     return(df)
@@ -72,13 +75,15 @@ fillByGroup <- function(df, group, fill, multiple = c("stop", "mode")){
 #
 #' Find the most common value per group
 #'
-#' Given a grouped data.frame, count values per group and add a column with the
-#' most common value for each group.  If there are several equally common
+#' Given a grouped data.frame, count values per group and return a vector with
+#' the most common value for each group.  If there are several equally common
 #' values, the first will be chosen.
 #'
 #'@param df a grouped tibble
 #'@param cl Name of column find mode
+
 #'@param new_cl Name of column to create.  If NA (default), col is modified
+
 #'@param gp Name(s) of columns to group by
 #'@param min_n (integer(1), default NA) Minimum number of occurrences of
 #'majority value.  If provided, the majority value will be set to NA when it

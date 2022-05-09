@@ -66,14 +66,30 @@
 # .freducePartial ----
 #' Create a list of partial functions and apply in sequence
 #'
-#'
+#' Apply a function f repeatedly to different columns of a data.frame.  Assumes
+#' that ellipsis arguments contain (only) one vector entry and that function f
+#' should be applied sequentially to each of these entries.  Does not work with
+#' unquoted column names
 #'
 #' @param df A data.frame or tibble
 #' @param f Function that returns a (mutated) data.frame
-#' @param cols character(n) vector of column names.
+#' @param cls character(1) Name of entry in ... for iterating.
 #' @param ... Extra arguments for f
-#' @importFrom magrittr freduce
 #' @importFrom purrr partial
-.freducePartial <- function(df, f, cols, ...){
+#' @importFrom magrittr freduce
+.freducePartial <- function(df, f, cls, ...){
+    dots <- list(...)
 
+    stopifnot(cls %in% names(dots))
+
+    col_vals <- dots[[cls]]
+    dots[[cls]] <- NULL
+
+    partials <- lapply(col_vals, function(x){
+        args <- c(structure(c(f, x), names = c(".f", cls)), dots)
+        do.call(purrr::partial, args)
+    })
+
+    result <- magrittr::freduce(df, partials)
+    return(result)
 }
