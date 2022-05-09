@@ -12,31 +12,20 @@
 #'integer suffix will be added.
 #'@importFrom dplyr n_distinct
 #'@importFrom stats complete.cases
-nPerGroup <- function(df, group, col, nm = "n_per_group"){
+nPerGroup <- function(df, group, col, nm){
     # To do?
     # It would be possible to vectorise col with n temp names
 
-    dfo <- df
-
-    .warnIfColExists(df, nm)
-
-    # Remove rows with NAs in group
-    na_rows <- dplyr::filter(df, !complete.cases(!!!syms(group)))
-
-    # Group data frame, check if there are multiple values per group
-    df <- dplyr::filter(df, complete.cases(!!!syms(group)))
-
-    add_n <- function(df, group, col, nm){
-        tmp <- .tempColName(df, nm = nm)
-        df <- df %>%
-            dplyr::group_by(!!!syms(group)) %>%
-            dplyr::mutate(!!tmp :=
-                              dplyr::n_distinct(!!!syms(col), na.rm = TRUE))
-        return(df)
-    }
-
-    x <- add_n(df, group, col, nm)
-    y <- .splitMerge()
+    tmp <- .tempColName(df, nm = nm)
+    df <- splitMerge(df, complete.cases(!!!syms(group)),
+                     .addNPerGroup, group = group, tmp = tmp, col = col)
+    return(df)
 }
 
 
+.addNPerGroup <- function(df, group, nm, col){
+    df <- df %>%
+        dplyr::group_by(!!!syms(group)) %>%
+        dplyr::mutate(!!nm := dplyr::n_distinct(!!!syms(col), na.rm = TRUE))
+    return(df)
+}

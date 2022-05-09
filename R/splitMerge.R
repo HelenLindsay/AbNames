@@ -2,10 +2,15 @@
 
 #' Apply a function to a subset of a data.frame
 #'
-#' Subset a data.frame according to a condition, apply a function to the rows
-#' where the condition is TRUE, then rejoin with the rows where condition is
-#' FALSE.  A split-apply-combine where function is only applied to a subset of
-#' rows.
+#'@descrption Subset a data.frame according to a condition, apply a function
+#' to the rows where the condition is TRUE, then rejoin with the rows where
+#' condition is FALSE.  A split-apply-combine where function is only applied
+#' to a subset of rows.
+#'
+#' Filtering expression can be either quoted or unquoted, e.g.
+#' complete.cases(x, y) (where x and y are column names) or
+#' "complete.cases(x, y)".  To filter with multiple conditions use "&", e.g.
+#' "x == 1 & y == 2"
 #'
 #'@param df A data.frame or tibble
 #'@param ex character(1) An character expression for filtering df using
@@ -14,23 +19,22 @@
 #'data.frame
 #'@param ... Extra arguments for f
 #'@return df where function f has been applied only to the rows where ex is TRUE
-#'@importFrom rlang parse_expr
+#'@importFrom rlang parse_expr enexpr is_string expr
 splitMerge <- function(df, ex, f, ...){
 
-    # If input is an unquoted expression:
-    #df_ex <- dplyr::filter(df, {{ ex}} )
-    #print(df_ex)
-    #
-    #df_not_ex <- dplyr::filter(df, ! {{ ex }})
-    #print(df_not_ex)
+    # Switch depending on whether ex is a string or an expression
+    enex <- rlang::enexpr(ex)
+
+    if (rlang::is_string(enex)){
+        ex <- rlang::parse_expr(ex) # Parse string into expression
+    } else {
+        ex <- enex
+    }
 
     # Remove negative cases
-    not_ex <- rlang::parse_expr( paste("!", ex))
-    df_not_ex <- dplyr::filter(df, !!(not_ex))
-    print(nrow(df_not_ex))
+    df_not_ex <- dplyr::filter(df, ! ( !!(ex)))
 
-    # Filter for positive case works:
-    ex <- rlang::parse_expr(ex)
+    # Filter for positive case:
     df <- dplyr::filter(df, !!ex)
 
     # Apply f to filtered df and re-join
