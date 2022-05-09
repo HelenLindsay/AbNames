@@ -97,6 +97,9 @@ citeseq <- read.csv(citeseq_fname, sep = ",")
 
 ## Custom query table
 
+AbNames provides a few template functions that can be used to construct a pipeline for creating a query table.  
+
+
 ### Special case: T-cell receptors
 
 We found that querying the HGNC gene description was the easiest way to match
@@ -144,7 +147,6 @@ tcr_f <- AbNames::formatTCR(tcr, tcr = "query")
 tcr_f %>%
     head() 
 
-# TO DO: GET KABLE INSTALLED
 ```
 
 

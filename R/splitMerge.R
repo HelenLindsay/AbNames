@@ -17,7 +17,7 @@
 #'@importFrom rlang parse_expr
 splitMerge <- function(df, ex, f, ...){
 
-    # This works if input is an unquoted expression
+    # If input is an unquoted expression:
     #df_ex <- dplyr::filter(df, {{ ex}} )
     #print(df_ex)
     #

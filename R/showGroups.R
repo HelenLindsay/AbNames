@@ -44,7 +44,7 @@ showGroups <- function(df, i = 1, n = 1, max_rows = 50){
 .getGroups <- function(df, i = 1, n = 1){
     row_idxs <- df %>% dplyr::group_rows()
 
-    if (i > length(row_ids)){
+    if (i > length(row_idxs)){
         msg <- "Cannot print group %s, there are only %s groups in df"
         stop(sprintf(msg, i, length(row_idxs)))
     }

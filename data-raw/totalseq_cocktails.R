@@ -1,9 +1,12 @@
+# Setup ----
+
 library(readxl)
 library(dplyr)
 library(readr)
 library(AbNames)
 
-# Download TotalSeq cocktail information
+# Download TotalSeq cocktail information ----
+
 bl <- "https://www.biolegend.com/Files/Images/BioLegend/totalseq/"
 
 tsa <- paste0(bl, "TotalSeq_A_Human_Universal_Cocktail_v1_163_",
@@ -28,7 +31,7 @@ totalseq <- lapply(totalseq_fnames, function(fn){
 
 nrows <- sapply(totalseq, nrow)
 
-# Get the TotalSeq category from the filename and add to tables
+# Get the TotalSeq category from the filename and add to tables ----
 ts_cat <- gsub(".*TotalSeq_([ABCD])_.*", "\\1", basename(totalseq_fnames))
 ts_cat <- rep(ts_cat, nrows)
 ts_cat <- split(ts_cat, ts_cat)
@@ -39,10 +42,10 @@ totalseq <- lapply(seq_along(totalseq), function(i) {
 
 totalseq <- Reduce(dplyr::full_join, totalseq)
 
-# Check that no rows have been lost or gained
+# Check that no rows have been lost or gained ----
 nrow(totalseq) == sum(nrows)
 
-# Coalesce columns with the same meaning
+# Coalesce columns with the same meaning ----
 totalseq <- totalseq %>%
     dplyr::rename(Ensembl_ID = `Ensembl ID`,
                   Gene_Symbol = `Gene Name`,
@@ -62,15 +65,35 @@ totalseq <- totalseq %>%
                                       "human", NA),
                   Antigen = gsub("anti-human\\s", "", Antigen),
                   Oligo_ID = substr(Oligo_ID, 2, nchar(Oligo_ID)),
-                  Antigen = AbNames::replaceGreekSyms(Antigen, "sym2letter"))
+                  Antigen = AbNames::replaceGreekSyms(Antigen, "sym2letter"))%>%
+    dplyr::relocate(Antigen, Clone, Ensembl_ID, Gene_Symbol, Oligo_ID,
+                    TotalSeq_Cat, Barcode_Sequence, Reactivity)
+
+# Some TotalSeq B Ensembl_IDs are duplicated barcode sequences, set to NA ----
+totalseq <- totalseq %>%
+    dplyr::mutate(Ensembl_ID = ifelse(grepl("^ENSG", Ensembl_ID),
+                                      Ensembl_ID, NA))
+
+# Check that there is only one Ensembl_ID per Antigen-Clone combo ----
+
+ts <- totalseq %>%
+    AbNames::nPerGroup(group = c("Antigen", "Clone"), "Ensembl_ID")
+max(ts$n_per_group) == 1
+
+# Fill in missing genes if Antigen, Clone, and Oligo_ID match ----
+ts <- totalseq %>%
+    AbNames::nPerGroup(group = c("Antigen", "Clone"), "Oligo_ID")
+
+    dplyr::group_by(Antigen, Clone) %>%
+    dplyr::filter(any(is.na(Ensembl_ID)))
 
 
+# Create totalseq_cocktails data set ----
 totalseq <- as.data.frame(totalseq)
 usethis::use_data(totalseq, name = "totalseq_cocktails",
                   overwrite = TRUE, compress = "bzip2")
 
 
-# Fill in missing genes if Antigen, Clone, and Oligo_ID match
 # Note that by adding "Reactivity", controls will be removed as reactivity was
 # only defined for human
 #groups <- c("Antigen", "Clone", "Oligo_ID", "Reactivity")
