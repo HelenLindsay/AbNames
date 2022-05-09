@@ -4,12 +4,14 @@
 \alias{showGroups}
 \title{Interactively print individual groups of a grouped data.frame}
 \usage{
-showGroups(df, i = 1, max_rows = 50)
+showGroups(df, i = 1, n = 1, max_rows = 50)
 }
 \arguments{
 \item{df}{A *grouped* data.frame}
 
-\item{i}{integer(1) Index of the group to be printed (Default: 1).}
+\item{i}{(integer(1), default 1) Index of the group to be printed.}
+
+\item{n}{(integer(1), default 1) How many groups to show at once?}
 
 \item{max_rows}{integer(1) Maximum number of rows to print (Default: 50).}
 }

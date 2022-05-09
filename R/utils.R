@@ -61,3 +61,19 @@
     res[any_na] <- NA
     return(res)
 }
+
+
+# .freducePartial ----
+#' Create a list of partial functions and apply in sequence
+#'
+#'
+#'
+#' @param df A data.frame or tibble
+#' @param f Function that returns a (mutated) data.frame
+#' @param cols character(n) vector of column names.
+#' @param ... Extra arguments for f
+#' @importFrom magrittr freduce
+#' @importFrom purrr partial
+.freducePartial <- function(df, f, cols, ...){
+
+}

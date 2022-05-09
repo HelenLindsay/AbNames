@@ -12,7 +12,7 @@
 #'integer suffix will be added.
 #'@importFrom dplyr n_distinct
 #'@importFrom stats complete.cases
-nPerGroup <- function(df, group, col, nm){
+nPerGroup <- function(df, group, col, nm = "n_per_group"){
     # To do?
     # It would be possible to vectorise col with n temp names
 
@@ -29,3 +29,4 @@ nPerGroup <- function(df, group, col, nm){
         dplyr::mutate(!!nm := dplyr::n_distinct(!!!syms(col), na.rm = TRUE))
     return(df)
 }
+

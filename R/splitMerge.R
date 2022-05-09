@@ -2,10 +2,10 @@
 
 #' Apply a function to a subset of a data.frame
 #'
-#'@descrption Subset a data.frame according to a condition, apply a function
+#'@description Subset a data.frame according to a condition, apply a function
 #' to the rows where the condition is TRUE, then rejoin with the rows where
-#' condition is FALSE.  A split-apply-combine where function is only applied
-#' to a subset of rows.
+#' condition is FALSE or NA.  A split-apply-combine where function is only
+#' applied to a subset of rows.
 #'
 #' Filtering expression can be either quoted or unquoted, e.g.
 #' complete.cases(x, y) (where x and y are column names) or
@@ -20,7 +20,9 @@
 #'@param ... Extra arguments for f
 #'@return df where function f has been applied only to the rows where ex is TRUE
 #'@importFrom rlang parse_expr enexpr is_string expr
+#'@export
 splitMerge <- function(df, ex, f, ...){
+
 
     # Switch depending on whether ex is a string or an expression
     enex <- rlang::enexpr(ex)
@@ -31,17 +33,22 @@ splitMerge <- function(df, ex, f, ...){
         ex <- enex
     }
 
-    # Remove negative cases
-    df_not_ex <- dplyr::filter(df, ! ( !!(ex)))
+    tmp <- .tempColName(df)
+    original_nrow = nrow(df)
+    df <- dplyr::mutate(df,  !!tmp := !! ex)
+
+     # Remove negative cases
+    df_not_ex <- dplyr::filter(df, ! (!!sym(tmp)) | is.na(!!sym(tmp)))
 
     # Filter for positive case:
-    df <- dplyr::filter(df, !!ex)
+    df <- dplyr::filter(df, !! rlang::sym(tmp))
 
     # Apply f to filtered df and re-join
     df <- f(df, ...)
-    result <- dplyr::full_join(df, df_not_ex)
+    result <- dplyr::full_join(df, df_not_ex) %>%
+        dplyr::select(-all_of(tmp))
 
-    if (! nrow(result) == nrow(df) + nrow(df_not_ex)){
+    if (! nrow(result) == original_nrow){
         warning("Rows were added when merging split data.frames")
     }
 

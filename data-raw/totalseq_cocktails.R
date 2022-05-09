@@ -79,19 +79,25 @@ totalseq <- totalseq %>%
 ts <- totalseq %>%
     AbNames::nPerGroup(group = c("Antigen", "Clone"), "Ensembl_ID")
 max(ts$n_per_group) == 1
+if (max(ts$n_per_group) > 1){
+    warning("More than one value of Ensembl_ID per Antigen/Clone combo")
+}
+ts <- ts %>% dplyr::select(-n_per_group)
 
 # Fill in missing genes if Antigen, Clone, and Oligo_ID match ----
 ts <- totalseq %>%
-    AbNames::nPerGroup(group = c("Antigen", "Clone"), "Oligo_ID")
+    AbNames::fillByGroup(group = c("Antigen", "Clone"))
+
+    AbNames::nPerGroup(group = c("Antigen", "Clone"), "Oligo_ID") %>%
+
 
     dplyr::group_by(Antigen, Clone) %>%
     dplyr::filter(any(is.na(Ensembl_ID)))
 
 
 # Create totalseq_cocktails data set ----
-totalseq <- as.data.frame(totalseq)
-usethis::use_data(totalseq, name = "totalseq_cocktails",
-                  overwrite = TRUE, compress = "bzip2")
+totalseq_cocktails <- as.data.frame(totalseq)
+usethis::use_data(totalseq_cocktails, overwrite = TRUE, compress = "bzip2")
 
 
 # Note that by adding "Reactivity", controls will be removed as reactivity was

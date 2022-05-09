@@ -70,10 +70,10 @@ unable to find an exact match to the antibody name provided.
 
 ## BioLegend antibodies
 
-TO DO: CHECK WITH BIOLEGEND IF GENE NAME DATA CAN BE INCLUDED IN THIS PACKAGE
 BioLegend is a major supplier of antibodies, and provides several antibody
-panels for CITE-seq analyses.  
-
+panels for CITE-seq analyses.  The data set "totalseq_cocktails" is a
+re-formatted version of the TotalSeq cocktails data sheets available from the
+BioLegend website, including BioLegend antibody names and Ensembl gene IDs.
 
 # Creating a query table
 
@@ -97,7 +97,8 @@ citeseq <- read.csv(citeseq_fname, sep = ",")
 
 ## Custom query table
 
-AbNames provides a few template functions that can be used to construct a pipeline for creating a query table.  
+AbNames provides a few template functions that can be used to construct a
+pipeline for creating a query table.  
 
 
 ### Special case: T-cell receptors
@@ -159,7 +160,7 @@ tcr_f %>%
 # Filling NAs from a reference
 
 When filling in information from a reference data set, it can be useful to look
-at entries where for example annotations are inconsistent.  `r showGroups` is
+at entries where for example annotations are inconsistent.  `showGroups` is
 a function that allows users to interactively print group(s) from a grouped
 data.frame.
 

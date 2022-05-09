@@ -4,7 +4,7 @@
 \alias{nPerGroup}
 \title{Group a data.frame and count unique values}
 \usage{
-nPerGroup(df, group, col)
+nPerGroup(df, group, col, nm)
 }
 \arguments{
 \item{df}{a data.frame or tibble}
@@ -12,6 +12,10 @@ nPerGroup(df, group, col)
 \item{group}{character(n) Character vector of name(s) of grouping columns}
 
 \item{col}{character(1) Name of column in which to count distinct values}
+
+\item{nm}{character(1), default: "n_per_group". Name of column containing
+counts of distinct values per group.  If nm is already a column in df, an
+integer suffix will be added.}
 }
 \description{
 Grouping columns containing NAs are not considered.
