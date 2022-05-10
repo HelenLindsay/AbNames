@@ -50,7 +50,7 @@ defaultQry <- function(){
 #'@param new_col (character(1), default: "ID") Name of new ID column
 #'@param warn (TRUE/FALSE, default: TRUE) If TRUE, warn if IDs are not unique
 #'
-#'@return
+#'@return df with an extra ID column
 #'
 #'@importFrom dplyr mutate group_by pull all_of n syms
 addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",

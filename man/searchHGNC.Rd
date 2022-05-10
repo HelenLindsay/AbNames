@@ -4,10 +4,10 @@
 \alias{searchHGNC}
 \title{searchHGNC}
 \usage{
-searchHGNC(qd)
+searchHGNC(df)
 }
 \arguments{
-\item{gd}{A data.frame (or similar object, e.g. a tibble)}
+\item{df}{A data.frame (or similar object, e.g. a tibble)}
 }
 \description{
 Search HGNC gene symbols, aliases and names for an exact match

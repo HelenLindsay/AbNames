@@ -6,6 +6,11 @@
 \usage{
 .printGroupMatch(df, flt)
 }
+\arguments{
+\item{df}{A data.frame or tibble}
+
+\item{flt}{An (unquoted) expression for using with dplyr::filter}
+}
 \description{
 Get the first group of a grouped data.frame matching a condition and format
 output for printing an error message.
