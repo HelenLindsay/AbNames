@@ -24,7 +24,7 @@ formatTCR <- function(df, tcr = "TCR", new_col = "TCR_long"){
         dplyr::rename(!!tcr := .data$TCR)
 
     # Merge result into original data.frame
-    return(dplyr::full_join(df, tcr_t))
+    return(suppressMessages(dplyr::full_join(df, tcr_t)))
 
 }
 

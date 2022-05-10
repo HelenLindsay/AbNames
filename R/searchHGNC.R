@@ -5,6 +5,6 @@
 #'@param df A data.frame (or similar object, e.g. a tibble)
 #'@importFrom utils data
 searchHGNC <- function(df){
-    utils::data("hgnc_long")
+    utils::data("hgnc_long", envir = environment())
 
 }

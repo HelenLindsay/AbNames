@@ -25,7 +25,6 @@ Suggests:
     knitr,
     ontologyIndex,
     ontoProc,
-    pryr,
     readr,
     rmarkdown,
     testthat (>= 3.0.0)

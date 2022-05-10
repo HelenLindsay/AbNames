@@ -2,12 +2,12 @@
 
 # Rho?
 
-GREEKSYM_TO_NAME = c("\u03b1" = "alpha", "\u03b2" = "beta", "\u03b4" = "gamma",
+GREEKSYM_TO_NAME = c("\u03b1" = "alpha", "\u03b2" = "beta", "\u03b3" = "gamma",
                      "\u03b4" = "delta", "\u03b5" = "epsilon",
-                     "\u03b6" = "zeta", "\u03ba" = "kappa",
-                     "\u03bb" = "lambda", "\u03c4" = "tau", "\u03bc" = "mu")
+                     "\u03b6" = "zeta", "\u03ba" = "kappa", "\u03bb" = "lambda",
+                     "\u03c4" = "tau", "\u03bc" = "mu")
 
-GREEKSYM_TO_LETTER =  c("\u03b1" = "a", "\u03b2" = "b", "\u03b4" = "g",
+GREEKSYM_TO_LETTER =  c("\u03b1" = "a", "\u03b2" = "b", "\u03b3" = "g",
                         "\u03b4" = "d", "\u03b5" = "e", "\u03b6" = "z",
                         "\u03ba" = "k", "\u03bb" = "l", "\u03c4" = "t",
                         "\u03bc" = "m")

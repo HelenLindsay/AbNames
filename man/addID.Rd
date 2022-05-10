@@ -16,7 +16,7 @@ addID(df, id_cols = c("Antigen", "Study"), new_col = "ID", warn = TRUE)
 \item{warn}{(TRUE/FALSE, default: TRUE) If TRUE, warn if IDs are not unique}
 }
 \value{
-
+df with an extra ID column
 }
 \description{
 Adds an ID column to a data frame

@@ -24,16 +24,12 @@ AbNames performs two tasks:
 
 * Extracting potential gene names from antibody names, and
 
-* Matching human antibody names to gene names and IDs.
+* Matching human antibody names to gene names, IDs and protein complex IDs.
 
-Antibody names are not reported in a consistent format.  Antibodies are often
-named according to the antigen they target, which may not be the same as the
-name of the protein (complex) the antigen is part of.  Antibodies may target 
-multi-subunit protein complexes, and this can be reflected in the name, e.g. an
-antibody against the T-cell receptor alpha and beta subunits might be named
-TCRab. Antibody names may also include the name of the clone the antibody is
-derived from or the names of fluorophores or DNA-oligos the antibody is
-conjugated with.  For these reasons, it can be difficult to exactly match
+Antibody names are not reported in a consistent format in published data.  Antibodies are often named according to the antigen they target, which may not
+be the same as the name of the protein (complex) the antigen is part of. Antibodies may target multi-subunit protein complexes, and this can be reflected
+in the name, e.g. an antibody against the T-cell receptor alpha and beta subunits might be named TCRab. Antibody names may also include the name of the clone the antibody is derived from or the names of fluorophores or DNA-oligos the antibody
+is conjugated with.  For these reasons, it can be difficult to exactly match
 antibody names with gene or protein names.  As cell surface antigens often have
 very similar names, searching for partial matches to names in free-text gene descriptions is challenging and error-prone.
 
@@ -51,14 +47,47 @@ very similar names, searching for partial matches to names in free-text gene des
 # Data
 
 AbNames contains several curated gene name data sets for matching to antibody
-names:
+names.
 
 ## HGNC gene names
 
-AbNames contains a reformatted version of the protein-coding gene information
-downloaded from the Human Gene Names Consortium. This includes previous
-(obsolete) gene names and aliases, which in our experience have been useful for 
-matching to antibody names
+The `hgnc` data set is a reformatted version of the protein-coding gene
+information downloaded from the Human Gene Names Consortium. This includes
+previous (obsolete) gene names and aliases, which in our experience have been useful for matching to antibody names.  The `hgnc_long` data set contains the
+same seq of gene identifiers as the `hgnc` data set, in long format (one alias
+per row).
+
+Load using:
+
+```{r, message = FALSE}
+library(AbNames)
+library(dplyr)
+
+data("hgnc", package = "AbNames") # hgnc_long is loaded similarly
+
+# Show the first entries of hgnc, where each row is the start of one column
+dplyr::glimpse(hgnc) 
+
+# (Note: it isn't necessary to use dplyr:: to call "glimpse" as dplyr is loaded
+# with the library call above. This syntax is used to make it clear which
+# packages functions belong to)
+```
+
+## BioLegend antibodies
+
+BioLegend is a major supplier of antibodies, and provides several antibody
+panels for CITE-seq analyses.  The data set "totalseq_cocktails" is a
+re-formatted version of the TotalSeq cocktails data sheets available from the
+BioLegend website, including BioLegend antibody names and Ensembl gene IDs.
+
+Load using:
+```{r}
+data("totalseq_cocktails", package = "AbNames")
+dplyr::glimpse(totalseq_cocktails)
+```
+
+Note that the "Antigen" column here refers to antibody names with prefixes such
+as "anti-human" removed.
 
 ## CITE-seq antibodies
 
@@ -68,31 +97,46 @@ functions that were used to create this table.  This table includes manually
 curated matches between antibody names and gene IDs for cases where we were
 unable to find an exact match to the antibody name provided.
 
-## BioLegend antibodies
+Load using
+```{r, message = FALSE}
+# As the citeseq data set contains raw data, it is loaded differently
+# than the other data sets 
 
-BioLegend is a major supplier of antibodies, and provides several antibody
-panels for CITE-seq analyses.  The data set "totalseq_cocktails" is a
-re-formatted version of the TotalSeq cocktails data sheets available from the
-BioLegend website, including BioLegend antibody names and Ensembl gene IDs.
+citeseq_fname <- system.file("extdata", "citeseq.csv", package = "AbNames")
+citeseq <- read.csv(citeseq_fname)
+dplyr::glimpse(citeseq)
+```
+
+Here the column "Antigen" refers to the name given by the authors of the study
+in the table of resources used.  Some minimal formatting has been done, for
+example fixing Greek characters that were accidentally transformed upon data import.
 
 # Creating a query table
 
-```{r setup}
-library(AbNames)
+To illustrate the problem with matching antibody names to gene names, let's look
+at an example from the citeseq data set.
+
+```{r}
+# The regular expression inside "grepl" searches for PD.L1, PD-L1, PDL1 or CD274
+
+cd274 <- citeseq %>%
+    dplyr::filter(grepl("PD[\\.-]?L1|CD274", Antigen)) %>%
+    dplyr::pull(Antigen) %>%
+    unique()
+
+cd274
 ```
+
+All of the antigen names above refer to the same cell surface protein 
+
+
+We will demonstrate how to create a default query table using the raw CITE-seq
+data set.
 
 ## Default query table
 
 We will demonstrate how to create a default query table using the raw CITE-seq
 data set.  This collects information from the reagents tables provided as supplementary material in the studies used.
-
-First, we load the unnannotated data table:
-
-```{r}
-citeseq_fname <- system.file("extdata", "citeseq.csv", package = "AbNames")
-citeseq <- read.csv(citeseq_fname, sep = ",")
-
-```
 
 
 ## Custom query table
@@ -176,3 +220,18 @@ To fill using a reference data set, the strategy used is to add a temporary ID c
 
 ## TO DO
 An example of (interactively) deciding what to do if groups are inconsistent.
+
+
+## Isotype controls
+
+https://onlinelibrary.wiley.com/doi/full/10.1002/cyto.b.20485
+https://onlinelibrary.wiley.com/doi/full/10.1002/cyto.a.20333
+https://onlinelibrary.wiley.com/doi/full/10.1002/cyto.a.22995
+
+Isotype controls are antibodies of the same isotype as a given antibody.
+Ideally, isotype controls should match the heavy chain (e.g. IgG), heavy chain subclass (e.g. IgG1) and light chain (kappa or lambda), and have the
+same concentration and manufacturing process. 
+
+Isotype controls may have either unknown specificity or bind to antigens not present in the sample.  Isotype controls can indicate whether there is unintended binding of the FC region to (FcRs, CD16, CD32, CD64).  One or more of these are expressed in all leukocytes, with highest expressin in macrophages and monocytes.
+
+Does the isotype control signal match internal negative control (cells negative for a given marker).

@@ -5,19 +5,37 @@
 #'the names into possible gene names and return the data.frame in long format.
 #'
 #'@param df A data.frame or tibble
-#'@param ab (character(1), default "Antigen") Name of the column in df
-#' containing Antigen/Antibody names
-#'@param id_cols (character(n)) Names of columns to paste to form ID column
-#'@param funs A vector of string formatting functions to
-#'
+#'@param funs A vector of string formatting functions to apply to df.  Each
+#'should take a data.frame as a first argument and return a data.frame or
+#'tibble, and optional arguments should be filled in e.g. with purrr::partial.
+#'@param control_col (character(1), default: NA)  Optional name of a logical
+#'column indicating whether an antibody is an isotype control.  If present,
+#'controls will be removed to avoid spurious matches as they usually do not
+#'react against human genes.
+#'@param query_cols (character(n), default: NA) IF NA ASSUME THAT ALL COLUMNS
+#'ADDED ARE QUERY_COLS?
 #'@export
-makeQueryTable <- function(df, ab = "Antigen",
-                           id_cols = c("Antigen", "Study"), funs){
+makeQueryTable <- function(df, funs, query_cols = NA, control_col = NA){
+    # Remove controls
+    if (! is.na(control_col)) { df <- dplyr::filter(df, ! (!!sym(control_cl))) }
+
+    cn <- colnames(df)
+
+    query_cols <- NA
+    df <- magrittr::freduce(df, funs)
+    new_cn <- setdiff(colnames(df), cn)
+
 
 }
 
 
-defaultQry <- function(){
+# defaultQry ----
+#' Default list of functions for making an antibody query table
+#'
+#'@param ab (character(1), default "Antigen") Name of the column in df
+#' containing Antigen/Antibody names
+#'@param id_cols (character(n)) Names of columns to paste to form ID column
+defaultQry <- function(ab = "Antigen", id_cols = c("Antigen", "Study")){
 
     # Default transformation sequence for making query table ----
 
@@ -25,18 +43,21 @@ defaultQry <- function(){
     # Check that all columns to act on are either in the table or created
     # earlier in the pipeline
     # function, ab, new_col, args?
-    stopifnot(requireNamespace("pryr"))
 
     qry = list(addID,
-               gsubAb(), # Remove A/anti
-               pryr::partial(gsubAb, pattern = "\\sRecombinant"),
+               gsubAb, # Remove A/anti
+               purrr::partial(gsubAb, pattern = "\\sRecombinant"),
                splitUnnest(), # Brackets
                splitUnnest(split = ", "),  # Commas
                # / _ or . if at least 3 on each side and not TCR
-               pryr::partial(splitUnnest, exclude = "TCR",
-                        split = "(?<=[A-z0-9-]{3})[\\/_\\.](?=[A-z0-9-]{3,})")
+               purrr::partial(splitUnnest, exclude = "TCR",
+                        split = "(?<=[A-z0-9-]{3})[\\/_\\.](?=[A-z0-9-]{3,})")#,
+               #purrr::partial(dplyr::mutate, )
 
     )
+
+
+
 }
 
 
@@ -60,7 +81,9 @@ addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",
     if (! all(id_cols %in% colnames(df))){ stop("All id_cols must be in df") }
     .warnIfColExists(df, new_col)
 
-    df <- mutate(df, !!new_col := do.call(paste, c(!!syms(id_cols), sep = "-")))
+    df <- df %>%
+        dplyr::mutate(!!new_col :=
+                          do.call(paste, c(!!syms(id_cols), sep = "-")))
 
     if (isTRUE(warn)){
 
@@ -123,7 +146,7 @@ addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",
 gsubAb <- function(df, ab = "Antigen", pattern = "[Aa]nti-", replacement = "",
                    exclude = NA, restrict = NA, new_col = NA){
     if (is.na(new_col)) new_col <- ab
-    df <- dplyr::mutate(df, !!new_col :=  gsub(pattern, replacement, !!sym(ab)))
+    df <- dplyr::mutate(df, !!new_col := gsub(pattern, replacement, !!sym(ab)))
 
     # Restrict would have to be a filter expression, e.g. a particular study
     # Would need to use a temp column as in splitUnnest
@@ -135,6 +158,11 @@ gsubAb <- function(df, ab = "Antigen", pattern = "[Aa]nti-", replacement = "",
     # matches in column ab
 
     return(df)
+}
+
+
+upperNoDash <- function(df, ab = "Antigen", new_col = "upperNoDash"){
+
 }
 
 
@@ -189,7 +217,4 @@ splitUnnest <- function(df, ab = "Antigen", split = "[\\(\\)]", new_col = NA,
     df <- df %>% dplyr::rename(!!new_col := !!dplyr::sym(temp_col))
     return(df)
 }
-
-
-
 
