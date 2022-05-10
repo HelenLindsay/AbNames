@@ -22,23 +22,27 @@ fillByGroup <- function(df, group, fill, multiple = c("stop", "mode")){
     tmp <- .tempColName(df, 1, "ndistinct")
     original_nrows <- nrow(df)
 
-    # Remove rows with NAs in group, merge after filling
-    na_rows <- df %>%
-        dplyr::filter(!complete.cases(!!!syms(group)))
+    df <- AbNames::splitMerge(df, complete.cases(!!!syms(group)),
+                              .fillByGroup, group = group, tmp = tmp,
+                              fill = fill, multiple = multiple)
 
+    if (! nrow(df) == original_nrows){
+        warning("Rows have been lost or gained when merging NA rows")
+    }
+
+    return(df)
+}
+
+
+#' @importFrom dplyr across
+.fillByGroup <- function(df, group, tmp, fill, multiple){
     # Group data frame, check if there are multiple values per group
-    df <- df %>%
-        dplyr::filter(complete.cases(!!!syms(group))) %>%
-        dplyr::group_by(!!!syms(group)) %>%
-        dplyr::mutate(!!tmp := dplyr::n_distinct(!!!syms(fill), na.rm = TRUE))
+    df <- .addNPerGroup(df, group, tmp, fill)
 
     # Case: multiple possible values in a fill group and we should stop
     if (multiple == "stop" & any(df[, tmp] > 1)){
         msg <- "Some fill columns have multiple values per group, e.g. \n"
-
-        multi_df <- df %>% dplyr::filter(!!sym(tmp) > 1)
-        first_group <- .getGroups(multi_df)
-        fg <- paste(capture.output(print(first_group)), collapse = "\n")
+        fg <- .printGroupMatch(df, !!sym(tmp) > 1)
         stop(msg, fg)
     }
 
@@ -55,17 +59,14 @@ fillByGroup <- function(df, group, fill, multiple = c("stop", "mode")){
                  "columns is not implemented")
         }
 
+        print("fill by group flag 2")
+
+
         df <- groupMode(df, cl = fill, gp = group)
     }
 
-    df <- df %>%
-        dplyr::select(-all_of(tmp)) %>%
-        dplyr::full_join(na_rows)
 
-    if (! nrow(df) == original_nrows){
-        warning("Rows have been lost or gained when merging NA rows")
-    }
-
+    df <- dplyr::select(df, -all_of(tmp))
     return(df)
 }
 
@@ -74,13 +75,15 @@ fillByGroup <- function(df, group, fill, multiple = c("stop", "mode")){
 #
 #' Find the most common value per group
 #'
-#' Given a grouped data.frame, count values per group and add a column with the
-#' most common value for each group.  If there are several equally common
+#' Given a grouped data.frame, count values per group and return a vector with
+#' the most common value for each group.  If there are several equally common
 #' values, the first will be chosen.
 #'
 #'@param df a grouped tibble
 #'@param cl Name of column find mode
+
 #'@param new_cl Name of column to create.  If NA (default), col is modified
+
 #'@param gp Name(s) of columns to group by
 #'@param min_n (integer(1), default NA) Minimum number of occurrences of
 #'majority value.  If provided, the majority value will be set to NA when it
@@ -94,6 +97,7 @@ groupMode <- function(df, cl, gp, new_cl = NA, min_n = NA, n = NA){
 
     if (is.na(new_cl)) { new_cl <- cl }
 
+    # Find the mode for column cl in group gp
     df <- df %>%
         dplyr::group_by(!!!syms(c(gp, cl))) %>%
         dplyr::mutate(!!n := n(),
@@ -107,6 +111,7 @@ groupMode <- function(df, cl, gp, new_cl = NA, min_n = NA, n = NA){
                                           NA, !!sym(tmp)))
     }
 
+    # Fill with the majority value if current value is NA
     df <- df %>%
         dplyr::mutate(!!new_cl :=
                           dplyr::coalesce(.data[[cl]], .data[[tmp]])) %>%

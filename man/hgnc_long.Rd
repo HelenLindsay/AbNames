@@ -5,19 +5,7 @@
 \alias{hgnc_long}
 \title{Gene ids, names and aliases from HGNC, in long format}
 \format{
-An object of class \code{data.frame} with 90788 rows and 7 columns.
-}
-\usage{
-hgnc_long
-}
-\description{
-Contains the same data as hgnc, but aliases, previous aliases and names have
-been split to contain one entry per row, with an additional "symbol_type" column
-giving the source of the symbol (e.g. HGNC_SYMBOL, alias_symbol).  Chromosome
-data is not included
-}
-\details{
-#' @format A data frame with 90788 rows and 7 variables:
+A data frame with 90788 rows and 7 variables:
 \describe{
     \item{HGNC_ID}{HGNC gene IDs}
     \item{ENSEMBL_ID}{Ensembl gene ID corresponding to HGNC_ID}
@@ -28,5 +16,14 @@ data is not included
     \item{value}{A gene symbol or name}
 
 }
+}
+\usage{
+hgnc_long
+}
+\description{
+Contains the same data as hgnc, but aliases, previous aliases and names have
+been split to contain one entry per row, with an additional "symbol_type" column
+giving the source of the symbol (e.g. HGNC_SYMBOL, alias_symbol).  Chromosome
+data is not included
 }
 \keyword{datasets}

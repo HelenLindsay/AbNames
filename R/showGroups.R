@@ -7,7 +7,7 @@
 #'
 #'@param df A *grouped* data.frame
 #'@param i (integer(1), default 1) Index of the group to be printed.
-#'@paran n (integer(1), default 1) How many groups to show at once?
+#'@param n (integer(1), default 1) How many groups to show at once?
 #'@param max_rows integer(1) Maximum number of rows to print (Default: 50).
 #'@importFrom dplyr group_rows
 #'@export
@@ -28,6 +28,20 @@ showGroups <- function(df, i = 1, n = 1, max_rows = 50){
         if (! choice %in% c("n", "q")) readline(msg2)
         if (choice == "q") stop_interactive <- TRUE
     }
+}
+
+
+# printGpMatch ----
+#
+#' Select a group from a data.frame, format into a printable string
+#'
+#' Get the first group of a grouped data.frame matching a condition and format
+#' output for printing an error message.
+.printGroupMatch <-function(df, flt){
+    multi_df <- df %>% dplyr::filter(!!enquo(flt))
+    first_group <- .getGroups(multi_df)
+    fg <- paste(capture.output(print(first_group)), collapse = "\n")
+    return(fg)
 }
 
 

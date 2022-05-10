@@ -29,7 +29,7 @@
 #' giving the source of the symbol (e.g. HGNC_SYMBOL, alias_symbol).  Chromosome
 #' data is not included
 #'
-#'#' @format A data frame with 90788 rows and 7 variables:
+#'@format A data frame with 90788 rows and 7 variables:
 #' \describe{
 #'     \item{HGNC_ID}{HGNC gene IDs}
 #'     \item{ENSEMBL_ID}{Ensembl gene ID corresponding to HGNC_ID}
@@ -41,3 +41,27 @@
 #'
 #' }
 "hgnc_long"
+
+
+# totalseq_cocktails ----
+
+#' Antibody and gene information for TotalSeq cocktails from BioLegend
+#'
+#' This table contains information downloaded from www.biolegend.com and
+#' preprocessed into a consistent format.  The TotalSeq A, B, C and D
+#' (Heme Oncology) cocktails are included.
+#'
+#'@format A data frame with 485 rows and 8 variables:
+#' \describe{
+#'     \item{Oligo_ID}{BioLegend identifier for the oligo Barcode_Sequence}
+#'     \item{Antigen}{Name of the antigen (antibody name minus "anti-" prefix)}
+#'     \item{Clone}{Name of the cell line that produced the antibody}
+#'     \item{Ensembl_ID}{Ensembl gene identifier}
+#'     \item{Gene_Symbol}{Ensembl gene symbol}
+#'     \item{TotalSeq_Cat}{Identifier for the TotalSeq cocktail}
+#'     \item{Barcode_Sequence}{Sequence of DNA oligo conjuated to the antibody}
+#'     \item{Reactivity}{Species in which the antibody will bind, usually human}
+#' }
+#'
+#'@source \url{"https://www.biolegend.com/"}
+"totalseq_cocktails"

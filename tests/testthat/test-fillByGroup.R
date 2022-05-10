@@ -1,9 +1,22 @@
+# Data for use in tests ----
+
 df <- data.frame(A = c(rep("A", 3), NA, rep("B", 4), rep("C", 3), NA),
                  B = c(rep("A", 2), NA, "A", rep("B", 4), rep("C", 3), NA),
                  C = c(NA, 1, 1, 1, 2, 3, NA, 2, 4, 4, NA, 5))
 
 df_c <- df %>% dplyr::filter(! is.na(A) & ! is.na(B))
+df_d <- c(6, NA, 6, 7, 8, NA, 8, NA, 9, 8, NA, 10)
 
+# Simple filling function using tidyr::fill
+partial_f <- function(df, col, gp){
+    print(class(df))
+    print(col)
+    print(gp)
+    df %>%
+        dplyr::group_by(!!!syms(gp)) %>%
+        tidyr::fill(!!sym(col)) %>%
+        dplyr::ungroup()
+}
 
 test_that("groupMode correctly adds a new column if required", {
     res_col <- c(1,1,2,3,2,2,4,4,4)
@@ -35,3 +48,17 @@ test_that("fillByGroup with option=mode fills multiple values", {
     res <- fillByGroup(df, group = c("A", "B"), fill = "C", multiple = "mode")
     expect_equal(as.data.frame(res), exp_res)
 })
+
+
+test_that("fillByGroup can fill majority value for multiple columns", {
+
+})
+
+
+test_that(".freducePartial correctly handles ellipsis", {
+    df$D <- df_d
+    x <- .freducePartial(df, partial_f, cls = "col",
+                         gp = c("A", "B"), col = c("C", "D"))
+
+})
+
