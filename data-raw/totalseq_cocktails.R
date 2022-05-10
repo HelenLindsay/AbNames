@@ -4,6 +4,7 @@ library(readxl)
 library(dplyr)
 library(readr)
 library(AbNames)
+library(stringr)
 
 # Download TotalSeq cocktail information ----
 
@@ -40,7 +41,8 @@ totalseq <- lapply(seq_along(totalseq), function(i) {
     totalseq[[i]] %>% dplyr::mutate(TotalSeq_Cat = ts_cat[[i]])
 })
 
-totalseq <- Reduce(dplyr::full_join, totalseq)
+totalseq <- Reduce(dplyr::full_join, totalseq) %>%
+    dplyr::mutate(across(.cols = everything(), stringr::str_squish))
 
 # Check that no rows have been lost or gained ----
 nrow(totalseq) == sum(nrows)
@@ -94,8 +96,8 @@ totalseq <- totalseq %>%
 
 # Fill in the missing gene symbols if Ensembl ID is given
 totalseq <- totalseq %>%
-    AbNames::fillByGroup(group = "Ensembl_ID", fill = "Gene_Symbol")
-
+    AbNames::fillByGroup(group = "Ensembl_ID", fill = "Gene_Symbol") %>%
+    dplyr::ungroup()
 
 # Create totalseq_cocktails data set ----
 totalseq_cocktails <- as.data.frame(totalseq)
