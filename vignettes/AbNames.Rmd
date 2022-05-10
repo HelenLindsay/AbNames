@@ -98,8 +98,9 @@ citeseq <- read.csv(citeseq_fname, sep = ",")
 ## Custom query table
 
 AbNames provides a few template functions that can be used to construct a
-pipeline for creating a query table.  
+pipeline for creating a query table. 
 
+SHOULD `.freducePartial` be a public function?
 
 ### Special case: T-cell receptors
 
@@ -157,10 +158,18 @@ tcr_f %>%
 # Querying the protein ontology
 
 
-# Filling NAs from a reference
+# Filling NAs
 
+## Selecting a group
 When filling in information from a reference data set, it can be useful to look
 at entries where for example annotations are inconsistent.  `showGroups` is
 a function that allows users to interactively print group(s) from a grouped
 data.frame.
+
+## Filling NAs using a reference data set
+The function `fillByGroup` is used to fill in NAs in a grouped data.frame.  It differs from `tidyr::fill` in its treatment of inconsistent values.  Whereas `tidyr::fill` will fill using the first value, `fillByGroup` offers the option
+to fill in the most frequent value.  This can be useful when filling antibody
+IDs given the antibody name and clone or catalogue number.
+
+To fill using a reference data set, the strategy used is to add a temporary ID column, join the two data.frames, fill and separate again using the ID column.
 

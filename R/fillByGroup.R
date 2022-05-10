@@ -3,8 +3,7 @@
 #'
 #'Wrapper of tidyr::fill with checks for NAs in grouping values and the option
 #'to fill with the majority value if there is more than one value per group.
-#'If rlang is available and an error is raised, an example group that causes an
-#'error is returned
+#'If an error is raised, an example group that causes an error is returned
 #'
 #'@param df A data.frame or tibble with missing (NA) values to be filled
 #'@param group (character(n)) Names of column(s) to group by
@@ -54,17 +53,8 @@ fillByGroup <- function(df, group, fill, multiple = c("stop", "mode")){
 
     # Case: multiple values per group, select the most frequent one
     if (multiple == "mode"){
-        if (length(fill) > 1){
-            stop("Filling majority value for multiple ",
-                 "columns is not implemented")
-        }
-
-        print("fill by group flag 2")
-
-
-        df <- groupMode(df, cl = fill, gp = group)
+        df <- .freducePartial(df, groupMode, cls = "cl", cl = fill, gp = group)
     }
-
 
     df <- dplyr::select(df, -all_of(tmp))
     return(df)

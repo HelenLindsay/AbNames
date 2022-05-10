@@ -9,12 +9,9 @@ df_d <- c(6, NA, 6, 7, 8, NA, 8, NA, 9, 8, NA, 10)
 
 # Simple filling function using tidyr::fill
 partial_f <- function(df, col, gp){
-    print(class(df))
-    print(col)
-    print(gp)
     df %>%
         dplyr::group_by(!!!syms(gp)) %>%
-        tidyr::fill(!!sym(col)) %>%
+        tidyr::fill(!!sym(col), .direction = "updown") %>%
         dplyr::ungroup()
 }
 
@@ -50,15 +47,30 @@ test_that("fillByGroup with option=mode fills multiple values", {
 })
 
 
-test_that("fillByGroup can fill majority value for multiple columns", {
+test_that(".freducePartial correctly handles ellipsis", {
+    # Applying .freducePartial (in a loop) should equal applying
+    # fill directly (vectorised)
 
+    df$D <- df_d
+    res <- .freducePartial(df, partial_f, cls = "col",
+                           gp = c("A", "B"), col = c("C", "D"))
+    exp_res <- df %>%
+        dplyr::group_by(A, B) %>%
+        tidyr::fill(C, D, .direction = "updown")
+
+    expect_equal(as.data.frame(res), as.data.frame(exp_res))
 })
 
 
-test_that(".freducePartial correctly handles ellipsis", {
+test_that("fillByGroup can fill majority value for multiple columns", {
     df$D <- df_d
-    x <- .freducePartial(df, partial_f, cls = "col",
-                         gp = c("A", "B"), col = c("C", "D"))
-
+    res <- fillByGroup(df, group = c("A", "B"),
+                          fill = c("C", "D"), multiple = "mode")
+    exp_res <- data.frame(
+        A = c("A", "A", "B", "B", "B", "B", "C", "C", "C", "A", NA, NA),
+        B = c("A", "A", "B", "B", "B", "B", "C", "C", "C", NA, "A", NA),
+        C = c(1, 1, 2, 3, 2, 2, 4, 4, 4, 1, 1, 5),
+        D = c(6, 6, 8, 8, 8, 8, 9, 8, 9, 6, 7, 10))
+    expect_equal(as.data.frame(res), exp_res)
 })
 
