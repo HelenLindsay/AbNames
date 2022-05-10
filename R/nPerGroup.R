@@ -10,6 +10,7 @@
 #'@param na.rm
 #'@importFrom dplyr n_distinct
 #'@importFrom stats complete.cases
+#'@importFrom lang syms
 nPerGroup <- function(df, group, col, tmp){
 
     df <- splitMerge(df, complete.cases(!!!syms(group)),
