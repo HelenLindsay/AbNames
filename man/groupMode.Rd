@@ -19,10 +19,10 @@ groupMode(df, cl, gp, new_cl = NA, min_n = NA, n = NA)
 majority value.  If provided, the majority value will be set to NA when it
 occurs less than min_n times.}
 
-\item{n}{Name of count column.}
+\item{n}{Name of column containing counts.}
 }
 \description{
-Given a grouped data.frame, count values per group and add a column with the
-most common value for each group.  If there are several equally common
+Given a grouped data.frame, count values per group and return a vector with
+the most common value for each group.  If there are several equally common
 values, the first will be chosen.
 }

@@ -4,7 +4,7 @@
 \alias{nPerGroup}
 \title{Group a data.frame and count unique values}
 \usage{
-nPerGroup(df, group, col, nm)
+nPerGroup(df, group, col, nm = "n_per_group")
 }
 \arguments{
 \item{df}{a data.frame or tibble}

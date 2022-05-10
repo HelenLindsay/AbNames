@@ -4,7 +4,7 @@
 \alias{.getGroups}
 \title{Return the first n groups of a grouped data.frame}
 \usage{
-.getGroups(df, i = 1, n = 1)
+.getGroups(df, i = 1, n = 1, row_idxs = NULL)
 }
 \arguments{
 \item{df}{A grouped data.frame}
@@ -12,6 +12,8 @@
 \item{i}{(integer(1), default: 1) The index of the first group to return}
 
 \item{n}{(integer(1), default: 1) How many groups should be returned?}
+
+\item{row_idxs}{(Optional, default: NULL) Indices of rows}
 }
 \description{
 Useful for debugging, e.g. when trying to fill by but groups contain

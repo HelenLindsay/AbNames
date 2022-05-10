@@ -12,7 +12,7 @@
 #'integer suffix will be added.
 #'@importFrom dplyr n_distinct
 #'@importFrom stats complete.cases
-#'@importFrom lang syms
+#'@importFrom rlang syms
 nPerGroup <- function(df, group, col, nm = "n_per_group"){
     # To do? possible to vectorise col with n temp names
 

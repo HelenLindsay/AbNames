@@ -46,8 +46,12 @@ showGroups <- function(df, i = 1, n = 1, max_rows = 50){
 #'
 #' Get the first group of a grouped data.frame matching a condition and format
 #' output for printing an error message.
+#'
+#' @param df A data.frame or tibble
+#' @param flt An (unquoted) expression for using with dplyr::filter
+#' @importFrom rlang enquo
 .printGroupMatch <-function(df, flt){
-    multi_df <- df %>% dplyr::filter(!!enquo(flt))
+    multi_df <- df %>% dplyr::filter(!!rlang::enquo(flt))
     first_group <- .getGroups(multi_df)
     fg <- paste(capture.output(print(first_group)), collapse = "\n")
     return(fg)

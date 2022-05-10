@@ -116,9 +116,10 @@ addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",
 #'prefixes from
 #'@param pattern (character(1)) A regular expression for matching in column ab.
 #'@param replacement (character(1)) Replacement value, default "" (i.e. remove)
+#'@param exclude (Default: NA) - DOES NOTHING YET
+#'@param restrict (Default: NA) - DOES NOTHING YET
 #'@param new_col (character(1), default NA Name of the column to add to df.
 #'If NA, column ab is modified
-#'
 gsubAb <- function(df, ab = "Antigen", pattern = "[Aa]nti-", replacement = "",
                    exclude = NA, restrict = NA, new_col = NA){
     if (is.na(new_col)) new_col <- ab

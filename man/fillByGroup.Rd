@@ -20,6 +20,5 @@ the most common value)}
 \description{
 Wrapper of tidyr::fill with checks for NAs in grouping values and the option
 to fill with the majority value if there is more than one value per group.
-If rlang is available and an error is raised, an example group that causes an
-error is returned
+If an error is raised, an example group that causes an error is returned
 }

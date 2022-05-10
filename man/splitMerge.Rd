@@ -23,8 +23,8 @@ df where function f has been applied only to the rows where ex is TRUE
 \description{
 Subset a data.frame according to a condition, apply a function
 to the rows where the condition is TRUE, then rejoin with the rows where
-condition is FALSE.  A split-apply-combine where function is only applied
-to a subset of rows.
+condition is FALSE or NA.  A split-apply-combine where function is only
+applied to a subset of rows.
 
 Filtering expression can be either quoted or unquoted, e.g.
 complete.cases(x, y) (where x and y are column names) or
