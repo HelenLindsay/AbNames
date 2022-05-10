@@ -14,12 +14,11 @@
 #'@importFrom stats complete.cases
 #'@importFrom lang syms
 nPerGroup <- function(df, group, col, nm = "n_per_group"){
-    # To do?
-    # It would be possible to vectorise col with n temp names
+    # To do? possible to vectorise col with n temp names
 
     tmp <- .tempColName(df, nm = nm)
     df <- splitMerge(df, complete.cases(!!!syms(group)),
-                     .addNPerGroup, group = group, tmp = tmp, col = col)
+                     .addNPerGroup, group = group, nm = tmp, col = col)
     return(df)
 }
 

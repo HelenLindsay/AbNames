@@ -173,3 +173,6 @@ IDs given the antibody name and clone or catalogue number.
 
 To fill using a reference data set, the strategy used is to add a temporary ID column, join the two data.frames, fill and separate again using the ID column.
 
+
+## TO DO
+An example of (interactively) deciding what to do if groups are inconsistent.

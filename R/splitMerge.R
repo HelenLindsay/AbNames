@@ -45,7 +45,7 @@ splitMerge <- function(df, ex, f, ...){
 
     # Apply f to filtered df and re-join
     df <- f(df, ...)
-    result <- dplyr::full_join(df, df_not_ex) %>%
+    result <- suppressMessages(dplyr::full_join(df, df_not_ex)) %>%
         dplyr::select(-all_of(tmp))
 
     if (! nrow(result) == original_nrow){

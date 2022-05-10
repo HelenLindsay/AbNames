@@ -78,7 +78,7 @@ fillByGroup <- function(df, group, fill, multiple = c("stop", "mode")){
 #'@param min_n (integer(1), default NA) Minimum number of occurrences of
 #'majority value.  If provided, the majority value will be set to NA when it
 #'occurs less than min_n times.
-#'@param n Name of count column.
+#'@param n Name of column containing counts.
 #'@importFrom dplyr n
 #'@importFrom rlang .data
 groupMode <- function(df, cl, gp, new_cl = NA, min_n = NA, n = NA){

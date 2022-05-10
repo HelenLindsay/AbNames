@@ -76,33 +76,27 @@ totalseq <- totalseq %>%
 
 # Check that there is only one Ensembl_ID per Antigen-Clone combo ----
 
-ts <- totalseq %>%
+totalseq <- totalseq %>%
     AbNames::nPerGroup(group = c("Antigen", "Clone"), "Ensembl_ID")
-max(ts$n_per_group) == 1
-if (max(ts$n_per_group) > 1){
+
+if (max(totalseq$n_per_group) > 1){
     warning("More than one value of Ensembl_ID per Antigen/Clone combo")
 }
-ts <- ts %>% dplyr::select(-n_per_group)
+
+totalseq <- totalseq %>% dplyr::select(-n_per_group)
 
 # Fill in missing genes if Antigen, Clone, and Oligo_ID match ----
-ts <- totalseq %>%
-    AbNames::fillByGroup(group = c("Antigen", "Clone"))
+# Note that by adding "Reactivity", controls will be removed as reactivity was
+# only defined for human
+totalseq <- totalseq %>%
+    AbNames::fillByGroup(group = c("Antigen", "Clone", "Reactivity"),
+                         fill = c("Ensembl_ID", "Gene_Symbol"))
 
-    AbNames::nPerGroup(group = c("Antigen", "Clone"), "Oligo_ID") %>%
-
-
-    dplyr::group_by(Antigen, Clone) %>%
-    dplyr::filter(any(is.na(Ensembl_ID)))
+# Fill in the missing gene symbols if Ensembl ID is given
+totalseq <- totalseq %>%
+    AbNames::fillByGroup(group = "Ensembl_ID", fill = "Gene_Symbol")
 
 
 # Create totalseq_cocktails data set ----
 totalseq_cocktails <- as.data.frame(totalseq)
 usethis::use_data(totalseq_cocktails, overwrite = TRUE, compress = "bzip2")
-
-
-# Note that by adding "Reactivity", controls will be removed as reactivity was
-# only defined for human
-#groups <- c("Antigen", "Clone", "Oligo_ID", "Reactivity")
-
-
-# Fill in missing gene symbols if Ensembl_ID is provided

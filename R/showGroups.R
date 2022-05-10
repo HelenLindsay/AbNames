@@ -15,13 +15,22 @@ showGroups <- function(df, i = 1, n = 1, max_rows = 50){
     stop_interactive <- FALSE
     msg <- "Enter\nn to print the next group, or\nq to quit"
     msg2 <- "Please enter either n (next) or q (quit)"
-    gp_info <- "Group %s: %s rows"
+    gp_info <- "Group %s: %s rows\n"
+
+    row_idxs <- df %>% dplyr::group_rows()
+    n_groups <- length(row_idxs)
 
     while (isFALSE(stop_interactive)){
         # Print out group number i
-        p_df <- .getGroups(df, i = i, n = n)
+        cat(sprintf(gp_info, i, length(row_idxs[[i]])))
+        p_df <- .getGroups(df, i = i, n = n, row_idxs = row_idxs)
         print(as.data.frame(p_df[1:min(max_rows, nrow(p_df)), ]))
         i <- i + 1
+
+        if (i > n_groups){
+            cat("\nNo more groups to show\n")
+            break()
+        }
 
         choice <- readline(msg)
 
@@ -54,9 +63,10 @@ showGroups <- function(df, i = 1, n = 1, max_rows = 50){
 #'@param df A grouped data.frame
 #'@param i (integer(1), default: 1) The index of the first group to return
 #'@param n (integer(1), default: 1) How many groups should be returned?
+#'@param row_idxs (Optional, default: NULL) Indices of rows
 #'@importFrom dplyr group_rows
-.getGroups <- function(df, i = 1, n = 1){
-    row_idxs <- df %>% dplyr::group_rows()
+.getGroups <- function(df, i = 1, n = 1, row_idxs = NULL){
+    if (is.null(row_idxs)){ row_idxs <- df %>% dplyr::group_rows() }
 
     if (i > length(row_idxs)){
         msg <- "Cannot print group %s, there are only %s groups in df"
