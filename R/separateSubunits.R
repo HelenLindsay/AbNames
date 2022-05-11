@@ -69,7 +69,8 @@ separateSubunits <- function(df, ab = "Antigen", new_col = "subunit"){
     #  If there are any duplicated characters, it's probably not a subunit
     no_dup <- function(x){
         n_char <- lengths(x)
-        n_unq <- sapply(x, function(y) length(unique(y)))
+        # CHECK - CHANGED FROM SAPPLY
+        n_unq <- vapply(x, function(y) length(unique(y)), integer(1))
         return(n_char == n_unq)
     }
 

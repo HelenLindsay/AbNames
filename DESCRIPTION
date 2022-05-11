@@ -8,9 +8,11 @@ Authors@R:
 Description: Provides functions for matching antibody names, e.g. from an 
     antibody vendor website, to gene names using information from the Human
     Genome Naming Consortium (HGNC) and the protein ontology.
+biocViews:
+    AnnotationData,
+    Homo_sapiens
 License: AGPL (>= 3)
 Encoding: UTF-8
-LazyData: true
 Imports:
     dplyr,
     magrittr,
@@ -31,5 +33,5 @@ Suggests:
 Config/testthat/edition: 3
 RoxygenNote: 7.1.2
 Depends: 
-    R (>= 2.10)
+    R (>= 4.1.0)
 VignetteBuilder: knitr

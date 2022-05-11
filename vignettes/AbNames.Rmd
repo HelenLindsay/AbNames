@@ -235,3 +235,9 @@ same concentration and manufacturing process.
 Isotype controls may have either unknown specificity or bind to antigens not present in the sample.  Isotype controls can indicate whether there is unintended binding of the FC region to (FcRs, CD16, CD32, CD64).  One or more of these are expressed in all leukocytes, with highest expressin in macrophages and monocytes.
 
 Does the isotype control signal match internal negative control (cells negative for a given marker).
+
+# Session Info
+
+```{r}
+sessionInfo()
+```

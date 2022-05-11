@@ -4,17 +4,22 @@
 \alias{makeQueryTable}
 \title{Separate Antibody/Antigen names into component parts}
 \usage{
-makeQueryTable(df, ab = "Antigen", id_cols = c("Antigen", "Study"), funs)
+makeQueryTable(df, funs, query_cols = NA, control_col = NA)
 }
 \arguments{
 \item{df}{A data.frame or tibble}
 
-\item{ab}{(character(1), default "Antigen") Name of the column in df
-containing Antigen/Antibody names}
+\item{funs}{A vector of string formatting functions to apply to df.  Each
+should take a data.frame as a first argument and return a data.frame or
+tibble, and optional arguments should be filled in e.g. with purrr::partial.}
 
-\item{id_cols}{(character(n)) Names of columns to paste to form ID column}
+\item{query_cols}{(character(n), default: NA) IF NA ASSUME THAT ALL COLUMNS
+ADDED ARE QUERY_COLS?}
 
-\item{funs}{A vector of string formatting functions to}
+\item{control_col}{(character(1), default: NA)  Optional name of a logical
+column indicating whether an antibody is an isotype control.  If present,
+controls will be removed to avoid spurious matches as they usually do not
+react against human genes.}
 }
 \description{
 Given a data.frame containing Antigen/Antibody names, reformat

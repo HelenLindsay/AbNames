@@ -14,6 +14,7 @@
 #'react against human genes.
 #'@param query_cols (character(n), default: NA) IF NA ASSUME THAT ALL COLUMNS
 #'ADDED ARE QUERY_COLS?
+#'@importFrom tidyr pivot_longer
 #'@export
 makeQueryTable <- function(df, funs, query_cols = NA, control_col = NA){
     # Remove controls
@@ -21,21 +22,28 @@ makeQueryTable <- function(df, funs, query_cols = NA, control_col = NA){
 
     cn <- colnames(df)
 
-    query_cols <- NA
     df <- magrittr::freduce(df, funs)
-    new_cn <- setdiff(colnames(df), cn)
 
+    if (is.na(query_cols)) query_cols <- setdiff(colnames(df), cn)
 
+    # Convert to long format
+    df <- df %>%
+        tidyr::pivot_longer(cols = all_of(query_cols)) %>%
+        dplyr::filter(!is.na(value)) %>%
+        unique()
+
+    return(df)
 }
 
 
-# defaultQry ----
+# defaultQuery ----
 #' Default list of functions for making an antibody query table
 #'
 #'@param ab (character(1), default "Antigen") Name of the column in df
 #' containing Antigen/Antibody names
 #'@param id_cols (character(n)) Names of columns to paste to form ID column
-defaultQry <- function(ab = "Antigen", id_cols = c("Antigen", "Study")){
+#'@export
+defaultQuery <- function(ab = "Antigen", id_cols = c("Antigen", "Study")){
 
     # Default transformation sequence for making query table ----
 
@@ -43,21 +51,19 @@ defaultQry <- function(ab = "Antigen", id_cols = c("Antigen", "Study")){
     # Check that all columns to act on are either in the table or created
     # earlier in the pipeline
     # function, ab, new_col, args?
+    query_cols <- c(ab)
 
-    qry = list(addID,
-               gsubAb, # Remove A/anti
-               purrr::partial(gsubAb, pattern = "\\sRecombinant"),
-               splitUnnest(), # Brackets
-               splitUnnest(split = ", "),  # Commas
+    qry = list(purrr::partial(addID, id_cols = id_cols),
+               purrr::partial(gsubAb, ab = ab), # Remove A/antis
+               purrr::partial(gsubAb, ab = ab, pattern = "\\sRecombinant"),
+               purrr::partial(splitUnnest, ab = ab), # Brackets
+               purrr::partial(splitUnnest, ab = ab, split = ", "),  # Commas
                # / _ or . if at least 3 on each side and not TCR
                purrr::partial(splitUnnest, exclude = "TCR",
-                        split = "(?<=[A-z0-9-]{3})[\\/_\\.](?=[A-z0-9-]{3,})")#,
-               #purrr::partial(dplyr::mutate, )
-
+                        split = "(?<=[A-z0-9-]{3})[\\/_\\.](?=[A-z0-9-]{3,})")
     )
 
-
-
+    return(list(query_funs = qry, query_cols = query_cols))
 }
 
 
