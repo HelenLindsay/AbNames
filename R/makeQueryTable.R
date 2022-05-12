@@ -167,8 +167,20 @@ gsubAb <- function(df, ab = "Antigen", pattern = "[Aa]nti-", replacement = "",
 }
 
 
-upperNoDash <- function(df, ab = "Antigen", new_col = "upperNoDash"){
-
+# upperSquish ----
+#'
+#' Convert values to uppercase and remove punctuation
+#'
+#' Convert a character vector to uppercase and remove dashes, spaces and dots.
+#' Values are NA if the new value is identical to the original value and are
+#' only converted if there the original value has 2 segments separated by,
+#' punctuation, e.g. "IFN-g" would become "IFNG" but "IFN-g R alpha-chain" would
+#' have new value NA
+#'
+#'@param ab (character(n)) A vector of strings to transform
+#'@export
+upperSquish <- function(ab){
+    return(gsubNA("(^[A-z0-9]+)[-\\. ]([A-z0-9]+)$", "\\1\\2", toupper(ab)))
 }
 
 

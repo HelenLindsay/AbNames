@@ -35,8 +35,11 @@ searchHGNC <- function(query_df){
 
     # If there are only matches to aliases/previous symbols, aggregate matches
     aliases <- res %>%
-        dplyr::filter(! symbol_type %in% c("HGNC_SYMBOL", "HGNC_NAME"),
-                  ! value == HGNC_SYMBOL)
+        dplyr::filter(! any(symbol_type %in% c("HGNC_SYMBOL", "HGNC_NAME"))) %>%
+
+        dplyr::summarise(dplyr::summarise(HGNC_ALIAS = paste(unique(value), collapse = ", ")))
+
+
 
 
     # Select the results that match a HGNC symbol or name (e.g. not an alias)
