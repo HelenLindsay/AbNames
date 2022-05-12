@@ -92,10 +92,8 @@ as "anti-human" removed.
 ## CITE-seq antibodies
 
 This is a table matching antibody names to gene and protein IDs from >20 data
-sets with publicly available CITE-seq data.  The AbNames package collects the
-functions that were used to create this table.  This table includes manually
-curated matches between antibody names and gene IDs for cases where we were
-unable to find an exact match to the antibody name provided.
+sets with publicly available CITE-seq data.  The data sets are data that we have worked with and we would be happy to add other data sets if provided. The
+AbNames package collects the functions that were used to create this table. This table includes manually curated matches between antibody names and gene IDs for cases where we were unable to find an exact match to the antibody name provided.
 
 Load using
 ```{r, message = FALSE}
@@ -138,13 +136,21 @@ data set.
 We will demonstrate how to create a default query table using the raw CITE-seq
 data set.  This collects information from the reagents tables provided as supplementary material in the studies used.
 
+```{r}
+# To do: show which string permutation matched
+```
+
 
 ## Custom query table
 
 AbNames provides a few template functions that can be used to construct a
 pipeline for creating a query table. 
 
+To simplify selecting the correct match, we recommend that reformatted query columns be NA when identical to the original value
+
 SHOULD `.freducePartial` be a public function?
+
+## Incorrect matches
 
 ### Special case: T-cell receptors
 
@@ -235,6 +241,8 @@ same concentration and manufacturing process.
 Isotype controls may have either unknown specificity or bind to antigens not present in the sample.  Isotype controls can indicate whether there is unintended binding of the FC region to (FcRs, CD16, CD32, CD64).  One or more of these are expressed in all leukocytes, with highest expressin in macrophages and monocytes.
 
 Does the isotype control signal match internal negative control (cells negative for a given marker).
+
+# Check new annotations against previous
 
 # Session Info
 

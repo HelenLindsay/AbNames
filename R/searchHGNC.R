@@ -18,6 +18,8 @@ searchHGNC <- function(query_df){
         stop("Query data frame must contain columns named ID and value")
     }
 
+    official_nms <- c("HGNC_SYMBOL", "HGNC_NAME")
+
     utils::data("hgnc_long", envir = environment())
     utils::data("hgnc", envir = environment())
 
@@ -26,11 +28,25 @@ searchHGNC <- function(query_df){
         dplyr::group_by(ID) %>%
 
         # Count number of gene symbols per antibody ID
-        dplyr::mutate(nsym = length(unique(value)),
-                      nsym_types = length(unique(symbol_type))) %>%
+        dplyr::mutate(nsym_types = length(unique(symbol_type))) %>%
 
         # If there is more than one type of symbol, remove the previous symbols
-        dplyr::filter(! (symbol_type == "prev_symbol" & nsym_types > 1))
+        dplyr::filter(! (symbol_type == "prev_symbol" & nsym_types > 1)) %>%
+
+        # If there is an exact match to the offical symbol, discard others
+        dplyr::mutate(has_official = any(symbol_type %in% official_nms)) %>%
+        dplyr::filter(has_official & symbol_type %in% official_nms |
+                          ! has_official) %>%
+        dplyr::select(-has_official) %>% #, -nsym_types) %>%
+
+        # If there are matches to both symbol and name, keep symbol only
+
+        dplyr::mutate(nsym = length(unique(value)))
+
+
+
+
+# Matches to greek word, subunit, upper_no_dash, missing matches to lower_no_dash?
 
 
     # If there are only matches to aliases/previous symbols, aggregate matches

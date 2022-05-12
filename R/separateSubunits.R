@@ -35,7 +35,7 @@ separateSubunits <- function(df, ab = "Antigen", new_col = "subunit"){
 
     # Pattern 2: At least 2 capital letters/numbers, then -, then
     # at least 2 uppercase letters or numbers with optional / or ,
-    p2 <- "^[A-Z0-9]{2,}-([A-Z0-9\\/,]{2,})"
+    p2 <- "^[A-Z0-9]{2,}-([A-Z\\/,]{2,})"
 
     df <- .separateSubunits(df, ab, tmp[3], p1, "%s%s", tmp[1], tmp[2])
     df <- .separateSubunits(df, ab, tmp[4], p2, "%s-%s", tmp[1], tmp[2])
