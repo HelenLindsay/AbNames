@@ -138,6 +138,9 @@ data set.  This collects information from the reagents tables provided as supple
 
 ```{r}
 # To do: show which string permutation matched
+#res %>%
+# dplyr::group_by(name, symbol_type) %>%
+# dplyr::summarise(n = n())
 ```
 
 

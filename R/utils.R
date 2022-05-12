@@ -43,9 +43,19 @@
 #
 .gsubNA <- function(pattern, replacement, x, no_match = NA){
     res <- gsub(pattern, replacement, x)
-    res[res == x] <- no_match
-    return(res)
+    return(.noDups(res, x, no_match))
 }
+
+
+# .noDups ----
+#
+# Compares one vector to a reference, sets to NA if equal to the reference
+#
+.noDups <- function(x, reference, no_match = NA){
+    x[x == reference] <- no_match
+    return(x)
+}
+
 
 
 # .printf ----

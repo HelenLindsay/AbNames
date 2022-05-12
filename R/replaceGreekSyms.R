@@ -29,3 +29,13 @@ replaceGreekSyms <- function(x,
 
 
 
+# greekToLetter ----
+#
+# Wrapper for replaceGreekSyms for the specific case where both words and
+# symbols should be replaced, and values should be NA if the original value is
+# unchanged
+greekToLetter <- function(x){
+    y = replaceGreekSyms(x, "sym2letter")
+    y = replaceGreekSyms(y, "word2letter")
+    return(.noDups(y, x))
+}

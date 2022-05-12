@@ -40,8 +40,12 @@ searchHGNC <- function(query_df){
         dplyr::select(-has_official) %>% #, -nsym_types) %>%
 
         # If there are matches to both symbol and name, keep symbol only
+        dplyr::filter(! (any(symbol_type == "HGNC_SYMBOL") & !
+                          symbol_type == "HGNC_SYMBOL")) %>%
+
 
         dplyr::mutate(nsym = length(unique(value)))
+
 
 
 
@@ -56,18 +60,10 @@ searchHGNC <- function(query_df){
         dplyr::summarise(dplyr::summarise(HGNC_ALIAS = paste(unique(value), collapse = ", ")))
 
 
-
-
-    # Select the results that match a HGNC symbol or name (e.g. not an alias)
-    official <- res %>%
-        dplyr::filter(symbol_type %in% c("HGNC_NAME", "HGNC_SYMBOL")) %>%
-        dplyr::select(-nsym, -symbol_type, -value, -nsym_types) %>%
-        unique()
-
-    # Join official symbols with aliases
-
-
-
-
-
 }
+
+# CD1A, CD8A, CD158e1, PDGFRA, should have matched upperNoDash (careful greek set to NA)
+# 4.1BB, 4.BBL should match dotToDash
+# HLA.A.B.C?
+# NKAT2 match to lower
+#
