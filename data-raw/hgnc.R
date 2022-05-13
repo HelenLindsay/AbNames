@@ -65,7 +65,8 @@ hgnc_long <- dplyr::select(hgnc, -Chromosome) %>%
                           "prev_symbol"),
                         names_to = "symbol_type") %>%
     dplyr::filter(! is.na(value)) %>%
-    tidyr::unnest(value)
+    AbNames::splitUnnest(ab = "value", split = ", ") %>%
+    tidyr::unnest(cols = value)
 
 hgnc_long <- as.data.frame(hgnc_long)
 usethis::use_data(hgnc_long, overwrite = TRUE, compress = "bzip2")

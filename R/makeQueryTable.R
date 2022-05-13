@@ -27,11 +27,20 @@ makeQueryTable <- function(df, funs, query_cols = NA, control_col = NA){
     if (is.na(query_cols)) query_cols <- setdiff(colnames(df), cn)
 
     # Convert to long format
+    df <- qryToLong(df, query_cols)
+
+    return(df)
+}
+
+
+# qryToLong ----
+#
+# Convert wide query table to long format
+qryToLong <- function(df, query_cols){
     df <- df %>%
         tidyr::pivot_longer(cols = all_of(query_cols)) %>%
         dplyr::filter(!is.na(value)) %>%
         unique()
-
     return(df)
 }
 
@@ -82,6 +91,9 @@ defaultQuery <- function(ab = "Antigen", id_cols = c("Antigen", "Study")){
 #'@importFrom dplyr mutate group_by pull all_of n syms
 addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",
                   warn = TRUE){
+
+    # TO DO:
+    # should - be replaced by _ in id columns to make unsplitting easier?
 
     # Check id_cols exist in df and new_col does not
     if (! all(id_cols %in% colnames(df))){ stop("All id_cols must be in df") }
@@ -180,7 +192,35 @@ gsubAb <- function(df, ab = "Antigen", pattern = "[Aa]nti-", replacement = "",
 #'@param ab (character(n)) A vector of strings to transform
 #'@export
 upperSquish <- function(ab){
-    return(gsubNA("(^[A-z0-9]+)[-\\. ]([A-z0-9]+)$", "\\1\\2", toupper(ab)))
+    return(.gsubNA("(^[A-z0-9]+)[-\\. ]([A-z0-9]+)$", "\\1\\2", toupper(ab)))
+}
+
+
+# lowerNoDash ----
+#'
+#' Convert values to lowercase and replace - with space
+#'
+#' Convert a character vector to lowercase and replace - with spaces.
+#' Values are NA if the new value is identical to the original value.
+#'
+#'@param ab (character(n)) A vector of strings to transform
+#'@export
+lowerNoDash <- function(ab){
+    return(.gsubNA("-", " ", toupper(ab)))
+}
+
+
+# dashNotDot ----
+#'
+#' Convert dashes (-) to dots(.)
+#'
+#' Convert a character vector to lowercase and replace "-" with "."
+#' Values are NA if the new value is identical to the original value.
+#'
+#'@param ab (character(n)) A vector of strings to transform
+#'@export
+dashNotDot <- function(ab){
+    return(.gsubNA("-", "\\.", toupper(ab)))
 }
 
 
