@@ -192,7 +192,8 @@ gsubAb <- function(df, ab = "Antigen", pattern = "[Aa]nti-", replacement = "",
 #'@param ab (character(n)) A vector of strings to transform
 #'@export
 upperSquish <- function(ab){
-    return(.gsubNA("(^[A-z0-9]+)[-\\. ]([A-z0-9]+)$", "\\1\\2", toupper(ab)))
+    x <- toupper(gsub("(^[A-z0-9]+)[-\\. ]?([A-z0-9]+)$", "\\1\\2", ab))
+    return(.noDups(x, ab))
 }
 
 

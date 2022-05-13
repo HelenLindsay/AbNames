@@ -95,4 +95,4 @@ separateSubunits <- function(df, ab = "Antigen", new_col = "subunit"){
 }
 
 
-
+# checkSubunitMatches

@@ -35,3 +35,4 @@ RoxygenNote: 7.1.2
 Depends: 
     R (>= 4.1.0)
 VignetteBuilder: knitr
+

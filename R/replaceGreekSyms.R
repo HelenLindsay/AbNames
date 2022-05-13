@@ -34,8 +34,10 @@ replaceGreekSyms <- function(x,
 # Wrapper for replaceGreekSyms for the specific case where both words and
 # symbols should be replaced, and values should be NA if the original value is
 # unchanged
-greekToLetter <- function(x){
+# Dups: are duplicate entries allowed?
+greekToLetter <- function(x, dups = TRUE){
     y = replaceGreekSyms(x, "sym2letter")
     y = replaceGreekSyms(y, "word2letter")
+    if (isTRUE(dups)){ return(y) }
     return(.noDups(y, x))
 }

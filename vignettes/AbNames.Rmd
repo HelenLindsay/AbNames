@@ -33,6 +33,13 @@ is conjugated with.  For these reasons, it can be difficult to exactly match
 antibody names with gene or protein names.  As cell surface antigens often have
 very similar names, searching for partial matches to names in free-text gene descriptions is challenging and error-prone.
 
+# Goals
+
+## Standardise names of data sets for combined analysis
+
+## Identify all members of a protein complex bound by an antibody
+
+
 # Antibody naming conventions
 
 ## T-cell receptors

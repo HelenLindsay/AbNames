@@ -46,6 +46,9 @@ searchHGNC <- function(query_df){
 
         dplyr::mutate(nsym = length(unique(value)))
 
+        # IF it is a multi-subunit protein, we expect all subunits to match
+
+
 
 
 
@@ -62,8 +65,8 @@ searchHGNC <- function(query_df){
 
 }
 
-# CD1A, CD8A, CD158e1, PDGFRA, should have matched upperNoDash (careful greek set to NA)
+# CD77 should have matched previous symbol
 # 4.1BB, 4.BBL should match dotToDash
 # HLA.A.B.C?
-# NKAT2 match to lower
-#
+# NKAT2 match to lower, Annexin V, Cadherin 11, Galectin-3
+# HLA.A.B.C.

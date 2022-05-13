@@ -63,13 +63,18 @@ totalseq <- totalseq %>%
                   Antigen = dplyr::coalesce(Antigen, Specificity)) %>%
     dplyr::select(-Barcode, -`Format / Barcode`, -clone,
                   -`Ensemble ID`, -`Gene name`, -Sequence, -Specificity) %>%
-    dplyr::mutate(Reactivity = ifelse(grepl("anti-human\\s", Antigen),
-                                      "human", NA),
-                  Antigen = gsub("anti-human\\s", "", Antigen),
+    dplyr::mutate(Antigen = gsub("mouse/human", "human/mouse", Antigen),
+                  Reactivity =
+                .gsubNA("^anti-([Hh]uman(/mouse)?(/rat)?).*$", "\\1", Antigen),
+                  Reactivity = tolower(Reactivity),
+                  Antigen = gsub("^anti-([A-z\\/]+)\\s", "", Antigen),
+                  # Two names start with Hu instead of "anti-human"
+                  Antigen = gsub("^Hu\\s", "", Antigen),
                   Oligo_ID = substr(Oligo_ID, 2, nchar(Oligo_ID)),
                   Antigen = AbNames::replaceGreekSyms(Antigen, "sym2letter"))%>%
     dplyr::relocate(Antigen, Clone, Ensembl_ID, Gene_Symbol, Oligo_ID,
                     TotalSeq_Cat, Barcode_Sequence, Reactivity)
+
 
 # Some TotalSeq B Ensembl_IDs are duplicated barcode sequences, set to NA ----
 totalseq <- totalseq %>%
@@ -94,9 +99,11 @@ totalseq <- totalseq %>%
     AbNames::fillByGroup(group = c("Antigen", "Clone", "Reactivity"),
                          fill = c("Ensembl_ID", "Gene_Symbol"))
 
-# Fill in the missing gene symbols if Ensembl ID is given
+# Fill in the missing gene symbols and reactivity if Ensembl ID is given
+# (isotype controls do not have Ensembl IDs given)
 totalseq <- totalseq %>%
-    AbNames::fillByGroup(group = "Ensembl_ID", fill = "Gene_Symbol") %>%
+    AbNames::fillByGroup(group = "Ensembl_ID",
+                         fill = c("Gene_Symbol", "Reactivity")) %>%
     dplyr::ungroup()
 
 # Create totalseq_cocktails data set ----
