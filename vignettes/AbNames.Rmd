@@ -236,6 +236,10 @@ Isotype controls may have either unknown specificity or bind to antigens not pre
 
 Does the isotype control signal match internal negative control (cells negative for a given marker).
 
+
+# Standardise names in a singlecellexperiment
+
+
 # Session Info
 
 ```{r}
