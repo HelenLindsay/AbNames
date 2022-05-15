@@ -72,6 +72,24 @@
 }
 
 
+# groupsWith ----
+#
+# Select rows from a data.frame containing values in from another
+#
+#
+#@param df1 Filtered data.frame
+#@param df2 Unfiltered data.frame
+#@param col character(n) Name of column to use for selecting rows from df1
+#'@importFrom dplyr all_off
+groupsWith <- function(df1, df2, col){
+    # Only keep the columns in df2
+    df2 <- df2 %>%
+        dplyr::select(all_of(colnames(df1))) %>%
+        dplyr::filter(!!col %in% df1$col)
+    return(df2)
+}
+
+
 # .freducePartial ----
 #' Create a list of partial functions and apply in sequence
 #'

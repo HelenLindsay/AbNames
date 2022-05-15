@@ -76,6 +76,10 @@ totalseq <- totalseq %>%
                     TotalSeq_Cat, Barcode_Sequence, Reactivity)
 
 
+# Fix an importing error
+totalseq <- totalseq %>%
+    dplyr::mutate(Antigen = ifelse(Antigen == "Fc?RI?", "FceRIA", ""))
+
 # Some TotalSeq B Ensembl_IDs are duplicated barcode sequences, set to NA ----
 totalseq <- totalseq %>%
     dplyr::mutate(Ensembl_ID = ifelse(grepl("^ENSG", Ensembl_ID),

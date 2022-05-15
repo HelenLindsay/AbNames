@@ -70,3 +70,10 @@ searchHGNC <- function(query_df){
 # HLA.A.B.C?
 # NKAT2 match to lower, Annexin V, Cadherin 11, Galectin-3
 # HLA.A.B.C.
+
+
+#ags %>%
+#    dplyr::filter(! ID %in% res$ID) %>%
+#    select(Antigen, Cat_Number) %>%
+#    sort() %>%
+#    unique()

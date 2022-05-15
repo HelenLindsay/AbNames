@@ -207,7 +207,7 @@ upperSquish <- function(ab){
 #'@param ab (character(n)) A vector of strings to transform
 #'@export
 lowerNoDash <- function(ab){
-    return(.gsubNA("-", " ", toupper(ab)))
+    return(.gsubNA("-", " ", tolower(ab)))
 }
 
 

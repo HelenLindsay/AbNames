@@ -12,6 +12,5 @@ searchTotalseq <- function(df, ab = "Antigen"){
         dplyr::select(Antigen, Ensembl_ID, Gene_Symbol)
 
     result <- dplyr::left_join(df, ts, by = structure("Antigen", names = ab))
-
-
+    return(result)
 }
