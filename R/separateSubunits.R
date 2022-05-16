@@ -30,12 +30,12 @@ separateSubunits <- function(df, ab = "Antigen", new_col = "subunit"){
     tmp <- .tempColName(df, n = 4)
 
     # Pattern 1: At least 2 capital letters/numbers, optional separator,
-    # then at least 2 lowercase with optional separator
-    p1 <- "^[A-Z0-9]{2,}[-\\. ]?([a-z\\/\\.]{2,})"
+    # then at least 2 lowercase with optional separator, not more than 8
+    p1 <- "^[A-Z0-9]{2,}[-\\. ]?([a-z\\/\\.]{2,6})"
 
     # Pattern 2: At least 2 capital letters/numbers, then -, then
     # at least 2 uppercase letters or numbers with optional / or ,
-    p2 <- "^[A-Z0-9]{2,}-([A-Z\\/,]{2,})"
+    p2 <- "^[A-Z0-9]{2,}-([A-Z\\/,]{2,6})"
 
     df <- .separateSubunits(df, ab, tmp[3], p1, "%s%s", tmp[1], tmp[2])
     df <- .separateSubunits(df, ab, tmp[4], p2, "%s-%s", tmp[1], tmp[2])
@@ -95,4 +95,38 @@ separateSubunits <- function(df, ab = "Antigen", new_col = "subunit"){
 }
 
 
-# checkSubunitMatches
+# .checkSubunitMatches ----
+#
+#' Check if all subunits of a multi-subunit protein are matched
+#
+#' Internal AbNames function for removing spurious matches caused by guessing
+#' subunit names.  Column names are hard-coded and expected to match the default
+#' pipeline.  Returns a table containing gene name matches with spurious matches
+#' removed.
+#'
+#'@param df A data frame containing matches of gene names in a database
+#'@param query_df A data.frame containing potential gene/protein names, one
+# per row
+#'@importFrom dplyr anti_join
+.checkSubunitMatches <- function(df, query_df){
+    nms <- c("subunit", "TCR_long")
+
+    nsubunits <- query_df %>%
+        dplyr::filter(name %in% nms) %>%
+        dplyr::group_by(ID, name) %>%
+        dplyr::summarise(nexpected = dplyr::n())
+
+    incomplete <- df %>%
+        dplyr::filter(ID %in% nsubunits$ID, name %in% nms) %>%
+        dplyr::group_by(ID, name) %>%
+        dplyr::summarise(nmatched = dplyr::n()) %>%
+        dplyr::full_join(nsubunits, by = c("ID", "name")) %>%
+        dplyr::filter(! nmatched == nexpected) %>%
+        dplyr::select(-nmatched, -nexpected)
+
+    result <- df %>%
+        dplyr::anti_join(incomplete, by = c("ID", "name"))
+
+    return(result)
+}
+

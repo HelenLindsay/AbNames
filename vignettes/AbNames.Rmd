@@ -132,11 +132,21 @@ cd274 <- citeseq %>%
 cd274
 ```
 
-All of the antigen names above refer to the same cell surface protein 
+All of the antigen names above refer to the same cell surface protein. 
+
+
+
+
+
 
 
 We will demonstrate how to create a default query table using the raw CITE-seq
 data set.
+
+```{r}
+citeseq2hgnc <- searchHGNC()
+```
+
 
 ## Default query table
 
@@ -213,6 +223,25 @@ tcr_f %>%
 
 
 # Querying a dataset
+
+Our query pipeline is to query the HGNC and then use the other datasets and the
+antibody vendor information to find matches for the unmatched antibodies.
+
+By default, we require that matches must be found for all subunits of a
+multi-subunit protein to avoid incorrect matches.
+
+Here we will query the HGNC data set for the CITE-seq antibodies.
+
+## Multiple matches example CD11a, CD18
+
+
+
+"CD11a.CD18-Wu_2021_b"
+"CD270 (HVEM, TR2)-Hao_2021" - three different IDs
+"KIR2DL5" matches two genes HGNC:16345 HGNC:16346
+"CD279 (PD-1)-Mimitou_2021_cite_and_dogma_seq"
+"DR3 (TRAMP)-Liu_2021"
+"KLRG1 (MAFA)-Qian_2020"
 
 
 # Querying the protein ontology

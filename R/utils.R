@@ -89,7 +89,6 @@ groupsWith <- function(df1, df2, col){
         na.omit()
 
     df2 <- df2 %>%
-        dplyr::select(all_of(colnames(df1))) %>%
         dplyr::filter(!!sym(col) %in% col_vals)
     return(df2)
 }

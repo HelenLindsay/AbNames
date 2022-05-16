@@ -7,5 +7,6 @@ manual_matches <- tibble::tribble(
     "Mac-2", "LGALS3", "HGNC:6563", "", "",
     "FAS.L", "FASLG", "HGNC:11936", "", "",
     "IFN-g R a chain", "IFNGR1", "HGNC:5439", "PR:000001361", IFN_gamma,
-    "TCR Va7.2", "TRAV7", "HGNC:12145", "", ""
+    "TCR Va7.2", "TRAV7", "HGNC:12145", "", "",
+    "cKIT", "KIT", "HGNC:6342", "", "",
 )
