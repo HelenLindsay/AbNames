@@ -75,5 +75,4 @@ searchHGNC <- function(query_df){
 #ags %>%
 #    dplyr::filter(! ID %in% res$ID) %>%
 #    select(Antigen, Cat_Number) %>%
-#    sort() %>%
 #    unique()

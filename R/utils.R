@@ -81,11 +81,16 @@
 #@param df2 Unfiltered data.frame
 #@param col character(n) Name of column to use for selecting rows from df1
 #'@importFrom dplyr all_off
+#'@importFrom dplyr::pull
 groupsWith <- function(df1, df2, col){
     # Only keep the columns in df2
+    col_vals <- df1 %>%
+        dplyr::pull(!!sym(col)) %>%
+        na.omit()
+
     df2 <- df2 %>%
         dplyr::select(all_of(colnames(df1))) %>%
-        dplyr::filter(!!col %in% df1$col)
+        dplyr::filter(!!sym(col) %in% col_vals)
     return(df2)
 }
 
