@@ -36,7 +36,7 @@ formatIg <- function(df, ig = "Antigen", new_col = "Ig"){
     heavy <- .gsubNA("^Ig([ADEGM][0-4]?)[ABab]?[\\. ]?(Fc)?$",
                      sprintf("IGH%s", "\\1"), ig)
     kappa <- .gsubNA("^Ig .*k$", "IGKC", ig)
-    lambda <- .gsubNA("^Ig.*l.*[0-9].*$", sprintf("IGLC", "\\1"), ig)
+    lambda <- .gsubNA("^Ig.*l.*[0-9].*$", sprintf("IGLC%s", "\\1"), ig)
     result <- dplyr::coalesce(heavy, kappa, lambda)
     return(result)
 }

@@ -134,43 +134,48 @@ cd274
 
 All of the antigen names above refer to the same cell surface protein. 
 
-
-
-
-
-
-
-We will demonstrate how to create a default query table using the raw CITE-seq
-data set.
-
-```{r}
-citeseq2hgnc <- searchHGNC()
-```
-
-
 ## Default query table
 
 We will demonstrate how to create a default query table using the raw CITE-seq
 data set.  This collects information from the reagents tables provided as supplementary material in the studies used.
 
 ```{r}
-# To do: show which string permutation matched
-#res %>%
-# dplyr::group_by(name, symbol_type) %>%
-# dplyr::summarise(n = n())
+# To make it easier to view the query table, we will first remove some unneeded
+# columns
+citeseq <- dplyr::select(citeseq, Antigen, Study)
+
+# Apply the default transformation sequence and make a query table in long format
+query_df <- makeQueryTable(citeseq, ab = "Antigen",
+                           id_cols = c("Antigen", "Study"))
+
+
+# Select just the columns of interest (for view the table)
+#query_df <- query_df %>%
+#    dplyr::select(ID, name, value)
+
+head(query_df)
 ```
 
 
 ## Custom query table
 
 AbNames provides a few template functions that can be used to construct a
-pipeline for creating a query table. 
+pipeline for creating a query table. The default query table uses the function
+`defaultQuery` to create a list of partial functions which are then applied
+recursively to the data.frame using `magrittr::freduce`.  To use this strategy,
+all functions must accept the data.frame as the only required argument.  Other
+arguments should be filled in when creating the partial functions.
 
-To simplify selecting the correct match, we recommend that reformatted query columns be NA when identical to the original value
+The default function list can used as a starting point to add extra formatting
+functions, remove or modify certain steps.  The individual formatting functions
+are introduced below (SO FAR ONLY THE T-CELL RECEPTORS)
 
-SHOULD `.freducePartial` be a public function?
+```{r}
+# Get the default sequence of formatting functions 
+default_funs <- defaultQuery()
+head(default_funs)
+```
 
-## Incorrect matches
 
 ### Special case: T-cell receptors
 
@@ -224,13 +229,21 @@ tcr_f %>%
 
 # Querying a dataset
 
-Our query pipeline is to query the HGNC and then use the other datasets and the
-antibody vendor information to find matches for the unmatched antibodies.
+Our pipeline is to query the HGNC and then use the other datasets and
+the antibody vendor information to find matches for the unmatched antibodies.
 
 By default, we require that matches must be found for all subunits of a
 multi-subunit protein to avoid incorrect matches.
 
-Here we will query the HGNC data set for the CITE-seq antibodies.
+Here we will query the HGNC data set for the CITE-seq antibodies, using the
+query table created above
+
+```{r}
+hgnc_results <- searchHGNC(query_df)
+```
+
+
+
 
 ## Multiple matches example CD11a, CD18
 
