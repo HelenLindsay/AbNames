@@ -80,8 +80,7 @@
 #@param df1 Filtered data.frame
 #@param df2 Unfiltered data.frame
 #@param col character(n) Name of column to use for selecting rows from df1
-#'@importFrom dplyr all_off
-#'@importFrom dplyr::pull
+#'@importFrom dplyr pull
 groupsWith <- function(df1, df2, col){
     # Only keep the columns in df2
     col_vals <- df1 %>%

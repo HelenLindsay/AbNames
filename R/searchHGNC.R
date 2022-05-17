@@ -64,20 +64,3 @@ searchHGNC <- function(query_df, multisubunit = c("TCR_long", "subunit")){
 
     return(res)
 }
-
-
-
-
-
-
-# Matches to greek word, subunit, upper_no_dash, missing matches to lower_no_dash?
-
-# CD77 should have matched previous symbol
-# HLA.A.B.C?
-# NKAT2 match to lower, Annexin V, Cadherin 11, Galectin-3
-# HLA.A.B.C.
-
-#ags %>%
-#    dplyr::filter(! ID %in% res$ID) %>%
-#    select(Antigen, Cat_Number) %>%
-#    unique()

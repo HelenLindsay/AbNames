@@ -64,12 +64,16 @@ defaultQuery <- function(ab = "Antigen", id_cols = c("Antigen", "Study")){
 
     qry = list(purrr::partial(addID, id_cols = id_cols),
                purrr::partial(gsubAb, ab = ab), # Remove A/antis
-               purrr::partial(gsubAb, ab = ab, pattern = "\\sRecombinant"),
+               purrr::partial(gsubAb, ab = ab, pattern = "\\s[Rr]ecombinant"),
                purrr::partial(splitUnnest, ab = ab), # Brackets
                purrr::partial(splitUnnest, ab = ab, split = ", "),  # Commas
                # / _ or . if at least 3 on each side and not TCR
                purrr::partial(splitUnnest, exclude = "TCR",
-                        split = "(?<=[A-z0-9-]{3})[\\/_\\.](?=[A-z0-9-]{3,})")
+                        split = "(?<=[A-z0-9-]{3})[\\/_\\.](?=[A-z0-9-]{3,})"),
+
+
+
+
     )
 
     return(list(query_funs = qry, query_cols = query_cols))
@@ -208,7 +212,7 @@ upperSquish <- function(ab){
 #'@export
 lowerNoDash <- function(ab){
     result <- gsub("-", " ", tolower(ab))
-    return(.noDups(x, ab))
+    return(.noDups(result, ab))
 }
 
 

@@ -40,7 +40,7 @@ showGroups <- function(df, i = 1, n = 1, max_rows = 50){
 }
 
 
-# printGpMatch ----
+# printGroupMatch ----
 #
 #' Select a group from a data.frame, format into a printable string
 #'
