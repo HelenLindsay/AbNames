@@ -1,30 +1,37 @@
 # makeQueryTable ----
+#@param funs A vector of string formatting functions to apply to df.  Each
+#should take a data.frame as a first argument and return a data.frame or
+#tibble, and optional arguments should be filled in e.g. with purrr::partial.
+#@param query_cols (character(n), default: NULL) Name(s) of columns containing
+#potential names to search.  If not provided, any columns that are added to df
+#after applying funs are used as query columns.
+#
 #'Separate Antibody/Antigen names into component parts
 #'
 #'Given a data.frame containing Antigen/Antibody names, reformat
 #'the names into possible gene names and return the data.frame in long format.
 #'
 #'@param df A data.frame or tibble
-#'@param funs A vector of string formatting functions to apply to df.  Each
-#'should take a data.frame as a first argument and return a data.frame or
-#'tibble, and optional arguments should be filled in e.g. with purrr::partial.
+#'@param ab (character(1), default: "Antigen") Name of column in df containing
+#'antibody names
 #'@param control_col (character(1), default: NA)  Optional name of a logical
 #'column indicating whether an antibody is an isotype control.  If present,
 #'controls will be removed to avoid spurious matches as they usually do not
 #'react against human genes.
-#'@param query_cols (character(n), default: NA) IF NA ASSUME THAT ALL COLUMNS
-#'ADDED ARE QUERY_COLS?
 #'@importFrom tidyr pivot_longer
 #'@export
-makeQueryTable <- function(df, funs, query_cols = NA, control_col = NA){
+makeQueryTable <- function(df, ab = "Antigen", control_col = NA){
     # Remove controls
     if (! is.na(control_col)) { df <- dplyr::filter(df, ! (!!sym(control_cl))) }
 
     cn <- colnames(df)
 
+    funs <- defaultQuery(ab = ab)
     df <- magrittr::freduce(df, funs)
 
-    if (is.na(query_cols)) query_cols <- setdiff(colnames(df), cn)
+    # Make a list of column names that are query terms
+    query_cols <- c(ab, setdiff(colnames(df), cn)) # New columns + original ab
+    query_cols <- setdiff(query_cols, "ID") # minus ID column
 
     # Convert to long format
     df <- qryToLong(df, query_cols)
@@ -52,27 +59,29 @@ qryToLong <- function(df, query_cols){
 #' containing Antigen/Antibody names
 #'@param id_cols (character(n)) Names of columns to paste to form ID column
 #'@export
-defaultQuery <- function(ab = "Antigen", id_cols = c("Antigen", "Study")){
+defaultQuery <- function(ab = "Antigen"){
 
     # Default transformation sequence for making query table ----
 
-    # List of functions, column to act on and column to create?
     # Check that all columns to act on are either in the table or created
-    # earlier in the pipeline
-    # function, ab, new_col, args?
-    query_cols <- c(ab)
+    # earlier in the pipeline?
+    split_merge_str <- sprintf('grepl("TCR", %s)', ab)
 
-    qry = list(purrr::partial(addID, id_cols = id_cols),
-               purrr::partial(gsubAb, ab = ab), # Remove A/antis
-               purrr::partial(gsubAb, ab = ab, pattern = "\\sRecombinant"),
-               purrr::partial(splitUnnest, ab = ab), # Brackets
-               purrr::partial(splitUnnest, ab = ab, split = ", "),  # Commas
+    qry = list(purrr::partial(gsubAb, ab = !!ab), # Remove A/antis
+               purrr::partial(gsubAb, ab = !!ab, pattern = "\\s[Rr]ecombinant"),
+               purrr::partial(splitUnnest, ab = !!ab), # Brackets
+               purrr::partial(splitUnnest, ab = !!ab, split = ", "),  # Commas
                # / _ or . if at least 3 on each side and not TCR
                purrr::partial(splitUnnest, exclude = "TCR",
-                        split = "(?<=[A-z0-9-]{3})[\\/_\\.](?=[A-z0-9-]{3,})")
+                        split = "(?<=[A-z0-9-]{3})[\\/_\\.](?=[A-z0-9-]{3,})"),
+               purrr::partial(.reformatAb, ab = !!ab),
+               purrr::partial(separateSubunits, ab = !!ab, new_col = "subunit"),
+               purrr::partial(splitMerge, ex = !!split_merge_str,
+                              f = formatTCR, tcr = "greek_letter"),
+               purrr::partial(formatIg, ig = "greek_letter")
     )
 
-    return(list(query_funs = qry, query_cols = query_cols))
+    return(qry)
 }
 
 
@@ -89,11 +98,12 @@ defaultQuery <- function(ab = "Antigen", id_cols = c("Antigen", "Study")){
 #'@return df with an extra ID column
 #'
 #'@importFrom dplyr mutate group_by pull all_of n syms
+#'@export
 addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",
                   warn = TRUE){
 
     # TO DO:
-    # should - be replaced by _ in id columns to make unsplitting easier?
+    # should - be replaced by __ in id columns to make unsplitting easier?
 
     # Check id_cols exist in df and new_col does not
     if (! all(id_cols %in% colnames(df))){ stop("All id_cols must be in df") }
@@ -208,7 +218,7 @@ upperSquish <- function(ab){
 #'@export
 lowerNoDash <- function(ab){
     result <- gsub("-", " ", tolower(ab))
-    return(.noDups(x, ab))
+    return(.noDups(result, ab))
 }
 
 
@@ -278,3 +288,15 @@ splitUnnest <- function(df, ab = "Antigen", split = "[\\(\\)]", new_col = NA,
     return(df)
 }
 
+
+# .reformatAb ----
+# Perform a default sequence of reformatting operations
+.reformatAb <- function(df, ab = "Antigen"){
+    result <- df %>%
+        dplyr::mutate(greek_word = replaceGreekSyms(!!sym(ab), "sym2word"),
+                      greek_letter = greekToLetter(!!sym(ab)),
+                      upper_no_dash = upperSquish(greek_letter),
+                      lower_no_dash = lowerNoDash(greek_letter),
+                      dash_not_dot = dashNotDot(greek_letter))
+    return(result)
+}

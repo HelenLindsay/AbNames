@@ -9,9 +9,11 @@
 #'@param i (integer(1), default 1) Index of the group to be printed.
 #'@param n (integer(1), default 1) How many groups to show at once?
 #'@param max_rows integer(1) Maximum number of rows to print (Default: 50).
+#'@param interactive (default: TRUE) Should the function wait for a
+#'command prompt to show the next group?
 #'@importFrom dplyr group_rows
 #'@export
-showGroups <- function(df, i = 1, n = 1, max_rows = 50){
+showGroups <- function(df, i = 1, n = 1, max_rows = 50, interactive = TRUE){
     stop_interactive <- FALSE
     msg <- "Enter\nn to print the next group, or\nq to quit"
     msg2 <- "Please enter either n (next) or q (quit)"
@@ -27,6 +29,8 @@ showGroups <- function(df, i = 1, n = 1, max_rows = 50){
         print(as.data.frame(p_df[seq_len(min(max_rows, nrow(p_df))), ]))
         i <- i + 1
 
+        if (! isTRUE(interactive)) break()
+
         if (i > n_groups){
             cat("\nNo more groups to show\n")
             break()
@@ -36,11 +40,12 @@ showGroups <- function(df, i = 1, n = 1, max_rows = 50){
 
         if (! choice %in% c("n", "q")) readline(msg2)
         if (choice == "q") stop_interactive <- TRUE
+
     }
 }
 
 
-# printGpMatch ----
+# printGroupMatch ----
 #
 #' Select a group from a data.frame, format into a printable string
 #'

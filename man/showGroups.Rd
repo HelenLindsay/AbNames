@@ -4,7 +4,7 @@
 \alias{showGroups}
 \title{Interactively print individual groups of a grouped data.frame}
 \usage{
-showGroups(df, i = 1, n = 1, max_rows = 50)
+showGroups(df, i = 1, n = 1, max_rows = 50, interactive = TRUE)
 }
 \arguments{
 \item{df}{A *grouped* data.frame}
@@ -14,6 +14,9 @@ showGroups(df, i = 1, n = 1, max_rows = 50)
 \item{n}{(integer(1), default 1) How many groups to show at once?}
 
 \item{max_rows}{integer(1) Maximum number of rows to print (Default: 50).}
+
+\item{interactive}{(default: TRUE) Should the function wait for a
+command prompt to show the next group?}
 }
 \description{
 Print first group of a grouped data.frame, then prompt user to either print

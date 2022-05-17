@@ -2,17 +2,26 @@
 % Please edit documentation in R/searchHGNC.R
 \name{searchHGNC}
 \alias{searchHGNC}
-\title{searchHGNC}
+\title{Search for matches to antibody names in HGNC protein coding genes}
 \usage{
-searchHGNC(query_df)
+searchHGNC(query_df, multisubunit = c("TCR_long", "subunit"))
 }
 \arguments{
 \item{query_df}{A data.frame in long format for searching for exact matches to
 HGNC names.  Must contain a column "value" containing potential gene symbols
-for matching with HGNC symbols and descriptions and a column "ID" for grouping
-results}
+for matching with HGNC symbols and descriptions, a column "ID" for grouping
+results, and a column "name" indicating the type of match (only used for
+multi-subunit proteins and TCRs).}
+
+\item{multisubunit}{character(n) Name(s) of entries in "name" column
+corresponding to multi-subunit proteins.  Use NA if none exist.}
+}
+\value{
+A data.frame of matches from IDs in query_df to HGNC genes, including
+a column "n_matches" giving the number of matches to different genes.
 }
 \description{
 Search HGNC gene symbols, aliases and names for an exact match
 to an value, assumed to be an antigen name or part of an antigen name.
+query_df must have columns named "ID", "name" and "value".
 }

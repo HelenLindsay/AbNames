@@ -4,7 +4,7 @@
 \alias{defaultQuery}
 \title{Default list of functions for making an antibody query table}
 \usage{
-defaultQuery(ab = "Antigen", id_cols = c("Antigen", "Study"))
+defaultQuery(ab = "Antigen")
 }
 \arguments{
 \item{ab}{(character(1), default "Antigen") Name of the column in df
