@@ -14,22 +14,19 @@
 #'@param df A data.frame or tibble
 #'@param ab (character(1), default: "Antigen") Name of column in df containing
 #'antibody names
-#'@param id_cols (character(n)) Name(s) of columns to concatenate to create an
-#'ID column
 #'@param control_col (character(1), default: NA)  Optional name of a logical
 #'column indicating whether an antibody is an isotype control.  If present,
 #'controls will be removed to avoid spurious matches as they usually do not
 #'react against human genes.
 #'@importFrom tidyr pivot_longer
 #'@export
-makeQueryTable <- function(df, ab = "Antigen", id_cols = c("Antigen", "Study"),
-                           control_col = NA){
+makeQueryTable <- function(df, ab = "Antigen", control_col = NA){
     # Remove controls
     if (! is.na(control_col)) { df <- dplyr::filter(df, ! (!!sym(control_cl))) }
 
     cn <- colnames(df)
 
-    funs <- defaultQuery(ab = ab, id_cols = id_cols)
+    funs <- defaultQuery(ab = ab)
     df <- magrittr::freduce(df, funs)
 
     # Make a list of column names that are query terms
@@ -62,7 +59,7 @@ qryToLong <- function(df, query_cols){
 #' containing Antigen/Antibody names
 #'@param id_cols (character(n)) Names of columns to paste to form ID column
 #'@export
-defaultQuery <- function(ab = "Antigen", id_cols = c("Antigen", "Study")){
+defaultQuery <- function(ab = "Antigen"){
 
     # Default transformation sequence for making query table ----
 
@@ -70,8 +67,7 @@ defaultQuery <- function(ab = "Antigen", id_cols = c("Antigen", "Study")){
     # earlier in the pipeline?
     split_merge_str <- sprintf('grepl("TCR", %s)', ab)
 
-    qry = list(purrr::partial(addID, id_cols = !!id_cols),
-               purrr::partial(gsubAb, ab = !!ab), # Remove A/antis
+    qry = list(purrr::partial(gsubAb, ab = !!ab), # Remove A/antis
                purrr::partial(gsubAb, ab = !!ab, pattern = "\\s[Rr]ecombinant"),
                purrr::partial(splitUnnest, ab = !!ab), # Brackets
                purrr::partial(splitUnnest, ab = !!ab, split = ", "),  # Commas
@@ -102,11 +98,12 @@ defaultQuery <- function(ab = "Antigen", id_cols = c("Antigen", "Study")){
 #'@return df with an extra ID column
 #'
 #'@importFrom dplyr mutate group_by pull all_of n syms
+#'@export
 addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",
                   warn = TRUE){
 
     # TO DO:
-    # should - be replaced by _ in id columns to make unsplitting easier?
+    # should - be replaced by __ in id columns to make unsplitting easier?
 
     # Check id_cols exist in df and new_col does not
     if (! all(id_cols %in% colnames(df))){ stop("All id_cols must be in df") }

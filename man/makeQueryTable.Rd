@@ -4,21 +4,13 @@
 \alias{makeQueryTable}
 \title{Separate Antibody/Antigen names into component parts}
 \usage{
-makeQueryTable(
-  df,
-  ab = "Antigen",
-  id_cols = c("Antigen", "Study"),
-  control_col = NA
-)
+makeQueryTable(df, ab = "Antigen", control_col = NA)
 }
 \arguments{
 \item{df}{A data.frame or tibble}
 
 \item{ab}{(character(1), default: "Antigen") Name of column in df containing
 antibody names}
-
-\item{id_cols}{(character(n)) Name(s) of columns to concatenate to create an
-ID column}
 
 \item{control_col}{(character(1), default: NA)  Optional name of a logical
 column indicating whether an antibody is an isotype control.  If present,

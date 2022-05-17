@@ -128,14 +128,14 @@ All of the antigen names above refer to the same cell surface protein.
 We will demonstrate how to create a default query table using the raw CITE-seq
 data set.  This collects information from the reagents tables provided as supplementary material in the studies used.
 
-```{r}
-# To make it easier to view the query table, we will first remove some unneeded
-# columns
-citeseq <- dplyr::select(citeseq, Antigen, Study)
 
+```{r}
+# Add an ID column to the citeseq data set to allow the results table to be merged
+citeseq <- AbNames::addID(citeseq)
+
+print(colnames(citeseq))
 # Apply the default transformation sequence and make a query table in long format
-query_df <- AbNames::makeQueryTable(citeseq, ab = "Antigen",
-                                    id_cols = c("Antigen", "Study"))
+query_df <- AbNames::makeQueryTable(citeseq, ab = "Antigen")
 
 # Select just the columns of interest (for viewing the table)
 query_df <- query_df %>%
@@ -244,28 +244,41 @@ hgnc_results <- searchHGNC(query_df)
 # Print 10 random results:
 hgnc_results %>%
     dplyr::select(ID, name, value, symbol_type) %>%
-    dplyr::ungroup() %>%
     dplyr::sample_n(10)
 ```
 
 The results table above contains (just) the matches between the query table and the HGNC tables.  In the example above, we see in the "name" column the formatting function that generated the string in the "value" column that was matched, and in the "symbol_type" column which column of the HGNC data was matched.  If there are multiple matches for a given ID, the offical symbol ("HGNC_SYMBOL") is preferred over aliases or previous symbols.
 
 We may wish to review the matches before merging the results into the original table.
+For example, we can check for matches to different genes where the name was not guessed to be a multi-subunit protein.
 
+```{r}
+multi_gene <- hgnc_results %>%
+    dplyr::group_by(ID) %>%
+    dplyr::mutate(n_ids = dplyr::n_distinct(HGNC_ID)) %>% # Count distinct IDs
+    # Select antigens where there are matches to multiple genes but not
+    # because the antibody is against a multi-gene protein 
+    dplyr::filter(n_ids > 1, ! all(name %in% c("TCR_long", "subunit"))) %>%
+    dplyr::select(ID, name, value, HGNC_ID)
+
+# Look at the first group in multi_gene.
+# Set interactive = FALSE for interactive exploration
+showGroups(multi_gene, 1, interactive = FALSE)
+
+# This is an example where the antibody is against a heterodimeric protein.
+# We can confirm this by looking up the vendor catalogue number:
+citeseq %>%
+    dplyr::filter(ID == "CD11a.CD18-Wu_2021_b") %>%
+    dplyr::select(Antigen, Cat_Number, Vendor)
+
+```
 
 
 NOTE: I haven't written a convenience function for merging back into the original table yet.
+TODO: QUERY FOR CD11/CD18 in protein ontology
 
 
 
-
-
-
-## Multiple matches example CD11a, CD18
-
-
-
-"CD11a.CD18-Wu_2021_b"
 "CD270 (HVEM, TR2)-Hao_2021" - three different IDs
 "KIR2DL5" matches two genes HGNC:16345 HGNC:16346
 "CD279 (PD-1)-Mimitou_2021_cite_and_dogma_seq"
