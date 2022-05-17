@@ -39,18 +39,6 @@ very similar names, searching for partial matches to names in free-text gene des
 
 ## Identify all members of a protein complex bound by an antibody
 
-
-# Antibody naming conventions
-
-## T-cell receptors
-
-## Immunoglobins
-
-## Major histocompatibility complex genes 
-
-## Isotype controls
-
-
 # Data
 
 AbNames contains several curated gene name data sets for matching to antibody
@@ -60,7 +48,8 @@ names.
 
 The `hgnc` data set is a reformatted version of the protein-coding gene
 information downloaded from the Human Gene Names Consortium. This includes
-previous (obsolete) gene names and aliases, which in our experience have been useful for matching to antibody names.  The `hgnc_long` data set contains the
+previous (obsolete) gene names and aliases, which in our experience have been
+useful for matching to antibody names.  The `hgnc_long` data set contains the
 same seq of gene identifiers as the `hgnc` data set, in long format (one alias
 per row).
 
@@ -145,17 +134,22 @@ data set.  This collects information from the reagents tables provided as supple
 citeseq <- dplyr::select(citeseq, Antigen, Study)
 
 # Apply the default transformation sequence and make a query table in long format
-query_df <- makeQueryTable(citeseq, ab = "Antigen",
-                           id_cols = c("Antigen", "Study"))
+query_df <- AbNames::makeQueryTable(citeseq, ab = "Antigen",
+                                    id_cols = c("Antigen", "Study"))
 
+# Select just the columns of interest (for viewing the table)
+query_df <- query_df %>%
+    dplyr::select(ID, name, value)
 
-# Select just the columns of interest (for view the table)
-#query_df <- query_df %>%
-#    dplyr::select(ID, name, value)
+# Print one example antigen from the query table:
+query_df %>%
+    dplyr::filter(ID == "TCR alpha/beta-Hao_2021")
 
-head(query_df)
 ```
 
+The example above shows that each antibody name has been reformatted in several
+ways.  When querying a data set, we search for an exact match to any of these
+strings.
 
 ## Custom query table
 
@@ -172,12 +166,14 @@ are introduced below (SO FAR ONLY THE T-CELL RECEPTORS)
 
 ```{r}
 # Get the default sequence of formatting functions 
-default_funs <- defaultQuery()
-head(default_funs)
+default_funs <- AbNames::defaultQuery()
+
+# Print the first two formatting functions as an example
+default_funs[1:2]
 ```
 
 
-### Special case: T-cell receptors
+### T-cell receptors
 
 We found that querying the HGNC gene description was the easiest way to match
 the names of antibodies against the T-cell receptor to their gene IDs.  (An
@@ -238,9 +234,29 @@ multi-subunit protein to avoid incorrect matches.
 Here we will query the HGNC data set for the CITE-seq antibodies, using the
 query table created above
 
+```{r, echo = FALSE}
+set.seed(549867)
+```
+
 ```{r}
 hgnc_results <- searchHGNC(query_df)
+
+# Print 10 random results:
+hgnc_results %>%
+    dplyr::select(ID, name, value, symbol_type) %>%
+    dplyr::ungroup() %>%
+    dplyr::sample_n(10)
 ```
+
+The results table above contains (just) the matches between the query table and the HGNC tables.  In the example above, we see in the "name" column the formatting function that generated the string in the "value" column that was matched, and in the "symbol_type" column which column of the HGNC data was matched.  If there are multiple matches for a given ID, the offical symbol ("HGNC_SYMBOL") is preferred over aliases or previous symbols.
+
+We may wish to review the matches before merging the results into the original table.
+
+
+
+NOTE: I haven't written a convenience function for merging back into the original table yet.
+
+
 
 
 
@@ -260,7 +276,7 @@ hgnc_results <- searchHGNC(query_df)
 # Querying the protein ontology
 
 
-# Filling NAs
+# Filling missing information
 
 ## Selecting a group
 When filling in information from a reference data set, it can be useful to look
@@ -277,27 +293,11 @@ To fill using a reference data set, the strategy used is to add a temporary ID c
 
 
 ## TO DO
-An example of (interactively) deciding what to do if groups are inconsistent.
 
-
-## Isotype controls
-
-https://onlinelibrary.wiley.com/doi/full/10.1002/cyto.b.20485
-https://onlinelibrary.wiley.com/doi/full/10.1002/cyto.a.20333
-https://onlinelibrary.wiley.com/doi/full/10.1002/cyto.a.22995
-
-Isotype controls are antibodies of the same isotype as a given antibody.
-Ideally, isotype controls should match the heavy chain (e.g. IgG), heavy chain subclass (e.g. IgG1) and light chain (kappa or lambda), and have the
-same concentration and manufacturing process. 
-
-Isotype controls may have either unknown specificity or bind to antigens not present in the sample.  Isotype controls can indicate whether there is unintended binding of the FC region to (FcRs, CD16, CD32, CD64).  One or more of these are expressed in all leukocytes, with highest expressin in macrophages and monocytes.
-
-Does the isotype control signal match internal negative control (cells negative for a given marker).
-
-
-# Standardise names in a singlecellexperiment
-
-# Check new annotations against previous
+*An example of (interactively) deciding what to do if groups are inconsistent.
+*Standardise names in a singlecellexperiment
+*Check new annotations against previous
+*Isotype controls
 
 # Session Info
 
