@@ -1,0 +1,379 @@
+---
+title: "Introduction to AbNames"
+author: "Helen Lindsay"
+package: AbNames
+output:
+  BiocStyle::html_document
+vignette: >
+  %\VignetteIndexEntry{AbNames}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+# Overview
+
+AbNames performs two tasks:
+
+* Extracting potential gene names from antibody names, and
+
+* Matching human antibody names to gene names, IDs and protein complex IDs.
+
+Antibody names are not reported in a consistent format in published data.  Antibodies are often named according to the antigen they target, which may not
+be the same as the name of the protein (complex) the antigen is part of. Antibodies may target multi-subunit protein complexes, and this can be reflected
+in the name, e.g. an antibody against the T-cell receptor alpha and beta subunits might be named TCRab. Antibody names may also include the name of the clone the antibody is derived from or the names of fluorophores or DNA-oligos the antibody
+is conjugated with.  For these reasons, it can be difficult to exactly match
+antibody names with gene or protein names.  As cell surface antigens often have
+very similar names, searching for partial matches to names in free-text gene descriptions is challenging and error-prone.
+
+# Goals
+
+## Standardise names of data sets for combined analysis
+
+## Identify all members of a protein complex bound by an antibody
+
+# Data
+
+AbNames contains several curated gene name data sets for matching to antibody
+names.
+
+## HGNC gene names
+
+The `hgnc` data set is a reformatted version of the protein-coding gene
+information downloaded from the Human Gene Names Consortium. This includes
+previous (obsolete) gene names and aliases, which in our experience have been
+useful for matching to antibody names.  The `hgnc_long` data set contains the
+same seq of gene identifiers as the `hgnc` data set, in long format (one alias
+per row).
+
+Load using:
+
+```{r, message = FALSE}
+library(AbNames)
+library(dplyr)
+
+data("hgnc", package = "AbNames") # hgnc_long is loaded similarly
+
+# Show the first entries of hgnc, where each row is the start of one column
+dplyr::glimpse(hgnc) 
+
+# (Note: it isn't necessary to use dplyr:: to call "glimpse" as dplyr is loaded
+# with the library call above. This syntax is used to make it clear which
+# packages functions belong to)
+```
+
+## BioLegend antibodies
+
+BioLegend is a major supplier of antibodies, and provides several antibody
+panels for CITE-seq analyses.  The data set "totalseq_cocktails" is a
+re-formatted version of the TotalSeq cocktails data sheets available from the
+BioLegend website, including BioLegend antibody names and Ensembl gene IDs.
+
+Load using:
+```{r}
+data("totalseq_cocktails", package = "AbNames")
+dplyr::glimpse(totalseq_cocktails)
+```
+
+Note that the "Antigen" column here refers to antibody names with prefixes such
+as "anti-human" removed.
+
+## CITE-seq antibodies
+
+This is a table matching antibody names to gene and protein IDs from >20 data
+sets with publicly available CITE-seq data.  The data sets are data that we have worked with and we would be happy to add other data sets if provided. The
+AbNames package collects the functions that were used to create this table. This table includes manually curated matches between antibody names and gene IDs for cases where we were unable to find an exact match to the antibody name provided.
+
+Load using
+```{r, message = FALSE}
+# As the citeseq data set contains raw data, it is loaded differently
+# than the other data sets 
+
+citeseq_fname <- system.file("extdata", "citeseq.csv", package = "AbNames")
+citeseq <- read.csv(citeseq_fname)
+dplyr::glimpse(citeseq)
+```
+
+Here the column "Antigen" refers to the name given by the authors of the study
+in the table of resources used.  Some minimal formatting has been done, for
+example fixing Greek characters that were accidentally transformed upon data import.
+
+# Creating a query table
+
+To illustrate the problem with matching antibody names to gene names, let's look
+at an example from the citeseq data set.
+
+```{r}
+# The regular expression inside "grepl" searches for PD.L1, PD-L1, PDL1 or CD274
+
+cd274 <- citeseq %>%
+    dplyr::filter(grepl("PD[\\.-]?L1|CD274", Antigen)) %>%
+    dplyr::pull(Antigen) %>%
+    unique()
+
+cd274
+```
+
+All of the antigen names above refer to the same cell surface protein. 
+
+## Default query table
+
+We will demonstrate how to create a default query table using the raw CITE-seq
+data set.  This collects information from the reagents tables provided as supplementary material in the studies used.
+
+
+```{r}
+# Add an ID column to the citeseq data set to allow the results table to be merged
+citeseq <- AbNames::addID(citeseq)
+
+# Select just the columns that are needed for querying:
+citeseq_q <- citeseq %>% dplyr::select(ID, Antigen)
+
+# Apply the default transformation sequence and make a query table in long format
+query_df <- AbNames::makeQueryTable(citeseq_q, ab = "Antigen")
+
+# Print one example antigen from the query table:
+query_df %>%
+    dplyr::filter(ID == "TCR alpha/beta-Hao_2021")
+
+```
+
+The example above shows that each antibody name has been reformatted in several
+ways.  When querying a data set, we search for an exact match to any of these
+strings.
+
+## Custom query table
+
+AbNames provides a few template functions that can be used to construct a
+pipeline for creating a query table. The default query table uses the function
+`defaultQuery` to create a list of partial functions which are then applied
+recursively to the data.frame using `magrittr::freduce`.  To use this strategy,
+all functions must accept the data.frame as the only required argument.  Other
+arguments should be filled in when creating the partial functions.
+
+The default function list can used as a starting point to add extra formatting
+functions, remove or modify certain steps.  The individual formatting functions
+are introduced below (SO FAR ONLY THE T-CELL RECEPTORS)
+
+```{r}
+# Get the default sequence of formatting functions 
+default_funs <- AbNames::defaultQuery()
+
+# Print the first two formatting functions as an example
+default_funs[1:2]
+```
+
+
+### T-cell receptors
+
+We found that querying the HGNC gene description was the easiest way to match
+the names of antibodies against the T-cell receptor to their gene IDs.  (An
+alternative method is to search for the gene symbol.)
+
+We will start with a data.frame of antibodies against the T-cell receptor from
+the CITE-seq data set. We have already done some fomatting of these names, e.g. 
+for "TCR Va24-Ja18 (iNKT cell)" we have removed the section in brackets. We wish
+to create a query data.frame where each subunit of the TCR complex appears on a
+separate line. 
+
+```{r}
+tcr <- data.frame(Antigen =
+                      c("TCR alpha/beta", "TCRab", "TCR gamma/delta", "TCRgd",
+                        "TCR g/d", "TCR Vgamma9", "TCR Vg9", "TCR Vd2",
+                        "TCR Vdelta2", "TCR Vα24-Jα18", "TCRVa24.Ja18", 
+                        "TCR Valpha24-Jalpha18", "TCR Vα7.2", "TCR Va7.2",
+                        "TCRa7.2", "TCRVa7.2", "TCR Vbeta13.1", "TCR γ/δ", 
+                        "TCR Vβ13.1", "TCR Vγ9", "TCR Vδ2", "TCR α/β",
+                        "TCRb", "TCRg"))
+
+
+# First, we convert the Greek symbols to letters.  
+# Note that as we are using replaceGreekSyms in a dplyr pipeline, we don't 
+# put quotes around the column name, i.e. Antigen not "Antigen".
+
+tcr <- tcr %>%
+    dplyr::mutate(query = 
+                    AbNames::replaceGreekSyms(Antigen, replace = "sym2letter"))
+ 
+# Print out a few rows to see the result
+tcr %>% 
+    dplyr::filter(Antigen %in% c("TCR Vβ13.1", "TCR Vδ2", "TCR α/β"))
+
+```
+
+Now we use the function `formatTCR` to format the antibody names for querying
+the gene description field of the HGNC data set.
+
+```{r}
+tcr_f <- AbNames::formatTCR(tcr, tcr = "query")
+
+# Print out the first few rows
+tcr_f %>%
+    head() 
+
+```
+
+
+# Querying a dataset
+
+Our pipeline is to query the HGNC and then use the other datasets and
+the antibody vendor information to find matches for the unmatched antibodies.
+
+By default, we require that matches must be found for all subunits of a
+multi-subunit protein to avoid incorrect matches.
+
+Here we will query the HGNC data set for the CITE-seq antibodies, using the
+query table created above.  
+
+```{r, echo = FALSE}
+set.seed(549867)
+```
+
+```{r}
+hgnc_results <- searchHGNC(query_df)
+
+# Print 10 random results:
+hgnc_results %>%
+    dplyr::select(ID, name, value, symbol_type) %>%
+    dplyr::ungroup() %>%
+    dplyr::sample_n(10)
+```
+
+The results table above contains (just) the matches between the query table and the HGNC tables.  In the example above, we see in the "name" column the formatting function that generated the string in the "value" column that was matched, and in the "symbol_type" column which column of the HGNC data was matched.  If there are multiple matches for a given ID, the official symbol ("HGNC_SYMBOL") is preferred over aliases or previous symbols.
+
+We may wish to review the matches before merging the results into the original table.
+For example, we can check for matches to different genes where the name was not guessed to be a multi-subunit protein.
+
+```{r}
+hgnc_results <- hgnc_results %>%
+    dplyr::group_by(ID) %>%
+    dplyr::mutate(n_ids = dplyr::n_distinct(HGNC_ID)) # Count distinct IDs
+    
+# Select antigens where there are matches to multiple genes but not
+# because the antibody is against a multi-gene protein 
+multi_gene <- hgnc_results %>%
+    dplyr::filter(n_ids > 1, ! all(name %in% c("TCR_long", "subunit"))) %>%
+    dplyr::select(ID, name, value, HGNC_ID)
+
+# Look at the first group in multi_gene.
+# Set interactive = FALSE for interactive exploration
+showGroups(multi_gene, 1, interactive = FALSE)
+
+# This is an example where the antibody is against a heterodimeric protein.
+# We can confirm this by looking up the vendor catalogue number:
+citeseq %>%
+    dplyr::filter(ID == "CD11a.CD18-Wu_2021_b") %>%
+    dplyr::select(Antigen, Cat_Number, Vendor)
+
+```
+
+However, there are also cases where the results table contains false matches, for example:
+
+```{r}
+hgnc_results %>%
+    dplyr::filter(ID == "CD270 (HVEM, TR2)-Hao_2021") %>%
+    data.frame()
+```
+
+In the above table, we see from the "value" column that the gene "ENSG00000157873" has alias symbols "CD270", "HVEM" and "TR2".  The next two
+rows show genes that have alias symbols for only "TR2".  Here we could guess
+that the gene with the most matches is the correct one. 
+
+NOTE: I haven't written a convenience function for merging back into the original table yet.
+TODO:
+
+* Add official HGNC symbols back into to the HGNC data set
+* QUERY FOR CD11/CD18 in protein ontology
+* Remove redundant results because of Antigen/greek_letter e.g. "KLRG1 (MAFA)-Qian_2020" 
+
+Other examples to discuss?
+
+*"KIR2DL5" matches two genes HGNC:16345 HGNC:16346
+
+*"CD279 (PD-1)-Mimitou_2021_cite_and_dogma_seq"
+
+*"DR3 (TRAMP)-Liu_2021"
+
+For now I will remove all genes with multiple matches before merging the results into the citeseq data.
+
+```{r}
+nrow(hgnc_results)
+
+# Remove matches to several genes, select just columns of interest
+hgnc_results <- hgnc_results %>%
+    dplyr::filter(n_ids == 1 | ! all(name %in% c("TCR_long", "subunit"))) %>%
+    dplyr::select(ID, HGNC_ID, ENSEMBL_ID, UNIPROT_IDS)
+
+nrow(hgnc_results)
+
+citeseq <- citeseq %>%
+    dplyr::full_join(hgnc_results, by = "ID") %>%
+    dplyr::relocate(ID, Antigen, Cat_Number, HGNC_ID) %>%
+    unique()
+
+head(citeseq)
+```
+
+
+# Querying the protein ontology
+
+
+# Filling missing information
+
+## Selecting a group
+When filling in information from a reference data set, it can be useful to look
+at entries where for example annotations are inconsistent.  `showGroups` is
+a function that allows users to interactively print group(s) from a grouped
+data.frame.
+
+## Filling NAs using a reference data set
+The function `fillByGroup` is used to fill in NAs in a grouped data.frame.  It differs from `tidyr::fill` in its treatment of inconsistent values.  Whereas `tidyr::fill` will fill using the first value, `fillByGroup` offers the option
+to fill in the most frequent value.  This can be useful when filling antibody
+IDs given the antibody name and clone or catalogue number.
+
+To fill using a reference data set, the strategy used is to add a temporary ID column, join the two data.frames, fill and separate again using the ID column.
+
+```{r}
+# Select some data to demonstrate filling:
+# Get entries sharing the same catalogue number,
+# where not every entry has a match
+fill_demo <- citeseq %>%
+    dplyr::group_by(Cat_Number) %>%
+    dplyr::arrange(Cat_Number) %>%
+    dplyr::filter(!is.na(Cat_Number), 
+                  any(is.na(HGNC_ID)),
+                  ! all(is.na(HGNC_ID)))
+
+AbNames::showGroups(fill_demo, interactive = FALSE)
+```
+
+In the above example, we can see that for antibodies with catalogue number "300475", a match was found if the antibody was named "CD3E" but not if it was named "CD3".  We can fill in the missing information using `fillByGroup`:
+
+```{r}
+fill_demo <- AbNames::fillByGroup(fill_demo, "Cat_Number",
+                                  fill = c("HGNC_ID", "TotalSeq_Cat", "Vendor",
+                                           "ENSEMBL_ID", "UNIPROT_IDS"))
+# Print out the first group again
+AbNames::showGroups(fill_demo, interactive = FALSE)
+```
+
+
+## TO DO
+
+*An example of (interactively) deciding what to do if groups are inconsistent.
+*Standardise names in a singlecellexperiment
+*Check new annotations against previous
+*Isotype controls
+
+# Session Info
+
+```{r}
+sessionInfo()
+```
