@@ -133,13 +133,11 @@ data set.  This collects information from the reagents tables provided as supple
 # Add an ID column to the citeseq data set to allow the results table to be merged
 citeseq <- AbNames::addID(citeseq)
 
-print(colnames(citeseq))
-# Apply the default transformation sequence and make a query table in long format
-query_df <- AbNames::makeQueryTable(citeseq, ab = "Antigen")
+# Select just the columns that are needed for querying:
+citeseq_q <- citeseq %>% dplyr::select(ID, Antigen)
 
-# Select just the columns of interest (for viewing the table)
-query_df <- query_df %>%
-    dplyr::select(ID, name, value)
+# Apply the default transformation sequence and make a query table in long format
+query_df <- AbNames::makeQueryTable(citeseq_q, ab = "Antigen")
 
 # Print one example antigen from the query table:
 query_df %>%
@@ -232,7 +230,7 @@ By default, we require that matches must be found for all subunits of a
 multi-subunit protein to avoid incorrect matches.
 
 Here we will query the HGNC data set for the CITE-seq antibodies, using the
-query table created above
+query table created above.  
 
 ```{r, echo = FALSE}
 set.seed(549867)
@@ -253,11 +251,13 @@ We may wish to review the matches before merging the results into the original t
 For example, we can check for matches to different genes where the name was not guessed to be a multi-subunit protein.
 
 ```{r}
-multi_gene <- hgnc_results %>%
+hgnc_results <- hgnc_results %>%
     dplyr::group_by(ID) %>%
-    dplyr::mutate(n_ids = dplyr::n_distinct(HGNC_ID)) %>% # Count distinct IDs
-    # Select antigens where there are matches to multiple genes but not
-    # because the antibody is against a multi-gene protein 
+    dplyr::mutate(n_ids = dplyr::n_distinct(HGNC_ID)) # Count distinct IDs
+    
+# Select antigens where there are matches to multiple genes but not
+# because the antibody is against a multi-gene protein 
+multi_gene <- hgnc_results %>%
     dplyr::filter(n_ids > 1, ! all(name %in% c("TCR_long", "subunit"))) %>%
     dplyr::select(ID, name, value, HGNC_ID)
 
@@ -273,17 +273,52 @@ citeseq %>%
 
 ```
 
+However, there are also cases where the results table contains false matches, for example:
+
+```{r}
+hgnc_results %>%
+    dplyr::filter(ID == "CD270 (HVEM, TR2)-Hao_2021") %>%
+    data.frame()
+```
+
+In the above table, we see from the "value" column that the gene "ENSG00000157873" has alias symbols "CD270", "HVEM" and "TR2".  The next two
+rows show genes that have alias symbols for only "TR2".  Here we could guess
+that the gene with the most matches is the correct one. 
 
 NOTE: I haven't written a convenience function for merging back into the original table yet.
-TODO: QUERY FOR CD11/CD18 in protein ontology
+TODO:
 
+* Add official HGNC symbols back into to the HGNC data set
+* QUERY FOR CD11/CD18 in protein ontology
+* Remove redundant results because of Antigen/greek_letter e.g. "KLRG1 (MAFA)-Qian_2020" 
 
+Other examples to discuss?
 
-"CD270 (HVEM, TR2)-Hao_2021" - three different IDs
-"KIR2DL5" matches two genes HGNC:16345 HGNC:16346
-"CD279 (PD-1)-Mimitou_2021_cite_and_dogma_seq"
-"DR3 (TRAMP)-Liu_2021"
-"KLRG1 (MAFA)-Qian_2020"
+*"KIR2DL5" matches two genes HGNC:16345 HGNC:16346
+
+*"CD279 (PD-1)-Mimitou_2021_cite_and_dogma_seq"
+
+*"DR3 (TRAMP)-Liu_2021"
+
+For now I will remove all genes with multiple matches before merging the results into the citeseq data.
+
+```{r}
+nrow(hgnc_results)
+
+# Remove matches to several genes, select just columns of interest
+hgnc_results <- hgnc_results %>%
+    dplyr::filter(n_ids == 1 | ! all(name %in% c("TCR_long", "subunit"))) %>%
+    dplyr::select(ID, HGNC_ID, ENSEMBL_ID, UNIPROT_IDS)
+
+nrow(hgnc_results)
+
+citeseq <- citeseq %>%
+    dplyr::full_join(hgnc_results, by = "ID") %>%
+    dplyr::relocate(ID, Antigen, Cat_Number, HGNC_ID) %>%
+    unique()
+
+head(citeseq)
+```
 
 
 # Querying the protein ontology
@@ -303,6 +338,30 @@ to fill in the most frequent value.  This can be useful when filling antibody
 IDs given the antibody name and clone or catalogue number.
 
 To fill using a reference data set, the strategy used is to add a temporary ID column, join the two data.frames, fill and separate again using the ID column.
+
+```{r}
+# Select some data to demonstrate filling:
+# Get entries sharing the same catalogue number,
+# where not every entry has a match
+fill_demo <- citeseq %>%
+    dplyr::group_by(Cat_Number) %>%
+    dplyr::arrange(Cat_Number) %>%
+    dplyr::filter(!is.na(Cat_Number), 
+                  any(is.na(HGNC_ID)),
+                  ! all(is.na(HGNC_ID)))
+
+AbNames::showGroups(fill_demo, interactive = FALSE)
+```
+
+In the above example, we can see that for antibodies with catalogue number "300475", a match was found if the antibody was named "CD3E" but not if it was named "CD3".  We can fill in the missing information using `fillByGroup`:
+
+```{r}
+fill_demo <- AbNames::fillByGroup(fill_demo, "Cat_Number",
+                                  fill = c("HGNC_ID", "TotalSeq_Cat", "Vendor",
+                                           "ENSEMBL_ID", "UNIPROT_IDS"))
+# Print out the first group again
+AbNames::showGroups(fill_demo, interactive = FALSE)
+```
 
 
 ## TO DO
