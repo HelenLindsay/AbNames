@@ -33,6 +33,7 @@ fillByGroup <- function(df, group, fill, multiple = c("stop", "mode")){
 }
 
 
+# .fillByGroup ----
 #' @importFrom dplyr across
 .fillByGroup <- function(df, group, tmp, fill, multiple){
     # Group data frame, check if there are multiple values per group
@@ -46,7 +47,7 @@ fillByGroup <- function(df, group, fill, multiple = c("stop", "mode")){
     }
 
     # Case: only one value per group
-    if (all(df[, tmp] == 1)){
+    if (all(df[, tmp] <= 1)){
         df <- tidyr::fill(df, !!!syms(fill), .direction = "updown") %>%
             dplyr::ungroup()
     }

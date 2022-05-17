@@ -60,7 +60,8 @@ searchHGNC <- function(query_df, multisubunit = c("TCR_long", "subunit")){
         unique() %>%
 
         dplyr::group_by(ID) %>%
-        dplyr::mutate(n_matches = length(unique(value)))
+        dplyr::mutate(n_matches = length(unique(value))) %>%
+        dplyr::ungroup()
 
     return(res)
 }

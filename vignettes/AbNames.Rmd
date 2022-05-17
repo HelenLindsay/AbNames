@@ -242,10 +242,11 @@ hgnc_results <- searchHGNC(query_df)
 # Print 10 random results:
 hgnc_results %>%
     dplyr::select(ID, name, value, symbol_type) %>%
+    dplyr::ungroup() %>%
     dplyr::sample_n(10)
 ```
 
-The results table above contains (just) the matches between the query table and the HGNC tables.  In the example above, we see in the "name" column the formatting function that generated the string in the "value" column that was matched, and in the "symbol_type" column which column of the HGNC data was matched.  If there are multiple matches for a given ID, the offical symbol ("HGNC_SYMBOL") is preferred over aliases or previous symbols.
+The results table above contains (just) the matches between the query table and the HGNC tables.  In the example above, we see in the "name" column the formatting function that generated the string in the "value" column that was matched, and in the "symbol_type" column which column of the HGNC data was matched.  If there are multiple matches for a given ID, the official symbol ("HGNC_SYMBOL") is preferred over aliases or previous symbols.
 
 We may wish to review the matches before merging the results into the original table.
 For example, we can check for matches to different genes where the name was not guessed to be a multi-subunit protein.
