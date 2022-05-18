@@ -21,7 +21,9 @@
 formatIg <- function(df, ig = "Antigen", new_col = "Ig"){
     .warnIfColExists(df, new_col)
 
-    df <- dplyr::mutate(df, !!new_col := .formatIg(df[[ig]]))
+    df <- df %>%
+        dplyr::ungroup() %>%
+        dplyr::mutate(!!new_col := .formatIg(df[[ig]]))
     return(df)
 }
 
