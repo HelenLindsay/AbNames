@@ -97,8 +97,11 @@ Load using
 # than the other data sets 
 
 citeseq_fname <- system.file("extdata", "citeseq.csv", package = "AbNames")
-citeseq <- read.csv(citeseq_fname)
+citeseq <- read.csv(citeseq_fname) %>% unique()
 dplyr::glimpse(citeseq)
+
+# TO DO: AS THIS IS ONLY A SUBSET OF THE CITESEQ INFO, THERE ARE APPARENT
+# DUPLICATES, DECIDE WHAT TO DO WITH THESE
 ```
 
 Here the column "Antigen" refers to the name given by the authors of the study
