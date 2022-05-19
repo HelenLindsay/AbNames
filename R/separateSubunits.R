@@ -65,6 +65,7 @@ separateSubunits <- function(df, ab = "Antigen", new_col = "subunit"){
 #'@param t1 first temporary column name
 #'@param t2 second temporary column name
 #'@importFrom rlang :=
+#'@importFrom dplyr all_of
 .separateSubunits <- function(df, ab, new_col, pattern, join_pattern, t1, t2){
     #  If there are any duplicated characters, it's probably not a subunit
     no_dup <- function(x){
@@ -82,10 +83,10 @@ separateSubunits <- function(df, ab = "Antigen", new_col = "subunit"){
                       !!t1 := stringr::str_replace(!!sym(ab), !!sym(t2), ""),
                       !!t1 := gsub("[- ]$", "", !!sym(t1)),
                       !!t2 := strsplit(gsub("[,/\\.]", "", !!sym(t2)), ""),
-                      !!t2 := ifelse(no_dup(!!sym(t2)), !!sym(t2), NA)) %>%
+                      !!t2 := ifelse(no_dup(!!sym(t2)), !!sym(t2), list(NA))) %>%
 
         # Unnest to give one row per subunit
-        tidyr::unnest(t2) %>%
+        tidyr::unnest(all_of(t2)) %>%
         # Join subunits
         dplyr::mutate(!!new_col :=
                           .printf(join_pattern, !!sym(t1), !!sym(t2))) %>%

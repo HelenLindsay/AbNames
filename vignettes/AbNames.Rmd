@@ -317,7 +317,7 @@ hgnc_results <- hgnc_results %>%
 nrow(hgnc_results)
 
 citeseq <- citeseq %>%
-    dplyr::full_join(hgnc_results, by = "ID") %>%
+    dplyr::left_join(hgnc_results, by = "ID") %>%
     dplyr::relocate(ID, Antigen, Cat_Number, HGNC_ID) %>%
     unique()
 
