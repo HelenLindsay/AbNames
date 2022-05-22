@@ -57,6 +57,12 @@ fillByGroup <- function(df, group, fill, multiple = c("stop", "mode")){
         df <- .freducePartial(df, groupMode, cls = "cl", cl = fill, gp = group)
     }
 
+    #if (multiple == "ignore" & any(df[, tmp] > 1)){
+    #    df <- splitMerge(df, !!sym(tmp) == 1)
+    #}
+
+
+
     df <- dplyr::select(df, -all_of(tmp))
     return(df)
 }

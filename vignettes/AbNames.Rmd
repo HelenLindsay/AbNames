@@ -344,6 +344,17 @@ IDs given the antibody name and clone or catalogue number.
 To fill using a reference data set, the strategy used is to add a temporary ID column, join the two data.frames, fill and separate again using the ID column.
 
 ```{r}
+# Before filling, check how many antibodies were matched.
+n_matched <- function(df){
+    df %>%
+        dplyr::group_by(ID) %>%
+        dplyr::summarise(match = any(! is.na(HGNC_ID))) %>%
+        dplyr::ungroup() %>%
+        dplyr::count(match)
+}
+
+print(n_matched(citeseq))
+
 # Select some data to demonstrate filling:
 # Get entries sharing the same catalogue number,
 # where not every entry has a match
@@ -367,6 +378,10 @@ fill_demo <- AbNames::fillByGroup(fill_demo, "Cat_Number",
 AbNames::showGroups(fill_demo, interactive = FALSE)
 ```
 
+Now we will fill the gene information in the citeseq data similarly, and check
+how many antibodies have not been matched.
+
+
 
 ## TO DO
 
@@ -374,6 +389,9 @@ AbNames::showGroups(fill_demo, interactive = FALSE)
 *Standardise names in a singlecellexperiment
 *Check new annotations against previous
 *Isotype controls
+*Add checks on filling if the values are not unique
+*Add control column to isotype controls to prevent false match to mouse IgG2a
+*Add ignore option to split merge?
 
 # Session Info
 
