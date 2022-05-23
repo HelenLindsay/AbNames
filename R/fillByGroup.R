@@ -61,8 +61,6 @@ fillByGroup <- function(df, group, fill, multiple = c("stop", "mode")){
     #    df <- splitMerge(df, !!sym(tmp) == 1)
     #}
 
-
-
     df <- dplyr::select(df, -all_of(tmp))
     return(df)
 }

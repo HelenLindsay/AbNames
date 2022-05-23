@@ -353,7 +353,7 @@ n_matched <- function(df){
         dplyr::count(match)
 }
 
-print(n_matched(citeseq))
+original_nmatched <- n_matched(citeseq)
 
 # Select some data to demonstrate filling:
 # Get entries sharing the same catalogue number,
@@ -381,6 +381,20 @@ AbNames::showGroups(fill_demo, interactive = FALSE)
 Now we will fill the gene information in the citeseq data similarly, and check
 how many antibodies have not been matched.
 
+```{r}
+citeseq <- citeseq %>%
+     AbNames::fillByGroup("Cat_Number", multiple = "mode",
+                          fill = c("HGNC_ID", "TotalSeq_Cat", "Vendor",
+                                           "ENSEMBL_ID", "UNIPROT_IDS"))
+nmatched_after_fill <- n_matched(citeseq)
+
+print("Before filling:")
+original_nmatched
+print("After filling:")
+nmatched_after_fill
+
+
+```
 
 
 ## TO DO
