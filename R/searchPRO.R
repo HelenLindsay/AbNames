@@ -4,7 +4,6 @@
 #
 # As this function slow, we recommend only using this function for
 # antibodies that were not matched by other means.
-#'@importFrom dplyr any
 searchPRO <- function(df, ab, group = "ID", interactive = FALSE,
                       species = "human"){
     tmp <- .tempColName(df)
