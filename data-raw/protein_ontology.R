@@ -35,6 +35,8 @@ po_syns <- tibble::as_tibble(po_syns) %>%
                                                  "\\1", synonym)) %>%
     tidyr::unnest(xref, keep_empty = TRUE)
 
+# xref not useful unless the uniprot isn't anywhere else?
+
 pro_long <- po_syns %>%
     tidyr::pivot_longer(cols = c(name, synonym), names_to = "name_type")
 
