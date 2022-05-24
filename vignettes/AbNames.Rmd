@@ -89,7 +89,8 @@ as "anti-human" removed.
 
 This is a table matching antibody names to gene and protein IDs from >20 data
 sets with publicly available CITE-seq data.  The data sets are data that we have worked with and we would be happy to add other data sets if provided. The
-AbNames package collects the functions that were used to create this table. This table includes manually curated matches between antibody names and gene IDs for cases where we were unable to find an exact match to the antibody name provided.
+AbNames package collects the functions that were used to create this table. This table (NOT IN THERE YET) includes manually curated matches between antibody names and gene IDs for cases where we were unable to find an exact match to the antibody name provided.  Isotype controls were manually identified based on either the 
+name, e.g. "IgG1 Isotype Ctrl" or the reactivity, e.g. "Mouse IgG2b".
 
 Load using
 ```{r, message = FALSE}
@@ -135,6 +136,10 @@ data set.  This collects information from the reagents tables provided as supple
 ```{r}
 # Add an ID column to the citeseq data set to allow the results table to be merged
 citeseq <- AbNames::addID(citeseq)
+
+# Remove control columns, as we are only searching human proteins
+controls <- dplyr::filter(citeseq, Control)
+citeseq <- dplyr::filter(citeseq, ! Control)
 
 # Select just the columns that are needed for querying:
 citeseq_q <- citeseq %>% dplyr::select(ID, Antigen)
@@ -311,8 +316,11 @@ nrow(hgnc_results)
 
 # Remove matches to several genes, select just columns of interest
 hgnc_results <- hgnc_results %>%
-    dplyr::filter(n_ids == 1 | ! all(name %in% c("TCR_long", "subunit"))) %>%
-    dplyr::select(ID, HGNC_ID, ENSEMBL_ID, UNIPROT_IDS)
+    dplyr::filter(n_ids == 1 | all(name %in% c("TCR_long", "subunit"))) %>%
+    dplyr::select(ID, HGNC_ID, ENSEMBL_ID, UNIPROT_IDS) %>%
+    unique() %>% # Collapse results with same ID from different queries
+    dplyr::summarise(dplyr::across(c(HGNC_ID, ENSEMBL_ID, UNIPROT_IDS),
+                                   toString)) # Collapse multi-subunit entries
 
 nrow(hgnc_results)
 
@@ -324,10 +332,6 @@ citeseq <- citeseq %>%
 head(citeseq)
 ```
 
-
-# Querying the protein ontology
-
-
 # Filling missing information
 
 ## Selecting a group
@@ -337,11 +341,14 @@ a function that allows users to interactively print group(s) from a grouped
 data.frame.
 
 ## Filling NAs using a reference data set
+
 The function `fillByGroup` is used to fill in NAs in a grouped data.frame.  It differs from `tidyr::fill` in its treatment of inconsistent values.  Whereas `tidyr::fill` will fill using the first value, `fillByGroup` offers the option
 to fill in the most frequent value.  This can be useful when filling antibody
 IDs given the antibody name and clone or catalogue number.
 
-To fill using a reference data set, the strategy used is to add a temporary ID column, join the two data.frames, fill and separate again using the ID column.
+To fill using a reference data set, the strategy used is either to add a
+temporary ID column, join the two data.frames, fill and separate again using the
+ID column, or use dplyr::update_rows.  We will demonstrate the latter approach below. 
 
 ```{r}
 # Before filling, check how many antibodies were matched.
@@ -394,6 +401,29 @@ print("After filling:")
 nmatched_after_fill
 
 
+```
+
+We can also fill some of the missing information using the totalseq_cocktails table.
+
+```{r}
+
+
+```
+
+
+
+
+
+# Querying the protein ontology
+
+Let's see which antibodies were not matched in the HGNC.
+
+```{r}
+citeseq %>%
+    dplyr::filter(is.na(HGNC_ID)) %>%
+    pull(Antigen) %>%
+    sort() %>%
+    unique()
 ```
 
 

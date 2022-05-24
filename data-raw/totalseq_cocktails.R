@@ -49,8 +49,8 @@ nrow(totalseq) == sum(nrows)
 
 # Coalesce columns with the same meaning ----
 totalseq <- totalseq %>%
-    dplyr::rename(Ensembl_ID = `Ensembl ID`,
-                  Gene_Symbol = `Gene Name`,
+    dplyr::rename(ENSEMBL_ID = `Ensembl ID`,
+                  HGNC_SYMBOL = `Gene Name`,
                   Barcode_Sequence = `Barcode sequence`,
                   Oligo_ID = DNA_ID,
                   Antigen = Description) %>%
@@ -58,37 +58,37 @@ totalseq <- totalseq %>%
                       dplyr::coalesce(Barcode_Sequence, Barcode, Sequence),
                   Oligo_ID = dplyr::coalesce(Oligo_ID, `Format / Barcode`),
                   Clone = dplyr::coalesce(Clone, clone),
-                  Ensembl_ID = dplyr::coalesce(Ensembl_ID, `Ensemble ID`),
-                  Gene_Symbol = dplyr::coalesce(Gene_Symbol, `Gene name`),
+                  ENSEMBL_ID = dplyr::coalesce(ENSEMBL_ID, `Ensemble ID`),
+                  HGNC_SYMBOL = dplyr::coalesce(HGNC_SYMBOL, `Gene name`),
                   Antigen = dplyr::coalesce(Antigen, Specificity)) %>%
     dplyr::select(-Barcode, -`Format / Barcode`, -clone,
                   -`Ensemble ID`, -`Gene name`, -Sequence, -Specificity) %>%
     dplyr::mutate(Antigen = gsub("mouse/human", "human/mouse", Antigen),
                   Reactivity =
-                .gsubNA("^anti-([Hh]uman(/mouse)?(/rat)?).*$", "\\1", Antigen),
+                      AbNames:::.gsubNA("^anti-([Hh]uman(/mouse)?(/rat)?).*$",
+                                  "\\1", Antigen),
                   Reactivity = tolower(Reactivity),
                   Antigen = gsub("^anti-([A-z\\/]+)\\s", "", Antigen),
                   # Two names start with Hu instead of "anti-human"
                   Antigen = gsub("^Hu\\s", "", Antigen),
                   Oligo_ID = substr(Oligo_ID, 2, nchar(Oligo_ID)),
                   Antigen = AbNames::replaceGreekSyms(Antigen, "sym2letter"))%>%
-    dplyr::relocate(Antigen, Clone, Ensembl_ID, Gene_Symbol, Oligo_ID,
+    dplyr::relocate(Antigen, Clone, ENSEMBL_ID, HGNC_SYMBOL, Oligo_ID,
                     TotalSeq_Cat, Barcode_Sequence, Reactivity)
-
 
 # Fix an importing error
 totalseq <- totalseq %>%
-    dplyr::mutate(Antigen = ifelse(Antigen == "Fc?RI?", "FceRIA", ""))
+    dplyr::mutate(Antigen = ifelse(Antigen == "Fc?RI?", "FceRIA", Antigen))
 
 # Some TotalSeq B Ensembl_IDs are duplicated barcode sequences, set to NA ----
 totalseq <- totalseq %>%
-    dplyr::mutate(Ensembl_ID = ifelse(grepl("^ENSG", Ensembl_ID),
-                                      Ensembl_ID, NA))
+    dplyr::mutate(ENSEMBL_ID = ifelse(grepl("^ENSG", ENSEMBL_ID),
+                                      ENSEMBL_ID, NA))
 
 # Check that there is only one Ensembl_ID per Antigen-Clone combo ----
 
 totalseq <- totalseq %>%
-    AbNames::nPerGroup(group = c("Antigen", "Clone"), "Ensembl_ID")
+    AbNames:::nPerGroup(group = c("Antigen", "Clone"), "ENSEMBL_ID")
 
 if (max(totalseq$n_per_group) > 1){
     warning("More than one value of Ensembl_ID per Antigen/Clone combo")
@@ -101,14 +101,38 @@ totalseq <- totalseq %>% dplyr::select(-n_per_group)
 # only defined for human
 totalseq <- totalseq %>%
     AbNames::fillByGroup(group = c("Antigen", "Clone", "Reactivity"),
-                         fill = c("Ensembl_ID", "Gene_Symbol"))
+                         fill = c("ENSEMBL_ID", "HGNC_SYMBOL"))
 
 # Fill in the missing gene symbols and reactivity if Ensembl ID is given
 # (isotype controls do not have Ensembl IDs given)
 totalseq <- totalseq %>%
-    AbNames::fillByGroup(group = "Ensembl_ID",
-                         fill = c("Gene_Symbol", "Reactivity")) %>%
+    AbNames::fillByGroup(group = "ENSEMBL_ID",
+                         fill = c("HGNC_SYMBOL", "Reactivity")) %>%
     dplyr::ungroup()
+
+# Check that HGNC_SYMBOL in totalseq matches hgnc data set ----
+data(hgnc)
+hgnc <- hgnc %>%
+    dplyr::select(HGNC_ID, HGNC_SYMBOL, ENSEMBL_ID) %>%
+    dplyr::filter(! is.na(ENSEMBL_ID))
+
+hgnc_to_ts <- hgnc$HGNC_SYMBOL[match(totalseq$ENSEMBL_ID, hgnc$ENSEMBL_ID)]
+df <- tibble(hgnc = hgnc_to_ts, ts = totalseq$HGNC_SYMBOL)
+
+# Values do not match when
+# - totalseq is missing
+# - totalseq gives extra information (TNFRSF8 (CD30), MME (CD10))
+# - CD34 / CD334 - this is clearly a mistake in totalseq as Antigen = CD34
+
+df %>% dplyr::filter(! hgnc == ts | is.na(ts))
+
+# Replace symbols with HGNC values, add HGNC ids
+totalseq <- totalseq %>%
+    dplyr::select(-HGNC_SYMBOL) %>%
+    dplyr::left_join(hgnc, by = "ENSEMBL_ID")
+
+any(is.na(totalseq$HGNC_SYMBOL))
+
 
 # Create totalseq_cocktails data set ----
 totalseq_cocktails <- as.data.frame(totalseq)
