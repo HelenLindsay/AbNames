@@ -46,6 +46,18 @@
     return(.noDups(res, x, no_match))
 }
 
+# .wordGrep ----
+#
+# Grep requiring search string is a word
+#
+# Wrapper for grepl requiring that search string is either surrounded by spaces
+# or appears at the start or the end of the search string.  Does not cover full
+# stops at the end of sentences
+.wordGrep <- function(pattern, x){
+    grep_cmd <- sprintf("(^|\\s)%s($|\\s|\\.\\s|\\.$)", pattern)
+    grepl(grep_cmd, x)
+}
+
 
 # .noDups ----
 #

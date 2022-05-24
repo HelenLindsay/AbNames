@@ -6,3 +6,14 @@ test_that(".tempColName returns a column name that doesn't already exist", {
     expect_equal(.tempColName(data.frame(TEMP = 1, TEMP2 = 2), n = 2),
                  c("TEMP1", "TEMP3"))
 })
+
+
+test_that(".wordGrep handles pattern at all positions", {
+    expect_equal(.wordGrep("CD3", "CD33"), FALSE)
+    expect_equal(.wordGrep("CD3", "in the CD3 middle"), TRUE)
+    expect_equal(.wordGrep("CD3", "sentence about CD3."), TRUE)
+    expect_equal(.wordGrep("CD3", "two CD3. Sentences."), TRUE)
+    expect_equal(.wordGrep("CD3", "CD3"), TRUE)
+    expect_equal(.wordGrep("CD3", "CD3.A"), FALSE)
+    expect_equal(.wordGrep("CD3", "Sentence with CD3.A"), FALSE)
+})

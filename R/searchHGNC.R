@@ -61,7 +61,10 @@ searchHGNC <- function(query_df, multisubunit = c("TCR_long", "subunit")){
 
         dplyr::group_by(ID) %>%
         dplyr::mutate(n_matches = length(unique(value))) %>%
-        dplyr::ungroup()
+        dplyr::ungroup() %>%
+
+        # Add the HGNC symbols
+        dplyr::left_join(hgnc %>% dplyr::select(HGNC_ID, HGNC_SYMBOL))
 
     return(res)
 }

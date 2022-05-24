@@ -317,9 +317,10 @@ nrow(hgnc_results)
 # Remove matches to several genes, select just columns of interest
 hgnc_results <- hgnc_results %>%
     dplyr::filter(n_ids == 1 | all(name %in% c("TCR_long", "subunit"))) %>%
-    dplyr::select(ID, HGNC_ID, ENSEMBL_ID, UNIPROT_IDS) %>%
+    dplyr::select(ID, HGNC_ID, HGNC_SYMBOL, ENSEMBL_ID, UNIPROT_IDS) %>%
     unique() %>% # Collapse results with same ID from different queries
-    dplyr::summarise(dplyr::across(c(HGNC_ID, ENSEMBL_ID, UNIPROT_IDS),
+    dplyr::summarise(dplyr::across(c(HGNC_ID, HGNC_SYMBOL,
+                                     ENSEMBL_ID, UNIPROT_IDS),
                                    toString)) # Collapse multi-subunit entries
 
 nrow(hgnc_results)
@@ -334,11 +335,44 @@ head(citeseq)
 
 # Filling missing information
 
-## Selecting a group
+## Filling using the TotalSeq cocktails
+
+We can annotate some of the antibodies that could not be annotated using the
+HGNC by using the totalseq_cocktails table:
+
+```{r}
+count_missing <- function(df){
+    dplyr::filter(df, is.na(HGNC_ID)) %>% nrow()
+}
+
+data(totalseq_cocktails)
+ts <- totalseq_cocktails %>%
+    dplyr::select(any_of(colnames(citeseq)))
+
+missing <- count_missing(citeseq)
+
+# Fill in IDs where Antigen, Oligo, Clone and TotalSeq category match
+citeseq <- citeseq %>%
+    dplyr::rows_patch(ts,
+                      by = c("Antigen", "Oligo_ID", "Clone", "TotalSeq_Cat"),
+                      unmatched = "ignore")
+
+missing_after_ts <- count_missing(citeseq)
+
+# Missing before filling:
+missing
+
+# Still missing after filling with TotalSeq:
+missing_after_ts
+```
+
+
+## Inspecting groups before filling
+
 When filling in information from a reference data set, it can be useful to look
 at entries where for example annotations are inconsistent.  `showGroups` is
 a function that allows users to interactively print group(s) from a grouped
-data.frame.
+data.frame.  We give a (non-interactive) example below.
 
 ## Filling NAs using a reference data set
 
@@ -348,19 +382,11 @@ IDs given the antibody name and clone or catalogue number.
 
 To fill using a reference data set, the strategy used is either to add a
 temporary ID column, join the two data.frames, fill and separate again using the
-ID column, or use dplyr::update_rows.  We will demonstrate the latter approach below. 
+ID column, or use dplyr::rows_patch.  We will demonstrate the latter approach below. 
 
 ```{r}
 # Before filling, check how many antibodies were matched.
-n_matched <- function(df){
-    df %>%
-        dplyr::group_by(ID) %>%
-        dplyr::summarise(match = any(! is.na(HGNC_ID))) %>%
-        dplyr::ungroup() %>%
-        dplyr::count(match)
-}
-
-original_nmatched <- n_matched(citeseq)
+original_nmatched <- count_missing(citeseq)
 
 # Select some data to demonstrate filling:
 # Get entries sharing the same catalogue number,
@@ -380,7 +406,9 @@ In the above example, we can see that for antibodies with catalogue number "3004
 ```{r}
 fill_demo <- AbNames::fillByGroup(fill_demo, "Cat_Number",
                                   fill = c("HGNC_ID", "TotalSeq_Cat", "Vendor",
-                                           "ENSEMBL_ID", "UNIPROT_IDS"))
+                                           "ENSEMBL_ID", "UNIPROT_IDS")) %>%
+    dplyr::group_by(Cat_Number) # Re-group as fillByGroup ungroups
+
 # Print out the first group again
 AbNames::showGroups(fill_demo, interactive = FALSE)
 ```
@@ -389,23 +417,18 @@ Now we will fill the gene information in the citeseq data similarly, and check
 how many antibodies have not been matched.
 
 ```{r}
+# We first fill using the Catalogue number:
 citeseq <- citeseq %>%
      AbNames::fillByGroup("Cat_Number", multiple = "mode",
                           fill = c("HGNC_ID", "TotalSeq_Cat", "Vendor",
                                            "ENSEMBL_ID", "UNIPROT_IDS"))
-nmatched_after_fill <- n_matched(citeseq)
+
+nmatched_after_fill <- count_missing(citeseq)
 
 print("Before filling:")
 original_nmatched
 print("After filling:")
 nmatched_after_fill
-
-
-```
-
-We can also fill some of the missing information using the totalseq_cocktails table.
-
-```{r}
 
 
 ```
@@ -424,6 +447,10 @@ citeseq %>%
     pull(Antigen) %>%
     sort() %>%
     unique()
+
+missing <- citeseq %>%
+    dplyr::filter(is.na(HGNC_ID)) %>%
+    dplyr::select(ID, Antigen)
 ```
 
 
@@ -436,6 +463,10 @@ citeseq %>%
 *Add checks on filling if the values are not unique
 *Add control column to isotype controls to prevent false match to mouse IgG2a
 *Add ignore option to split merge?
+* CD25 (good example, multiple genes), CD270, CD279 matched in HGNC?
+# CD279 PD-1 - example where only some are matched
+# Fix Hao Clone CD25
+
 
 # Session Info
 

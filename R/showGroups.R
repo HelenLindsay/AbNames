@@ -14,6 +14,10 @@
 #'@importFrom dplyr group_rows
 #'@export
 showGroups <- function(df, i = 1, n = 1, max_rows = 50, interactive = TRUE){
+    if (! "grouped_df" %in% class(df)){
+        warning("Data.frame is not grouped")
+    }
+
     stop_interactive <- FALSE
     msg <- "Enter\nn to print the next group, or\nq to quit"
     msg2 <- "Please enter either n (next) or q (quit)"

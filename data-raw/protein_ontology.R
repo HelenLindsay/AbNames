@@ -31,9 +31,13 @@ po_syns <- tibble::as_tibble(po_syns) %>%
     dplyr::mutate(synonym_id = gsub(".* \\[(.*)\\]$", "\\1", synonym),
                   synonym_type = gsub('\\".*\\" (.*) \\[.*$', "\\1", synonym),
                   synonym = gsub('\\"(.*)\\".*', "\\1", synonym),
-                  uniprot_id = .gsubNA("(UniProt[A-z0-9:]+),.*", "\\1",
-                                       synonym)) %>%
+                  uniprot_id = AbNames:::.gsubNA("(UniProt[A-z0-9:]+),.*",
+                                                 "\\1", synonym)) %>%
     tidyr::unnest(xref, keep_empty = TRUE)
+
+pro_long <- po_syns %>%
+    tidyr::pivot_longer(cols = c(name, synonym), names_to = "name_type")
+
 
 
 # MOD: ID for protein modification
