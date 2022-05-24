@@ -36,4 +36,5 @@ Depends:
     R (>= 4.1.0)
 VignetteBuilder: knitr
 LazyData: true
-URL: https://helenlindsay.github.io/AbNames/
+URL: https://github.com/HelenLindsay/AbNames
+BugReports: https://github.com/HelenLindsay/AbNames/issues
