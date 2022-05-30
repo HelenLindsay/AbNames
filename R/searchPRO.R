@@ -21,5 +21,4 @@ searchPRO <- function(df, ab, group = "ID", interactive = FALSE,
 
     df_ab <- unique(df[[ab]])
 
-
 }

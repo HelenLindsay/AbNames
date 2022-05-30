@@ -11,11 +11,7 @@ fn <- "https://proconsortium.org/download/current/pro_reasoned.obo"
 f <- tempfile()
 download.file(fn, destfile = f)
 
-po <- ontologyIndex::get_ontology(f,
-                                  #propagate_relationships =
-                                  #  c("is_a", "intersection_of","relationship"),
-                                  extract_tags = "everything")
-
+po <- ontologyIndex::get_ontology(f, extract_tags = "everything")
 
 
 # Just get the entries with a synonym

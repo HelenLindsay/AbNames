@@ -134,6 +134,12 @@ totalseq <- totalseq %>%
 any(is.na(totalseq$HGNC_SYMBOL))
 
 
+# CD3 is CD3E on website but CD3D in totalseq, remove
+
+totalseq <- totalseq %>%
+    dplyr::filter(! Antigen == "CD3")
+
+
 # Create totalseq_cocktails data set ----
 totalseq_cocktails <- as.data.frame(totalseq)
 usethis::use_data(totalseq_cocktails, overwrite = TRUE, compress = "bzip2")

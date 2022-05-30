@@ -35,7 +35,7 @@ very similar names, searching for partial matches to names in free-text gene des
 
 # Goals
 
-## Standardise names of data sets for combined analysis
+ Standardise names of data sets for combined analysis
 
 ## Identify all members of a protein complex bound by an antibody
 
@@ -74,7 +74,7 @@ dplyr::glimpse(hgnc)
 BioLegend is a major supplier of antibodies, and provides several antibody
 panels for CITE-seq analyses.  The data set "totalseq_cocktails" is a
 re-formatted version of the TotalSeq cocktails data sheets available from the
-BioLegend website, including BioLegend antibody names and Ensembl gene IDs.
+BioLegend website, including BioLegend antibody names and Ensembl gene IDs.  The isotypes of the antibodies are not included in the TotalSeq data sheets.
 
 Load using:
 ```{r}
@@ -149,7 +149,7 @@ query_df <- AbNames::makeQueryTable(citeseq_q, ab = "Antigen")
 
 # Print one example antigen from the query table:
 query_df %>%
-    dplyr::filter(ID == "TCR alpha/beta-Hao_2021")
+    dplyr::filter(ID == "TCR alpha/beta__Hao_2021")
 
 ```
 
@@ -417,7 +417,7 @@ Now we will fill the gene information in the citeseq data similarly, and check
 how many antibodies have not been matched.
 
 ```{r}
-# We first fill using the Catalogue number:
+# We fill by grouping the Catalogue number:
 citeseq <- citeseq %>%
      AbNames::fillByGroup("Cat_Number", multiple = "mode",
                           fill = c("HGNC_ID", "TotalSeq_Cat", "Vendor",
