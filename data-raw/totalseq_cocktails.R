@@ -143,3 +143,13 @@ totalseq <- totalseq %>%
 # Create totalseq_cocktails data set ----
 totalseq_cocktails <- as.data.frame(totalseq)
 usethis::use_data(totalseq_cocktails, overwrite = TRUE, compress = "bzip2")
+
+
+# TO CHECK:
+# CD158 (KIR2DL1/S1/S3/S5)
+# CD158b (KIR2DL2/L3, NKAT2)
+# CD158e1 (KIR3DL1, NKB1)
+# CD169
+# CD3
+
+

@@ -466,7 +466,10 @@ missing <- citeseq %>%
 * CD25 (good example, multiple genes), CD270, CD279 matched in HGNC?
 # CD279 PD-1 - example where only some are matched
 # Fix Hao Clone CD25
-
+# Search for similar genes in master table
+# Generate camel case regexp?
+# Split HGNC alias_name, prev_name - keep only if contains "antigen" or "CD"?
+# Unintuitive to use quoted for splitUnnest
 
 # Session Info
 
