@@ -470,6 +470,8 @@ missing <- citeseq %>%
 # Generate camel case regexp?
 # Split HGNC alias_name, prev_name - keep only if contains "antigen" or "CD"?
 # Unintuitive to use quoted for splitUnnest
+# Uniprot ids - possible to split to create complex uniprot and modification
+# uniprot?
 
 # Session Info
 

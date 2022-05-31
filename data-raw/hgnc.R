@@ -31,10 +31,13 @@ hgnc_proteins <- dplyr::rename(hgnc_proteins,
                                ENSEMBL_ID = ensembl_gene_id,
                                UNIPROT_IDS = uniprot_ids,
                                HGNC_SYMBOL = symbol,
+                               ALIAS = alias_symbol,
+                               PREVIOUS_SYMBOL = prev_symbol,
                                Chromosome = location)
 hgnc_proteins <- dplyr::mutate(hgnc_proteins,
-                               alias_symbol = gsub("\\|", ", ", alias_symbol),
-                               prev_symbol = gsub("\\|", ", ", prev_symbol))
+                               ALIAS = gsub("\\|", ", ", ALIAS),
+                               PREVIOUS_SYMBOL =
+                                   gsub("\\|", ", ", PREVIOUS_SYMBOL))
 
 hgnc_groups <- readr::read_delim(hgnc_groups)
 
@@ -47,10 +50,13 @@ hgnc_groups <- dplyr::rename(hgnc_groups,
                              HGNC_NAME = `Approved name`,
                              ENSEMBL_ID = `Ensembl gene ID`,
                              HGNC_SYMBOL = `Approved symbol`,
-                             alias_symbol = `Alias symbols`,
-                             prev_symbol = `Previous symbols`)
+                             ALIAS = `Alias symbols`,
+                             PREVIOUS_SYMBOL = `Previous symbols`)
 
-hgnc <- dplyr::full_join(hgnc_proteins, hgnc_groups)
+hgnc <- dplyr::full_join(hgnc_proteins, hgnc_groups) %>%
+    dplyr::rename(ALIAS_NAME = alias_name,
+                  PREVIOUS_NAME = prev_name)
+
 hgnc <- unique(hgnc)
 hgnc <- as.data.frame(hgnc)
 usethis::use_data(hgnc, overwrite = TRUE, compress = "bzip2")
@@ -58,11 +64,13 @@ usethis::use_data(hgnc, overwrite = TRUE, compress = "bzip2")
 
 # Create and save long version of the HGNC table for querying ----
 
+alias_grep <- "^CD|[Aa]ntigen|MHC|HLA|(T[- ]cell)|(B[- ]cell)|surface|immunoglo"
+
 hgnc_long <- dplyr::select(hgnc, -Chromosome) %>%
     tidyr::pivot_longer(c("HGNC_SYMBOL",
                           "HGNC_NAME",
-                          "alias_symbol",
-                          "prev_symbol"),
+                          "ALIAS",
+                          "PREVIOUS_SYMBOL"),
                         names_to = "symbol_type") %>%
     dplyr::filter(! is.na(value)) %>%
     AbNames::splitUnnest(ab = "value", split = ", ") %>%
