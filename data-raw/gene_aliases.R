@@ -12,6 +12,14 @@
 # Single NCBI maps to multiple ENSEMBL, are both locations valid?
 # Do they produce the same protein?  Does Protein Ontology differentiate?
 
+# Setup -----
+
+library(tidyverse)
+library(readxl)
+
+source("ncbi.R")
+source("org_db.R")
+
 
 # Cell marker database ---------------------------------------------
 
@@ -22,15 +30,14 @@ gsubCellmarker <- function(x){
     p1_sub <- gsub(", ", "\\|", unlist(p1_matches))
     p1_sub <- gsub("\\[|\\]", "", p1_sub)
     p1_sub <- relist(p1_sub, p1_matches)
-
-    x <- cellmarker$geneSymbol
-    m <- gregexpr("\\[([^\\[]+)\\]", x[60:65])
-    regmatches(x[60:65], m) <- p1_sub[60:65]
+    m <- gregexpr("\\[([^\\[]+)\\]", x)
+    regmatches(x, m) <- p1_sub
     return(x)
 }
 
 # Cellmarker
-cellmarker_loc <- "http://bio-bigdata.hrbmu.edu.cn/CellMarker/download/Human_cell_markers.txt"
+cellmarker_loc <- paste0("http://bio-bigdata.hrbmu.edu.cn/CellMarker/download/",
+                         "Human_cell_markers.txt")
 cellmarker_fname <- "~/Analyses/CITEseq_curation/data/CellMarker_human.txt"
 download.file(cellmarker_loc, destfile = cellmarker_fname)
 
@@ -51,12 +58,37 @@ cellmarker <- readr::read_delim(cellmarker_fname) %>%
                       lengths(geneSymbol) == lengths(geneID) &
                       lengths(proteinID) == lengths(proteinName)) %>%
     tidyr::unnest(cols = c(cellMarker, geneSymbol, geneID,
-                           proteinName, proteinID))
+                           proteinName, proteinID)) %>%
+    dplyr::rename(Antigen = cellMarker,
+                  ENTREZ_IDS = geneID,
+                  ENTREZ_SYMBOL = geneSymbol,
+                  UNIPROT_IDS = proteinID)
+
+
+
 
 protein_complexes <- cellmarker %>%
-    dplyr::filter(grepl("\\|", geneSymbol)) %>%
-    dplyr::select(cellMarker, geneSymbol, geneID, proteinName, proteinID) %>%
+    dplyr::filter(grepl("\\|", ENTREZ_SYMBOL)) %>%
+    dplyr::select(Antigen, ENTREZ_SYMBOL, ENTREZ_IDS,
+                  proteinName, UNIPROT_IDS) %>%
     unique()
+
+# Using org.db, add ENSEMBL identifiers
+protein_complexes <- protein_complexes %>%
+    dplyr::mutate(across(c(ENTREZ_SYMBOL, ENTREZ_IDS,
+                           proteinName, UNIPROT_IDS), ~strsplit(.x, "\\|"))) %>%
+    tidyr::unnest(cols = c(ENTREZ_SYMBOL, ENTREZ_IDS,
+                           proteinName, UNIPROT_IDS)) %>%
+    dplyr::left_join(org_db, by = c(ENTREZ_IDS = "ENTREZ_ID"))
+
+
+
+
+# Split into individual genes, check the symbols are official symbols,
+# add HGNC and ENSEMBL IDs.
+
+
+
 
 
 # Row Epithelial cell starting Adhesion molecules -
@@ -72,7 +104,6 @@ protein_complexes <- cellmarker %>%
 
 # http://wlab.ethz.ch/cspa/#abstract
 
-library(readxl)
 
 # Table of validated surfaceome proteins
 cspa_loc <- "http://wlab.ethz.ch/cspa/data/S2_File.xlsx"
@@ -80,13 +111,60 @@ cspa_fname <- "~/Analyses/CITEseq_curation/data/cspa.xlsx"
 download.file(cspa_loc, destfile = cspa_fname)
 
 # Sheet A has human proteins and entrez IDs
+cspa <- readxl::read_xlsx(cspa_fname) %>%
+    dplyr::select(UP_Protein_name, UP_entry_name, CD, ENTREZ_gene_ID,
+                  `ENTREZ gene symbol`) %>%
+    dplyr::rename(UNIPROT_NAME = UP_Protein_name,
+                  ENTREZ_ID = ENTREZ_gene_ID,
+                  ENTREZ_SYMBOL = `ENTREZ gene symbol`,
+                  Antigen = CD)
 
 
-# EBI complex portal ----------------------------------------------
+# Merge HGNC, NCBI and org.db --------------------------------------
 
-# Human complex tab
-ebi <- paste("http://ftp.ebi.ac.uk/pub/databases/intact/complex/",
-             "current/complextab/9606.tsv")
+# Only want genes for which there is a HGNC / ENSEMBL combination in HGNC
+ncbi_f <- ncbi_genes %>%
+    dplyr::semi_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID))
+
+# NCBI and HGNC can differ in how they describe a symbol, e.g. previous
+# vs alias. Assume that HGNC annotations are correct, as HGNC is the
+# naming consortium.  Remove entries where the value is the same
+# (Regardless of how it is annotated)
+ncbi_f <- ncbi_f %>%
+    dplyr::anti_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID, value))
+
+# Check filling e.g. HGNC:104
+
+genes <- dplyr::bind_rows(hgnc, ncbi_f) %>%
+    dplyr::arrange(HGNC_ID, ENSEMBL_ID, value) %>%
+    dplyr::group_by(HGNC_ID) %>%
+    tidyr::fill(UNIPROT_IDS, NCBI_ID, HGNC_NAME, .direction = "updown") %>%
+
+    # Check if values are unambiguous
+    dplyr::group_by(value) %>%
+    dplyr::mutate(n_genes = n_distinct(HGNC_ID)) %>%
+    dplyr::filter(n_genes == 1 | source == "HGNC") %>%
+    dplyr::select(-n_genes)
+
+
+# Add in the org.db genes
+
+
+
+
+# Only want genes for which there is a HGNC / ENSEMBL combination in HGNC
+org_f <- org_db %>%
+    dplyr::semi_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID))
+
+# NCBI and HGNC can differ in how they describe a symbol, e.g. previous
+# vs alias. Assume that HGNC annotations are correct, as HGNC is the
+# naming consortium.  Remove entries where the value is the same
+# (Regardless of how it is annotated)
+ncbi_f <- ncbi_f %>%
+    dplyr::anti_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID, value))
+
+
+
 
 
 

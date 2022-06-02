@@ -153,3 +153,8 @@ usethis::use_data(totalseq_cocktails, overwrite = TRUE, compress = "bzip2")
 # CD3
 
 
+# Testing for differences between totalseq and HGNC annotation
+# (Where antigen name is shared)
+#totalseq %>%
+#    semi_join(genes, by = c(Antigen = "value")) %>%
+#    anti_join(genes, by = c(ENSEMBL_ID = "ENSEMBL_ID", Antigen = "value")

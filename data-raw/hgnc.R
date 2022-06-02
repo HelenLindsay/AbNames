@@ -85,21 +85,14 @@ hgnc <- hgnc %>%
     dplyr::rename(HGNC_SYMBOL = HGNC_SYMBOL2) %>%
     unique() %>%
 
-
-    # Remove entries that match the HGNC_SYMBOL
+    # Remove entries that match the HGNC_SYMBOL, redundant
     dplyr::filter(! (value == HGNC_SYMBOL & ! symbol_type == "HGNC_SYMBOL")) %>%
 
     # Only keep ambiguous values if it's an official symbol
     dplyr::group_by(value) %>%
     dplyr::mutate(ngroups = n_distinct(HGNC_ID)) %>%
-    dplyr::filter(ngroups == 1 | symbol_type == "HGNC_SYMBOL")
-
-
-
-
-    # Put the HGNC_SYMBOL back as a separate column
-
-
+    dplyr::filter(ngroups == 1 | symbol_type == "HGNC_SYMBOL") %>%
+    dplyr::select(-ngroups)
 
 
 

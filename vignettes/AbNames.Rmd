@@ -472,6 +472,9 @@ missing <- citeseq %>%
 # Unintuitive to use quoted for splitUnnest
 # Uniprot ids - possible to split to create complex uniprot and modification
 # uniprot?
+# Redocument data sets
+# HAO CD45 should have catalogue numbers!
+
 
 # Session Info
 
