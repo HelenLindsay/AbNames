@@ -13,6 +13,10 @@
 # Do they produce the same protein?  Does Protein Ontology differentiate?
 
 
+# Cell marker database ---------------------------------------------
+
+# http://bio-bigdata.hrbmu.edu.cn/CellMarker/index.jsp
+
 gsubCellmarker <- function(x){
     p1_matches <- stringr::str_extract_all(x, "\\[([^\\[]+)\\]")
     p1_sub <- gsub(", ", "\\|", unlist(p1_matches))
@@ -39,18 +43,51 @@ cellmarker <- readr::read_delim(cellmarker_fname) %>%
     dplyr::mutate(across(c(geneSymbol, geneID, proteinName, proteinID),
                          ~ gsubCellmarker(.x))) %>%
     dplyr::mutate(across(c(cellMarker, geneSymbol, geneID,
-                         proteinName, proteinID), ~strsplit(.x, ", ")))
+                         proteinName, proteinID), ~strsplit(.x, ", "))) %>%
 
-# cellMarkers match genes, genes can also have multi genes for one marker
+    # If there is not 1 marker per gene, something is wrong
+    dplyr::filter(lengths(cellMarker) == lengths(geneSymbol) &
+                      lengths(cellMarker) == lengths(proteinID) &
+                      lengths(geneSymbol) == lengths(geneID) &
+                      lengths(proteinID) == lengths(proteinName)) %>%
+    tidyr::unnest(cols = c(cellMarker, geneSymbol, geneID,
+                           proteinName, proteinID))
 
+protein_complexes <- cellmarker %>%
+    dplyr::filter(grepl("\\|", geneSymbol)) %>%
+    dplyr::select(cellMarker, geneSymbol, geneID, proteinName, proteinID) %>%
+    unique()
 
-# Check that these are 1-to-1
-all(lengths(cellmarker$geneSymbol) == lengths(cellmarker$cellMarker))
 
 # Row Epithelial cell starting Adhesion molecules -
 # Number of cell markers is not equal to number of gene (groups),
 # is there an extra , Adhesion molecules, LFA1, Adhesion molecules LFA2?
 
 
- #dplyr::rename(ENTREZ_ID = geneID,
- #             UNIPROT_ID = proteinID) %>%
+#dplyr::rename(ENTREZ_ID = geneID,
+#             UNIPROT_ID = proteinID) %>%
+
+
+# Cell surface protein atlas ---------------------------------------
+
+# http://wlab.ethz.ch/cspa/#abstract
+
+library(readxl)
+
+# Table of validated surfaceome proteins
+cspa_loc <- "http://wlab.ethz.ch/cspa/data/S2_File.xlsx"
+cspa_fname <- "~/Analyses/CITEseq_curation/data/cspa.xlsx"
+download.file(cspa_loc, destfile = cspa_fname)
+
+# Sheet A has human proteins and entrez IDs
+
+
+# EBI complex portal ----------------------------------------------
+
+# Human complex tab
+ebi <- paste("http://ftp.ebi.ac.uk/pub/databases/intact/complex/",
+             "current/complextab/9606.tsv")
+
+
+
+
