@@ -23,6 +23,9 @@ source("org_db.R")
 
 # Cell marker database ---------------------------------------------
 
+# Note: Isoform name may be mapped to gene name, e.g. CD45RO -> PTPRC
+# Some antigens have no annotation information, e.g. CD45.1
+
 # http://bio-bigdata.hrbmu.edu.cn/CellMarker/index.jsp
 
 gsubCellmarker <- function(x){
@@ -36,6 +39,7 @@ gsubCellmarker <- function(x){
 }
 
 # Cellmarker
+
 cellmarker_loc <- paste0("http://bio-bigdata.hrbmu.edu.cn/CellMarker/download/",
                          "Human_cell_markers.txt")
 cellmarker_fname <- "~/Analyses/CITEseq_curation/data/CellMarker_human.txt"
@@ -65,15 +69,14 @@ cellmarker <- readr::read_delim(cellmarker_fname) %>%
                   UNIPROT_IDS = proteinID)
 
 
-
-
 protein_complexes <- cellmarker %>%
     dplyr::filter(grepl("\\|", ENTREZ_SYMBOL)) %>%
     dplyr::select(Antigen, ENTREZ_SYMBOL, ENTREZ_IDS,
                   proteinName, UNIPROT_IDS) %>%
     unique()
 
-# Using org.db, add ENSEMBL identifiers
+# Using org.db, add ENSEMBL identifiers (one ENSEMBL may map to several ENTREZ?)
+# As this includes "ALIAS" column, rows may be added
 protein_complexes <- protein_complexes %>%
     dplyr::mutate(across(c(ENTREZ_SYMBOL, ENTREZ_IDS,
                            proteinName, UNIPROT_IDS), ~strsplit(.x, "\\|"))) %>%
@@ -81,6 +84,10 @@ protein_complexes <- protein_complexes %>%
                            proteinName, UNIPROT_IDS)) %>%
     dplyr::left_join(org_db, by = c(ENTREZ_IDS = "ENTREZ_ID"))
 
+
+
+# When a single gene is mapped to several Antigens, check if cellName annotation
+# is also the same
 
 
 
