@@ -1,3 +1,5 @@
+# To do ----
+
 # Check gene biotype of ensembl genes
 # Remove if same symbol mapped to two different ensembl genes?
 # e.g. one NCBI SYMBOL to many HGNC symbols or ENSEMBL genes
@@ -21,6 +23,96 @@ source("ncbi.R")
 source("org_db.R")
 
 
+# Merge HGNC, NCBI and org.db --------------------------------------
+
+# Merge HGNC and NCBI Entrez gene -----
+
+# Only want genes for which there is a HGNC / ENSEMBL combination in HGNC
+# (Note that not all HGNC IDs are in hgnc data set, e.g. non-protein-coding)
+
+# There are some differences in which ENSEMBL_ID is mapped to which HGNC_ID,
+# e.g. in HGNC HGNC:4883 -> ENSG00000000971 (official gene)
+#      in NCBI HGNC:4883 -> ENSG00000289697 (novel gene)
+
+ncbi_f <- ncbi_genes %>%
+    dplyr::semi_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID))
+
+# NCBI and HGNC can differ in how they describe a symbol, e.g. previous
+# vs alias. Assume that HGNC annotations are correct, as HGNC is the
+# naming consortium.  Remove entries where the value is the same
+# (Regardless of how it is annotated)
+
+ncbi_f <- ncbi_f %>%
+    dplyr::anti_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID, value))
+
+genes <- dplyr::bind_rows(hgnc, ncbi_f) %>%
+    dplyr::arrange(HGNC_ID, ENSEMBL_ID, value) %>%
+    dplyr::group_by(HGNC_ID) %>%
+    tidyr::fill(UNIPROT_IDS, NCBI_ID, HGNC_NAME, .direction = "updown") %>%
+
+    # Check if values are unambiguous
+    dplyr::group_by(value) %>%
+    dplyr::mutate(n_genes = n_distinct(HGNC_ID)) %>%
+    dplyr::filter(n_genes == 1 | source == "HGNC") %>%
+    dplyr::select(-n_genes)
+
+
+# Check for disagreements between org_db and NCBI ----
+ncbi_not_org_db <- ncbi_genes %>%
+    dplyr::select(ENTREZ_ID, ENSEMBL_ID) %>%
+    unique() %>%
+    dplyr::anti_join(org_db %>%
+                         dplyr::select(ENTREZ_ID, ENSEMBL_ID) %>%
+                         unique())
+
+
+
+# Genes in NCBI not org_db are where ENTREZ_ID is mapped to a novel gene or
+# scaffold.
+
+
+
+# Both org.db and ncbi can map one ENTREZ_ID to several ENSEMBL_IDs
+
+
+
+# Add in the org.db genes -----
+
+
+
+
+# Only want genes for which there is a HGNC / ENSEMBL combination in HGNC
+org_f <- org_db %>%
+    dplyr::semi_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID))
+
+# NCBI and HGNC can differ in how they describe a symbol, e.g. previous
+# vs alias. Assume that HGNC annotations are correct, as HGNC is the
+# naming consortium.  Remove entries where the value is the same
+# (Regardless of how it is annotated)
+ncbi_f <- ncbi_f %>%
+    dplyr::anti_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID, value))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Cell marker database ---------------------------------------------
 
 # Note: Isoform name may be mapped to gene name, e.g. CD45RO -> PTPRC
@@ -39,6 +131,8 @@ gsubCellmarker <- function(x){
 }
 
 # Cellmarker
+# To do: make sure that cellmarker cellMarker col mapped to same geneSymbol/ID
+# column is a correct, unambiguous alias
 
 cellmarker_loc <- paste0("http://bio-bigdata.hrbmu.edu.cn/CellMarker/download/",
                          "Human_cell_markers.txt")
@@ -82,7 +176,8 @@ protein_complexes <- protein_complexes %>%
                            proteinName, UNIPROT_IDS), ~strsplit(.x, "\\|"))) %>%
     tidyr::unnest(cols = c(ENTREZ_SYMBOL, ENTREZ_IDS,
                            proteinName, UNIPROT_IDS)) %>%
-    dplyr::left_join(org_db, by = c(ENTREZ_IDS = "ENTREZ_ID"))
+    dplyr::left_join(org_db %>% dplyr::select(-ALIAS) %>% unique(),
+                     by = c(ENTREZ_IDS = "ENTREZ_ID"))
 
 
 
@@ -125,53 +220,6 @@ cspa <- readxl::read_xlsx(cspa_fname) %>%
                   ENTREZ_ID = ENTREZ_gene_ID,
                   ENTREZ_SYMBOL = `ENTREZ gene symbol`,
                   Antigen = CD)
-
-
-# Merge HGNC, NCBI and org.db --------------------------------------
-
-# Only want genes for which there is a HGNC / ENSEMBL combination in HGNC
-ncbi_f <- ncbi_genes %>%
-    dplyr::semi_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID))
-
-# NCBI and HGNC can differ in how they describe a symbol, e.g. previous
-# vs alias. Assume that HGNC annotations are correct, as HGNC is the
-# naming consortium.  Remove entries where the value is the same
-# (Regardless of how it is annotated)
-ncbi_f <- ncbi_f %>%
-    dplyr::anti_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID, value))
-
-# Check filling e.g. HGNC:104
-
-genes <- dplyr::bind_rows(hgnc, ncbi_f) %>%
-    dplyr::arrange(HGNC_ID, ENSEMBL_ID, value) %>%
-    dplyr::group_by(HGNC_ID) %>%
-    tidyr::fill(UNIPROT_IDS, NCBI_ID, HGNC_NAME, .direction = "updown") %>%
-
-    # Check if values are unambiguous
-    dplyr::group_by(value) %>%
-    dplyr::mutate(n_genes = n_distinct(HGNC_ID)) %>%
-    dplyr::filter(n_genes == 1 | source == "HGNC") %>%
-    dplyr::select(-n_genes)
-
-
-# Add in the org.db genes
-
-
-
-
-# Only want genes for which there is a HGNC / ENSEMBL combination in HGNC
-org_f <- org_db %>%
-    dplyr::semi_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID))
-
-# NCBI and HGNC can differ in how they describe a symbol, e.g. previous
-# vs alias. Assume that HGNC annotations are correct, as HGNC is the
-# naming consortium.  Remove entries where the value is the same
-# (Regardless of how it is annotated)
-ncbi_f <- ncbi_f %>%
-    dplyr::anti_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID, value))
-
-
-
 
 
 

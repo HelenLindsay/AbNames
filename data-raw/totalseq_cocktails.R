@@ -133,6 +133,20 @@ totalseq <- totalseq %>%
 
 any(is.na(totalseq$HGNC_SYMBOL))
 
+# Check the cases where multiple antigens are mapped to the same gene ----
+
+x <- totalseq %>%
+    dplyr::group_by(ENSEMBL_ID) %>%
+    dplyr::mutate(n_antigen = n_distinct(Antigen)) %>%
+    dplyr::filter(n_antigen > 1) %>%
+    dplyr::select(ENSEMBL_ID, Antigen) %>%
+    dplyr::arrange(ENSEMBL_ID) %>%
+    unique()
+
+
+# CD45 / CD45RA / CD45RO
+# HLA-DR / HLA-DR, DP, DQ
+
 
 # CD3 is CD3E on website but CD3D in totalseq, remove
 

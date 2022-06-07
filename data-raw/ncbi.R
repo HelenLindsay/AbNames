@@ -1,17 +1,11 @@
 # Notes ----
 #
+# Entrez gene is a database for gene-specific information.  Includes curated
+# and automatic integration of RefSeq (sequence-based annotation)
+#
 # NCBI sometimes maps one HGNC_ID to multiple Ensembl IDs.  In these cases,
 # the chromosomal locations of the genes match.
 # e.g. NAT-1 appears to be a multi-copy gene.
-#
-#library(org.Hs.eg.db)
-#org.db <- org.Hs.eg.db
-#ensembl_locs <- AnnotationDbi::select(org.db,
-#                                      keys = ncbi_genes$ENSEMBL_ID,
-#                                      keytype = "ENSEMBL",
-#                                      columns = c("MAP", "SYMBOL")) %>%
-#    dplyr::rename(ENSEMBL_ID = ENSEMBL,
-#                  ENTREZ_SYMBOL = SYMBOL)
 #
 # Not all NCBI genes have a HGNC_SYMBOL or ENSEMBL_ID.
 # Could these be processed pseudogenes?
@@ -35,15 +29,17 @@ ncbi_genes <- readr::read_delim(f, na = c("", "NA", "-"))
 ncbi_genes <- ncbi_genes %>%
 
     dplyr::filter(type_of_gene == "protein-coding",
-                  ! grepl("pseudogene|uncharacterized|readthrough",
-                          Other_designations)) %>%
+                  if_all(.cols = c(HGNC_NAME, Other_designations),
+                         ~! grepl("pseudogene|uncharacterized|readthrough",
+                                  .x))) %>%
     dplyr::rename(HGNC_SYMBOL = Symbol_from_nomenclature_authority,
                   HGNC_NAME = Full_name_from_nomenclature_authority,
                   NCBI_SYMBOL = Symbol,
                   NCBI_ID = GeneID,
                   ALIAS = Synonyms,
                   NCBI_NAME = description,
-                  OTHER = Other_designations) %>%
+                  OTHER = Other_designations,
+                  ENTREZ_ID = NCBI_ID) %>%
 
     dplyr::mutate(HGNC_ID = stringr::str_extract_all(dbXrefs,
                                                     "(?<=HGNC:)HGNC:[0-9]+"),

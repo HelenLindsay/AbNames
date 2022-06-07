@@ -38,11 +38,6 @@ hgnc_proteins <- dplyr::rename(hgnc_proteins,
                                ALIAS_NAME = alias_name,
                                PREVIOUS_NAME = prev_name)
 
-#hgnc_proteins <- dplyr::mutate(hgnc_proteins,
-#                               ALIAS = gsub("\\|", ", ", ALIAS),
-#                               PREVIOUS_SYMBOL =
-#                                   gsub("\\|", ", ", PREVIOUS_SYMBOL))
-
 hgnc_groups <- readr::read_delim(hgnc_groups)
 
 hgnc_groups <- dplyr::select(hgnc_groups, -Status, -`Locus type`, -`Chromosome`,
@@ -60,9 +55,9 @@ hgnc_groups <- dplyr::rename(hgnc_groups,
 
 hgnc <- dplyr::full_join(hgnc_proteins, hgnc_groups)
 
-hgnc <- unique(hgnc)
-hgnc <- as.data.frame(hgnc)
-usethis::use_data(hgnc, overwrite = TRUE, compress = "bzip2")
+#hgnc <- unique(hgnc)
+#hgnc <- as.data.frame(hgnc)
+#usethis::use_data(hgnc, overwrite = TRUE, compress = "bzip2")
 
 
 # Create and save long version of the HGNC table for querying ----
@@ -95,6 +90,5 @@ hgnc <- hgnc %>%
     dplyr::select(-ngroups)
 
 
-
-hgnc_long <- as.data.frame(hgnc_long)
-usethis::use_data(hgnc_long, overwrite = TRUE, compress = "bzip2")
+hgnc <- as.data.frame(hgnc)
+usethis::use_data(hgnc, overwrite = TRUE, compress = "bzip2")
