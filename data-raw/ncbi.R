@@ -35,7 +35,7 @@ ncbi_genes <- ncbi_genes %>%
     dplyr::rename(HGNC_SYMBOL = Symbol_from_nomenclature_authority,
                   HGNC_NAME = Full_name_from_nomenclature_authority,
                   NCBI_SYMBOL = Symbol,
-                  NCBI_ID = GeneID,
+                  ENTREZ_ID = GeneID,
                   ALIAS = Synonyms,
                   NCBI_NAME = description,
                   OTHER = Other_designations,
@@ -56,7 +56,8 @@ ncbi_genes <- ncbi_genes %>%
     dplyr::mutate(# Only keep NCBI_SYMBOL if different from HGNC_SYMBOL
                   NCBI_SYMBOL = AbNames:::.noDups(NCBI_SYMBOL, HGNC_SYMBOL),
                   # Only keep NCBI_NAME if different from HGNC_NAME
-                  NCBI_NAME = AbNames:::.noDups(NCBI_NAME, HGNC_NAME)) %>%
+                  NCBI_NAME = AbNames:::.noDups(NCBI_NAME, HGNC_NAME),
+                  ENTREZ_ID = as.character(ENTREZ_ID)) %>%
 
     # Only keep columns of interest
     dplyr::select(-`#tax_id`, -`map_location`, -`type_of_gene`,
