@@ -10,8 +10,8 @@ hgnc_proteins_fname <- paste(c("http://ftp.ebi.ac.uk/pub/databases/",
                              "genenames/hgnc/tsv/locus_types/",
                              "gene_with_protein_product.txt"),
                            collapse = "")
-hgnc_proteins <- tempfile()
-download.file(hgnc_proteins_fname, destfile = hgnc_proteins)
+hgnc_proteins_f <- tempfile()
+download.file(hgnc_proteins_fname, destfile = hgnc_proteins_f)
 
 
 # HGNC groups
@@ -21,7 +21,7 @@ hgnc_groups <- tempfile()
 download.file(hgnc_groups_fname, destfile = hgnc_groups)
 
 # Select relevant columns, rename and merge tables ----
-hgnc_proteins <- readr::read_delim(hgnc_proteins)
+hgnc_proteins <- readr::read_delim(hgnc_proteins_f)
 
 hgnc_proteins <- hgnc_proteins[, c("hgnc_id", "symbol", "name", "alias_symbol",
                                    "prev_symbol", "ensembl_gene_id",
@@ -37,11 +37,6 @@ hgnc_proteins <- dplyr::rename(hgnc_proteins,
                                PREVIOUS_SYMBOL = prev_symbol,
                                ALIAS_NAME = alias_name,
                                PREVIOUS_NAME = prev_name)
-
-#hgnc_proteins <- dplyr::mutate(hgnc_proteins,
-#                               ALIAS = gsub("\\|", ", ", ALIAS),
-#                               PREVIOUS_SYMBOL =
-#                                   gsub("\\|", ", ", PREVIOUS_SYMBOL))
 
 hgnc_groups <- readr::read_delim(hgnc_groups)
 
@@ -60,9 +55,9 @@ hgnc_groups <- dplyr::rename(hgnc_groups,
 
 hgnc <- dplyr::full_join(hgnc_proteins, hgnc_groups)
 
-hgnc <- unique(hgnc)
-hgnc <- as.data.frame(hgnc)
-usethis::use_data(hgnc, overwrite = TRUE, compress = "bzip2")
+#hgnc <- unique(hgnc)
+#hgnc <- as.data.frame(hgnc)
+#usethis::use_data(hgnc, overwrite = TRUE, compress = "bzip2")
 
 
 # Create and save long version of the HGNC table for querying ----
@@ -94,7 +89,6 @@ hgnc <- hgnc %>%
     dplyr::filter(ngroups == 1 | symbol_type == "HGNC_SYMBOL") %>%
     dplyr::select(-ngroups)
 
-
-
-hgnc_long <- as.data.frame(hgnc_long)
-usethis::use_data(hgnc_long, overwrite = TRUE, compress = "bzip2")
+#hgnc_long <- as.data.frame(hgnc_long)
+#usethis::use_data(hgnc_long, overwrite = TRUE, compress = "bzip2")
+usethis::use_data(hgnc, overwrite = TRUE, compress = "bzip2")

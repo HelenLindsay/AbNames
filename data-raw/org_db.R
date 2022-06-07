@@ -8,6 +8,8 @@
 # Neither Ensembl nor REFSEQ protein/transcript identifiers appear to be
 # matched to isoform names, e.g. CD45 -> CD45RO
 
+# Biomart -----
+
 library(biomaRt)
 data(hgnc)
 
@@ -27,11 +29,28 @@ bm <- getBM(mart = ensembl,
                   HGNC_ID = hgnc_id,
                   ENTREZ_ID = entrezgene_id) %>%
     dplyr::group_by(HGNC_ID) %>%
-    dplyr::mutate(n_entrez = n_distinct(ENTREZ_ID),
-                  n_ensembl = n_distinct(ENSEMBL_ID),
-                  ENTREZ_ID = as.character(ENTREZ_ID)) %>%
+    dplyr::mutate(ENTREZ_ID = as.character(ENTREZ_ID),
+                  source = "BIOMART") %>%
+
     # Only select genes with a HGNC_ID in the hgnc data set
-    dplyr::semi_join(hgnc, by = "HGNC_ID")
+    dplyr::semi_join(hgnc, by = "HGNC_ID") %>%
+
+    # Remove aliases that map to more than one HGNC_SYMBOL
+    dplyr::group_by(ALIAS) %>%
+    dplyr::mutate(n_genes = n_distinct(HGNC_SYMBOL)) %>%
+    dplyr::filter(n_genes == 1) %>%
+    dplyr::select(-n_genes) %>%
+
+    # Remove entries that don't match HGNC (usually an unofficial symbol)
+    dplyr::semi_join(hgnc, by = c("ENSEMBL_ID", "HGNC_SYMBOL"))
+
+
+# Select the aliases that aren't already present in hgnc
+bm_novel <- bm %>%
+    dplyr::mutate(symbol_type = "ALIAS") %>%
+    dplyr::rename(value = ALIAS) %>%
+    dplyr::filter(! value == "") %>%
+    dplyr::anti_join(hgnc, by = c("HGNC_SYMBOL", "value"))
 
 
 
@@ -49,44 +68,56 @@ org_db <- select(hs,
     dplyr::rename(HGNC_SYMBOL = SYMBOL,
                   ENSEMBL_ID = ENSEMBL,
                   ENTREZ_ID = ENTREZID) %>%
+
     # Only keep entries with HGNC symbol (removes e.g. pseudogenes)
     dplyr::semi_join(hgnc, by = "HGNC_SYMBOL") %>%
-    # Only keep Ensembl ids that appear in the Biomart table
-    dplyr::filter(ENSEMBL_ID %in% bm$ENSEMBL_ID)
+    dplyr::mutate(source = "ORGDB") %>%
 
-# Does org_db have anything not in NCBI genes (and vice versa)? ----
+    # Only keep Ensembl ids that appear in the Biomart table (or missing)
+    dplyr::filter(ENSEMBL_ID %in% bm$ENSEMBL_ID | is.na(ENSEMBL_ID))
 
-org_db_long <- org_db %>%
-    dplyr::rename(NCBI_ID = ENTREZ_ID) %>%
-    tidyr::pivot_longer(cols = c(HGNC_SYMBOL, ALIAS),
-                        names_to = "symbol_type") %>%
-    dplyr::select(-symbol_type) %>%
-    unique()
+    # Remove aliases that map to more than one HGNC_SYMBOL
+    dplyr::group_by(ALIAS) %>%
+    dplyr::mutate(n_genes = n_distinct(HGNC_SYMBOL)) %>%
+    dplyr::filter(n_genes == 1) %>%
+    dplyr::select(-n_genes)
 
-ncbi_genes_long <- ncbi_genes %>%
-    dplyr::mutate(NCBI_ID = as.character(NCBI_ID)) %>%
-    tidyr::pivot_longer(cols = c(HGNC_SYMBOL, value),
-                        names_to = "symbol_type2") %>%
-    dplyr::select(-symbol_type, -symbol_type2) %>%
-    unique()
-
-# Yes, org_db has aliases that are not in ncbi_genes
-org_db_not_ncbi <- org_db_long %>%
-    dplyr::anti_join(ncbi_genes_long,
-                     by = c("NCBI_ID", "ENSEMBL_ID", "value"))
+# Select the aliases that aren't already present in hgnc -----
+org_db_novel <- org_db %>%
+    dplyr::mutate(symbol_type = "ALIAS") %>%
+    dplyr::rename(value = ALIAS) %>%
+    dplyr::anti_join(hgnc, by = c("HGNC_SYMBOL", "value"))
 
 
-# NCBI genes includes CD antigen descriptions, e.g. "CD138 antigen"
-ncbi_not_orgdb <- ncbi_genes_long %>%
-    dplyr::anti_join(org_db_long,
-                     by = c("NCBI_ID", "ENSEMBL_ID", "value"))
+# Select the ncbi aliases that aren't already present in hgnc ----
+ncbi_novel <- ncbi_genes %>%
+
+    dplyr::mutate(symbol_type = "ALIAS") %>%
+    dplyr::rename(value = ALIAS) %>%
+    dplyr::anti_join(hgnc, by = c("HGNC_SYMBOL", "value"))
+
+
+
+
+
+
+
+
 
 
 # Check if ncbi_genes and org_db agree on mapping between
 # HGNC, ENTREZ and ENSEMBL -----
 
+ncbi_id_map <- ncbi_genes %>%
+    dplyr::select(NCBI_ID, ENSEMBL_ID) %>%
+    unique()
 
+org_db_id_map <-  org_db %>%
+    dplyr::select(ENTREZ_ID, ENSEMBL_ID) %>%
+    unique()
 
+ncbi_diff <- anti_join(ncbi_id_map, org_db_id_map)
+org_db_diff <- anti_join(org_db_id_map, ncbi_id_map)
 
 
 
@@ -141,3 +172,5 @@ bm_minus_entrez <- dplyr::anti_join(bm, org_db,
 ens_entrez <- dplyr::semi_join(bm, org_db,
                                by = c("ENSEMBL_ID", "ENTREZ_ID"))
 
+
+# Two problems: one is mapping the IDs, the other is collecting the aliases
