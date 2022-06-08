@@ -1,8 +1,16 @@
+# Notes -----
+
+# Genes in NCBI not org_db are where ENTREZ_ID is mapped to a novel gene or
+# scaffold.
+
+# Both org.db and ncbi can map one ENTREZ_ID to several ENSEMBL_IDs
+
+# NCBI contains Entrez IDs not in org_db
+
 # To do ----
 
 # Check gene biotype of ensembl genes
-# Remove if same symbol mapped to two different ensembl genes?
-# e.g. one NCBI SYMBOL to many HGNC symbols or ENSEMBL genes
+
 # Check ensembl mapping location matches map_location (only one should?)
 
 # check whether each ensembl id in hgnc maps to only one hgnc symbol / id
@@ -25,36 +33,111 @@ source("org_db.R")
 
 # Merge HGNC, NCBI and org.db --------------------------------------
 
-# Merge HGNC and NCBI Entrez gene -----
+# Add novel aliases from biomaRt and NCBI
+# (Note - have previously checked that HGNC_ID / ENSEMBL_ID combinations
+# are correct)
+hgnc <- hgnc %>%
+    dplyr::bind_rows(bm_novel, ncbi_novel, org_db_novel) %>%
 
-# Only want genes for which there is a HGNC / ENSEMBL combination in HGNC
-# (Note that not all HGNC IDs are in hgnc data set, e.g. non-protein-coding)
-
-# There are some differences in which ENSEMBL_ID is mapped to which HGNC_ID,
-# e.g. in HGNC HGNC:4883 -> ENSG00000000971 (official gene)
-#      in NCBI HGNC:4883 -> ENSG00000289697 (novel gene)
-
-ncbi_f <- ncbi_genes %>%
-    dplyr::semi_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID))
-
-# NCBI and HGNC can differ in how they describe a symbol, e.g. previous
-# vs alias. Assume that HGNC annotations are correct, as HGNC is the
-# naming consortium.  Remove entries where the value is the same
-# (Regardless of how it is annotated)
-
-ncbi_f <- ncbi_f %>%
-    dplyr::anti_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID, value))
-
-genes <- dplyr::bind_rows(hgnc, ncbi_f) %>%
-    dplyr::arrange(HGNC_ID, ENSEMBL_ID, value) %>%
+    # Fill Entrez IDs from new aliases
     dplyr::group_by(HGNC_ID) %>%
-    tidyr::fill(UNIPROT_IDS, NCBI_ID, HGNC_NAME, .direction = "updown") %>%
+    tidyr::fill(ENTREZ_ID, HGNC_NAME, UNIPROT_IDS, .direction = "updown") %>%
+
+    # Fill HGNC IDs (missing from org_db)
+    dplyr::group_by(ENSEMBL_ID) %>%
+    tidyr::fill(HGNC_ID, HGNC_NAME, UNIPROT_IDS, .direction = "updown") %>%
+
+    # New values may come from more than one source, aggregate
+    dplyr::group_by("HGNC_ID", "value") %>%
+    dplyr::mutate(value = toString(SOURCE)) %>%
+    unique() %>%
 
     # Check if values are unambiguous
+    # (newly added aliases may create new ambiguities)
     dplyr::group_by(value) %>%
     dplyr::mutate(n_genes = n_distinct(HGNC_ID)) %>%
-    dplyr::filter(n_genes == 1 | source == "HGNC") %>%
+    dplyr::filter(n_genes == 1 | SOURCE == "HGNC") %>%
     dplyr::select(-n_genes)
+
+
+
+
+
+
+
+
+
+# Check if ncbi_genes and org_db agree on mapping between
+# HGNC, ENTREZ and ENSEMBL -----
+
+ncbi_id_map <- ncbi_genes %>%
+    dplyr::select(NCBI_ID, ENSEMBL_ID) %>%
+    unique()
+
+org_db_id_map <-  org_db %>%
+    dplyr::select(ENTREZ_ID, ENSEMBL_ID) %>%
+    unique()
+
+ncbi_diff <- anti_join(ncbi_id_map, org_db_id_map)
+org_db_diff <- anti_join(org_db_id_map, ncbi_id_map)
+
+
+
+# Joining Entrez and Ensembl -----
+
+# Usually one ENSEMBL to one HGNC (occasional exceptions), e.g. TCBE
+# TCBE appears to be multiple copies that produce the same protein
+# ENTREZ can be several to one HGNC
+
+# Within org_db, one ENTREZ_ID can map to several ENSEMBL_IDs
+# e.g. APOBEC3A_B / APOBEC3A BiomaRt only maps to one of the aliases
+
+
+
+# Sometimes biomaRt ENTREZ_IDs are NA.
+# Fill these if the ENSEMBL_ID and HGNC_SYMBOL agree
+
+org_db_patch <- org_db %>%
+    dplyr::select(ENSEMBL_ID, HGNC_SYMBOL, ENTREZ_ID) %>%
+    dplyr::filter(! is.na(ENSEMBL_ID)) %>%
+    unique()
+
+bm <- bm %>%
+    dplyr::rows_patch(org_db_patch,
+                      by = c("ENSEMBL_ID", "HGNC_SYMBOL"),
+                      unmatched = "ignore")
+
+
+
+
+
+
+union_join <- function(df, rows){
+    x <- unlist(df[rows, ], use.names = FALSE)
+    df %>% dplyr::filter(if_any(.cols = everything(), ~.x %in% x))
+}
+
+
+
+
+# There are cases where Biomart and org_db map the same
+# ENSEMBL_ID / HGNC_SYMBOL to different ENTREZ_IDs,
+# e.g. ENSG00000143702/CEP170 to 645455 (biomaRt) or 9859 (org_db)
+# In this case, biomaRt mapping is to a pseudogene according to NCBI
+
+
+# Just keep rows from org_db and Biomart where Entrez / Ensembl agree
+
+bm_minus_entrez <- dplyr::anti_join(bm, org_db,
+                                    by = c("ENSEMBL_ID", "ENTREZ_ID"))
+
+ens_entrez <- dplyr::semi_join(bm, org_db,
+                               by = c("ENSEMBL_ID", "ENTREZ_ID"))
+
+
+# Two problems: one is mapping the IDs, the other is collecting the aliases
+
+
 
 
 # Check for disagreements between org_db and NCBI ----
@@ -67,30 +150,13 @@ ncbi_not_org_db <- ncbi_genes %>%
 
 
 
-# Genes in NCBI not org_db are where ENTREZ_ID is mapped to a novel gene or
-# scaffold.
-
-
-
-# Both org.db and ncbi can map one ENTREZ_ID to several ENSEMBL_IDs
-
-
-
-# Add in the org.db genes -----
 
 
 
 
-# Only want genes for which there is a HGNC / ENSEMBL combination in HGNC
-org_f <- org_db %>%
-    dplyr::semi_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID))
 
-# NCBI and HGNC can differ in how they describe a symbol, e.g. previous
-# vs alias. Assume that HGNC annotations are correct, as HGNC is the
-# naming consortium.  Remove entries where the value is the same
-# (Regardless of how it is annotated)
-ncbi_f <- ncbi_f %>%
-    dplyr::anti_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID, value))
+
+
 
 
 

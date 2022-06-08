@@ -14,6 +14,7 @@
 
 library(tidyverse)
 library(AbNames)
+data(hgnc)
 
 # Get NCBI genes and aliases
 
@@ -74,13 +75,33 @@ ncbi_genes <- ncbi_genes %>%
     dplyr::filter(symbol_type == "OTHER" & grepl("[Aa]ntigen|^CD", value) |
                       ! symbol_type == "OTHER") %>%
 
-    dplyr::mutate(source = "NCBI") %>%
+    dplyr::mutate(SOURCE = "NCBI") %>%
 
     # Remove aliases that map to more than one HGNC_SYMBOL
     dplyr::group_by(value) %>%
     dplyr::mutate(n_genes = n_distinct(HGNC_SYMBOL)) %>%
     dplyr::filter(n_genes == 1) %>%
     dplyr::select(-n_genes)
+
+    # Only keep genes for which there is a HGNC / ENSEMBL combination in HGNC
+    # (Note that not all HGNC IDs are in hgnc data set, e.g. non-protein-coding)
+
+    # There are some differences in which ENSEMBL_ID is mapped to which HGNC_ID,
+    # e.g. in HGNC HGNC:4883 -> ENSG00000000971 (official gene)
+    #      in NCBI HGNC:4883 -> ENSG00000289697 (novel gene)
+    dplyr::semi_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID))
+
+
+
+# Select the ncbi aliases that aren't already present in hgnc ----
+
+# NCBI and HGNC can differ in how they describe a symbol, e.g. previous
+# vs alias. Assume that HGNC annotations are correct, as HGNC is the
+# naming consortium.  Remove entries where the value is the same
+# (Regardless of what type of symbol it is considered to be)
+ncbi_novel <- ncbi_genes %>%
+    dplyr::anti_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID, value))
+
 
 
 ncbi_genes <- as.data.frame(ncbi_genes)

@@ -10,8 +10,8 @@ hgnc_proteins_fname <- paste(c("http://ftp.ebi.ac.uk/pub/databases/",
                              "genenames/hgnc/tsv/locus_types/",
                              "gene_with_protein_product.txt"),
                            collapse = "")
-hgnc_proteins <- tempfile()
-download.file(hgnc_proteins_fname, destfile = hgnc_proteins)
+hgnc_proteins_f <- tempfile()
+download.file(hgnc_proteins_fname, destfile = hgnc_proteins_f)
 
 
 # HGNC groups
@@ -21,7 +21,7 @@ hgnc_groups <- tempfile()
 download.file(hgnc_groups_fname, destfile = hgnc_groups)
 
 # Select relevant columns, rename and merge tables ----
-hgnc_proteins <- readr::read_delim(hgnc_proteins)
+hgnc_proteins <- readr::read_delim(hgnc_proteins_f)
 
 hgnc_proteins <- hgnc_proteins[, c("hgnc_id", "symbol", "name", "alias_symbol",
                                    "prev_symbol", "ensembl_gene_id",
@@ -76,7 +76,7 @@ hgnc <- hgnc %>%
     dplyr::filter(! is.na(value)) %>%
     AbNames::splitUnnest(ab = "value", split = "\\|") %>%
     tidyr::unnest(cols = value) %>%
-    dplyr::mutate(source = "HGNC") %>%
+    dplyr::mutate(SOURCE = "HGNC") %>%
     dplyr::rename(HGNC_SYMBOL = HGNC_SYMBOL2) %>%
     unique() %>%
 
@@ -89,6 +89,9 @@ hgnc <- hgnc %>%
     dplyr::filter(ngroups == 1 | symbol_type == "HGNC_SYMBOL") %>%
     dplyr::select(-ngroups)
 
+
+#hgnc_long <- as.data.frame(hgnc_long)
+#usethis::use_data(hgnc_long, overwrite = TRUE, compress = "bzip2")
 
 hgnc <- as.data.frame(hgnc)
 usethis::use_data(hgnc, overwrite = TRUE, compress = "bzip2")
