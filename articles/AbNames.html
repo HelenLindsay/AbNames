@@ -49,7 +49,14 @@
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
 </form>
 
-      <ul class="navbar-nav"></ul>
+      <ul class="navbar-nav">
+<li class="nav-item">
+  <a class="external-link nav-link" href="https://github.com/HelenLindsay/AbNames/" aria-label="github">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 
     
@@ -64,7 +71,7 @@
                         <h4 data-toc-skip class="author">Helen Lindsay</h4>
             
       
-      
+      <small class="dont-index">Source: <a href="https://github.com/HelenLindsay/AbNames/blob/HEAD/vignettes/AbNames.Rmd" class="external-link"><code>vignettes/AbNames.Rmd</code></a></small>
       <div class="d-none name"><code>AbNames.Rmd</code></div>
     </div>
 
@@ -83,10 +90,7 @@
 <div class="section level2">
 <h2 id="goals">Goals<a class="anchor" aria-label="anchor" href="#goals"></a>
 </h2>
-<div class="section level3">
-<h3 id="standardise-names-of-data-sets-for-combined-analysis">Standardise names of data sets for combined analysis<a class="anchor" aria-label="anchor" href="#standardise-names-of-data-sets-for-combined-analysis"></a>
-</h3>
-</div>
+<p>Standardise names of data sets for combined analysis</p>
 <div class="section level3">
 <h3 id="identify-all-members-of-a-protein-complex-bound-by-an-antibody">Identify all members of a protein complex bound by an antibody<a class="anchor" aria-label="anchor" href="#identify-all-members-of-a-protein-complex-bound-by-an-antibody"></a>
 </h3>
@@ -102,7 +106,7 @@
 <p>The <code>hgnc</code> data set is a reformatted version of the protein-coding gene information downloaded from the Human Gene Names Consortium. This includes previous (obsolete) gene names and aliases, which in our experience have been useful for matching to antibody names. The <code>hgnc_long</code> data set contains the same seq of gene identifiers as the <code>hgnc</code> data set, in long format (one alias per row).</p>
 <p>Load using:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://helenlindsay.github.io/AbNames/">AbNames</a></span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/HelenLindsay/AbNames" class="external-link">AbNames</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"hgnc"</span>, package <span class="op">=</span> <span class="st">"AbNames"</span><span class="op">)</span> <span class="co"># hgnc_long is loaded similarly</span>
@@ -129,7 +133,7 @@
 <div class="section level3">
 <h3 id="biolegend-antibodies">BioLegend antibodies<a class="anchor" aria-label="anchor" href="#biolegend-antibodies"></a>
 </h3>
-<p>BioLegend is a major supplier of antibodies, and provides several antibody panels for CITE-seq analyses. The data set “totalseq_cocktails” is a re-formatted version of the TotalSeq cocktails data sheets available from the BioLegend website, including BioLegend antibody names and Ensembl gene IDs.</p>
+<p>BioLegend is a major supplier of antibodies, and provides several antibody panels for CITE-seq analyses. The data set “totalseq_cocktails” is a re-formatted version of the TotalSeq cocktails data sheets available from the BioLegend website, including BioLegend antibody names and Ensembl gene IDs. The isotypes of the antibodies are not included in the TotalSeq data sheets.</p>
 <p>Load using:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"totalseq_cocktails"</span>, package <span class="op">=</span> <span class="st">"AbNames"</span><span class="op">)</span>
@@ -216,9 +220,17 @@
 
 <span class="co"># Print one example antigen from the query table:</span>
 <span class="va">query_df</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">ID</span> <span class="op">==</span> <span class="st">"TCR alpha/beta-Hao_2021"</span><span class="op">)</span>
-<span class="co">#&gt; <span style="color: #949494;"># A tibble: 0 × 3</span></span>
-<span class="co">#&gt; <span style="color: #949494;"># … with 3 variables: ID &lt;chr&gt;, name &lt;chr&gt;, value &lt;chr&gt;</span></span></code></pre></div>
+    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">ID</span> <span class="op">==</span> <span class="st">"TCR alpha/beta__Hao_2021"</span><span class="op">)</span>
+<span class="co">#&gt; <span style="color: #949494;"># A tibble: 7 × 3</span></span>
+<span class="co">#&gt;   ID                       name          value                      </span>
+<span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                      </span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">1</span> TCR alpha/beta__Hao_2021 Antigen       TCR alpha/beta             </span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">2</span> TCR alpha/beta__Hao_2021 greek_word    TCR alpha/beta             </span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">3</span> TCR alpha/beta__Hao_2021 greek_letter  TCR a/b                    </span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">4</span> TCR alpha/beta__Hao_2021 upper_no_dash TCR A/B                    </span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">5</span> TCR alpha/beta__Hao_2021 lower_no_dash tcr a/b                    </span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">6</span> TCR alpha/beta__Hao_2021 TCR_long      T cell receptor alpha locus</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">7</span> TCR alpha/beta__Hao_2021 TCR_long      T cell receptor beta locus</span></code></pre></div>
 <p>The example above shows that each antibody name has been reformatted in several ways. When querying a data set, we search for an exact match to any of these strings.</p>
 </div>
 <div class="section level3">
@@ -535,7 +547,7 @@
 <span class="co">#&gt; 9      P07766</span></code></pre></div>
 <p>Now we will fill the gene information in the citeseq data similarly, and check how many antibodies have not been matched.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># We first fill using the Catalogue number:</span>
+<code class="sourceCode R"><span class="co"># We fill by grouping the Catalogue number:</span>
 <span class="va">citeseq</span> <span class="op">&lt;-</span> <span class="va">citeseq</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
      <span class="fu">AbNames</span><span class="fu">::</span><span class="fu"><a href="../reference/fillByGroup.html">fillByGroup</a></span><span class="op">(</span><span class="st">"Cat_Number"</span>, multiple <span class="op">=</span> <span class="st">"mode"</span>,
                           fill <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"HGNC_ID"</span>, <span class="st">"TotalSeq_Cat"</span>, <span class="st">"Vendor"</span>,
@@ -596,7 +608,7 @@
 <div class="section level3">
 <h3 id="to-do">TO DO<a class="anchor" aria-label="anchor" href="#to-do"></a>
 </h3>
-<p><em>An example of (interactively) deciding what to do if groups are inconsistent. </em>Standardise names in a singlecellexperiment <em>Check new annotations against previous </em>Isotype controls <em>Add checks on filling if the values are not unique </em>Add control column to isotype controls to prevent false match to mouse IgG2a <em>Add ignore option to split merge? </em> CD25 (good example, multiple genes), CD270, CD279 matched in HGNC? # CD279 PD-1 - example where only some are matched # Fix Hao Clone CD25</p>
+<p><em>An example of (interactively) deciding what to do if groups are inconsistent. </em>Standardise names in a singlecellexperiment <em>Check new annotations against previous </em>Isotype controls <em>Add checks on filling if the values are not unique </em>Add control column to isotype controls to prevent false match to mouse IgG2a <em>Add ignore option to split merge? </em> CD25 (good example, multiple genes), CD270, CD279 matched in HGNC? # CD279 PD-1 - example where only some are matched # Fix Hao Clone CD25 # Search for similar genes in master table # Generate camel case regexp? # Split HGNC alias_name, prev_name - keep only if contains “antigen” or “CD”? # Unintuitive to use quoted for splitUnnest # Uniprot ids - possible to split to create complex uniprot and modification # uniprot? # Redocument data sets # HAO CD45 should have catalogue numbers!</p>
 </div>
 </div>
 <div class="section level2">
