@@ -5,7 +5,19 @@
 
 # Both org.db and ncbi can map one ENTREZ_ID to several ENSEMBL_IDs
 
-# NCBI contains Entrez IDs not in org_db
+# NCBI contains Entrez IDs not in org_db and vice versa,
+# usually when they differ it is for this reason
+
+# Example of gene with ambiguous aliases -
+# CCL4L1/2 both have alias AT744.2
+
+# NCBI genes has more cases where one HGNC symbol is mapped to several
+# ENSEMBL IDs
+
+# Prefer to use two matches (e.g. symbol + ensembl) if possible
+
+# Not all HGNC Ensembl IDs are in the biomaRt table
+# (some are not protein-coding)
 
 # To do ----
 
@@ -22,6 +34,8 @@
 # Single NCBI maps to multiple ENSEMBL, are both locations valid?
 # Do they produce the same protein?  Does Protein Ontology differentiate?
 
+
+
 # Setup -----
 
 library(tidyverse)
@@ -29,6 +43,36 @@ library(readxl)
 
 source("ncbi.R")
 source("org_db.R")
+
+
+# Fill missing IDs -------------------------------------------------
+
+# When NCBI has multiple ENSEMBL_IDs for the same HGNC_SYMBOL,
+# select the one that ENSEMBL/HGNC agrees with (remove e.g. haplotypes)
+hgnc_patch <- hgnc %>%
+    dplyr::select(HGNC_ID, HGNC_SYMBOL) %>%
+
+
+ncbi_genes <- ncbi_genes %>%
+
+
+
+
+
+# Missing Ensembl IDs in org_db have been filled from HGNC,
+# also fill from NCBI
+
+
+ncbi_patch <- ncbi_genes %>%
+    dplyr::filter(! is.na(ENSEMBL_ID)) %>%
+    dplyr::select(HGNC_SYMBOL, ENTREZ_ID, ENSEMBL_ID) %>%
+    unique()
+
+org_db <- org_db %>%
+    dplyr::rows_patch(ncbi_patch,
+                      by = c("HGNC_SYMBOL", "ENTREZ_ID"),
+                      unmatched = "ignore")
+
 
 
 # Merge HGNC, NCBI and org.db --------------------------------------
@@ -48,9 +92,9 @@ hgnc <- hgnc %>%
     tidyr::fill(HGNC_ID, HGNC_NAME, UNIPROT_IDS, .direction = "updown") %>%
 
     # New values may come from more than one source, aggregate
-    dplyr::group_by("HGNC_ID", "value") %>%
-    dplyr::mutate(value = toString(SOURCE)) %>%
-    unique() %>%
+    dplyr::group_by(HGNC_ID, ENSEMBL_ID, UNIPROT_IDS, HGNC_SYMBOL,
+                    symbol_type, value) %>%
+    dplyr::summarise(SOURCE = toString(SOURCE0), .groups = "keep") %>%
 
     # Check if values are unambiguous
     # (newly added aliases may create new ambiguities)
@@ -65,22 +109,70 @@ hgnc <- hgnc %>%
 
 
 
-
-
 # Check if ncbi_genes and org_db agree on mapping between
 # HGNC, ENTREZ and ENSEMBL -----
 
+
 ncbi_id_map <- ncbi_genes %>%
-    dplyr::select(NCBI_ID, ENSEMBL_ID) %>%
+    dplyr::select(ENTREZ_ID, ENSEMBL_ID, HGNC_SYMBOL) %>%
     unique()
 
 org_db_id_map <-  org_db %>%
-    dplyr::select(ENTREZ_ID, ENSEMBL_ID) %>%
+    dplyr::select(ENTREZ_ID, ENSEMBL_ID, HGNC_SYMBOL) %>%
     unique()
 
-ncbi_diff <- anti_join(ncbi_id_map, org_db_id_map)
-org_db_diff <- anti_join(org_db_id_map, ncbi_id_map)
 
+
+ncbi_patch <- ncbi_id_map %>%
+    # Shares an ENTREZ id with org_db ...
+    dplyr::semi_join(org_db_id_map, by = "ENTREZ_ID") %>%
+    # ...but disagrees with "ENSEMBL_ID"
+    dplyr::anti_join(org_db_id_map) %>%
+    # Add the org_db IDs
+    dplyr::left_join(org_db_id_map, by = c("ENTREZ_ID", "HGNC_SYMBOL")) %>%
+    dplyr::rename("ENSEMBL_FROM_ORGDB" = "ENSEMBL_ID.y",
+                  "ENSEMBL_FROM_NCBI" = "ENSEMBL_ID.x") %>%
+    dplyr::left_join(hgnc %>%
+                         dplyr::select("HGNC_SYMBOL", "ENSEMBL_ID") %>%
+                         unique(),
+                     by = "HGNC_SYMBOL") %>%
+    # If one of ncbi_genes / org_db agrees with HGNC, keep that one
+    # If both disagree, set to NA
+    dplyr::mutate(ncbi = ENSEMBL_ID == ENSEMBL_FROM_NCBI,
+                  orgdb = ENSEMBL_ID == ENSEMBL_FROM_ORGDB)
+
+    dplyr::mutate(ENSEMBL_ID =
+                      ifelse(ENSEMBL_ID == ENSEMBL_FROM_ORGDB |
+                                 ENSEMBL_ID == ENSEMBL_FROM_NCBI,
+                             ENSEMBL_ID, NA)) %>%
+    dplyr::select(-ENSEMBL_FROM_ORGDB, ENSEMBL_FROM_NCBI)
+
+
+
+
+
+org_db_patch <- org_db_id_map %>%
+    dplyr::semi_join(ncbi_id_map, by = "ENTREZ_ID") %>%
+    dplyr::anti_join(ncbi_id_map) %>%
+    dplyr::left_join(ncbi_id_map, by = c("ENTREZ_ID", "HGNC_SYMBOL")) %>%
+    dplyr::rename("ENSEMBL_FROM_ORGDB" = "ENSEMBL_ID.x",
+                  "ENSEMBL_FROM_NCBI" = "ENSEMBL_ID.y") %>%
+    dplyr::left_join(hgnc %>%
+                         dplyr::select("HGNC_SYMBOL", "ENSEMBL_ID") %>%
+                         unique(),
+                     by = "HGNC_SYMBOL") %>%
+    # If one of ncbi_genes / org_db agrees with HGNC, keep that one
+    # If both disagree, set to NA
+    dplyr::mutate(ENSEMBL_ID =
+                      ifelse(ENSEMBL_ID == ENSEMBL_FROM_ORGDB |
+                                 ENSEMBL_ID == ENSEMBL_FROM_NCBI,
+                             ENSEMBL_ID, NA)) %>%
+    dplyr::select(-ENSEMBL_FROM_ORGDB, ENSEMBL_FROM_NCBI)
+
+
+
+
+# PATCH THE ENSEMBL ID - NA IF DISAGREES WITH HGNC
 
 
 # Joining Entrez and Ensembl -----
@@ -112,10 +204,7 @@ bm <- bm %>%
 
 
 
-union_join <- function(df, rows){
-    x <- unlist(df[rows, ], use.names = FALSE)
-    df %>% dplyr::filter(if_any(.cols = everything(), ~.x %in% x))
-}
+
 
 
 

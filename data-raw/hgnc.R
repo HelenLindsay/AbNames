@@ -17,8 +17,8 @@ download.file(hgnc_proteins_fname, destfile = hgnc_proteins_f)
 # HGNC groups
 hgnc_groups_fname <- paste(c("https://www.genenames.org/cgi-bin/genegroup/",
                              "download-all"), collapse = "")
-hgnc_groups <- tempfile()
-download.file(hgnc_groups_fname, destfile = hgnc_groups)
+hgnc_groups_f <- tempfile()
+download.file(hgnc_groups_fname, destfile = hgnc_groups_f)
 
 # Select relevant columns, rename and merge tables ----
 hgnc_proteins <- readr::read_delim(hgnc_proteins_f)
@@ -38,7 +38,7 @@ hgnc_proteins <- dplyr::rename(hgnc_proteins,
                                ALIAS_NAME = alias_name,
                                PREVIOUS_NAME = prev_name)
 
-hgnc_groups <- readr::read_delim(hgnc_groups)
+hgnc_groups <- readr::read_delim(hgnc_groups_f)
 
 hgnc_groups <- dplyr::select(hgnc_groups, -Status, -`Locus type`, -`Chromosome`,
                              -`NCBI Gene ID`, -`Vega gene ID`,
@@ -54,10 +54,6 @@ hgnc_groups <- dplyr::rename(hgnc_groups,
     dplyr::mutate(across(c(PREVIOUS_SYMBOL, ALIAS), ~gsub(", ", "\\|", .x)))
 
 hgnc <- dplyr::full_join(hgnc_proteins, hgnc_groups)
-
-#hgnc <- unique(hgnc)
-#hgnc <- as.data.frame(hgnc)
-#usethis::use_data(hgnc, overwrite = TRUE, compress = "bzip2")
 
 
 # Create and save long version of the HGNC table for querying ----
@@ -89,9 +85,6 @@ hgnc <- hgnc %>%
     dplyr::filter(ngroups == 1 | symbol_type == "HGNC_SYMBOL") %>%
     dplyr::select(-ngroups)
 
-
-#hgnc_long <- as.data.frame(hgnc_long)
-#usethis::use_data(hgnc_long, overwrite = TRUE, compress = "bzip2")
 
 hgnc <- as.data.frame(hgnc)
 usethis::use_data(hgnc, overwrite = TRUE, compress = "bzip2")

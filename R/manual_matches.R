@@ -28,7 +28,7 @@ manual_matches <- tibble::tribble(
         "https://www.sinobiological.com/research/cd-antigens/cd77", "",
     "Podocalyxin", "","PODXL", "HGNC:9171", "",
         "Podocalyxin is podocalxyin-like", "",
-    "[Ff]olate [Rr]eceptor b", "FOLR2", "HGNC:3793", "", "", "",
+    "[Ff]olate [Rr]eceptor b", "FOLR2", "HGNC:3793", "", "", "", "",
     "PE", "", NA, NA, NA,
         "anti-phycoerythrin, for binding PE-antibody labeled cells", "",
     "integrin b7", "","ITGB7", "HGNC:6162", "", "","",

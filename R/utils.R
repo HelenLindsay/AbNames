@@ -135,3 +135,21 @@ groupsWith <- function(df1, df2, col){
     result <- magrittr::freduce(df, partials)
     return(result)
 }
+
+
+
+# union_join ----
+# Select values from a data.frame df matching any column from another data.frame
+#
+# Either a second data.frame df2 can be provided, or a selection of rows indices
+# from the first data.frame
+union_join <- function(df, df2 = NULL, rows = NULL){
+    if (! is.null(df2) & ! is.null(rows)){
+        warning("Row selection will be made from df2")
+    }
+    qdf <- df
+    if (! is.null(df2)) { qdf <- df2 }
+    if (! is.null(rows)) qdf <- qdf[rows, ]
+    x <- unlist(qdf, use.names = FALSE)
+    df %>% dplyr::filter(if_any(.cols = everything(), ~.x %in% x))
+}

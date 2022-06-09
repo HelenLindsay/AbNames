@@ -15,6 +15,9 @@
 # ENSG00000244682 - (From Ensembl website: does not contain any transcripts for
 # which we have selected identical models in RefSeq).
 
+# Some Ensembl genes map to multiple Entrez genes, e.g. ENSG00000276070 to
+# 9560 / 388372
+
 # ---------------------------------------------------------------------------
 # Biomart -----
 
@@ -47,23 +50,13 @@ bm <- getBM(mart = ensembl,
     # Remove aliases that map to more than one HGNC_SYMBOL
     dplyr::group_by(ALIAS) %>%
     dplyr::mutate(n_genes = n_distinct(HGNC_SYMBOL)) %>%
-    dplyr::filter(n_genes == 1) %>%
+    dplyr::filter(n_genes == 1 | is.na(ALIAS)) %>%
     dplyr::select(-n_genes) %>%
     dplyr::ungroup() %>%
 
     # Remove entries that don't match HGNC
     # (usually an unofficial symbol, some of these could be saved if necessary)
     dplyr::semi_join(hgnc, by = c("ENSEMBL_ID", "HGNC_SYMBOL"))
-
-
-# Select the aliases that aren't already present in hgnc
-bm_novel <- bm %>%
-    dplyr::mutate(symbol_type = "ALIAS") %>%
-    dplyr::rename(value = ALIAS) %>%
-    dplyr::filter(! value == "") %>%
-    dplyr::anti_join(hgnc, by = c("HGNC_SYMBOL", "value")) %>%
-    # Only keep if HGNC_SYMBOL/ENSEMBL_ID combinations are correct
-    dplyr::semi_join(hgnc, by = c("HGNC_SYMBOL", "ENSEMBL_ID"))
 
 
 # ---------------------------------------------------------------------------
@@ -74,7 +67,7 @@ library(org.Hs.eg.db)
 hs <- org.Hs.eg.db
 
 # Select everything that has an Entrez gene ID
-org_db <- select(hs,
+org_db <- AnnotationDbi::select(hs,
                  keys = keys(hs),
                  keytype = "ENTREZID",
                  columns = c("SYMBOL", "ALIAS", "ENSEMBL")) %>%
@@ -97,11 +90,14 @@ org_db <- select(hs,
     dplyr::filter(n_genes == 1) %>%
     dplyr::select(-n_genes)
 
-
 # Fill in the Ensembl ID using hgnc if it is missing, require
 # matches between a symbol and (at least) one alias - TOO RESTRICTIVE?
 # Note that semi_join still matches if one value is NA
 # (None of the missing genes are in the biomart results)
+
+table(is.na(org_db$ENSEMBL_ID))
+# FALSE  TRUE
+# 61354  6091
 
 hgnc_patch <- hgnc %>%
     dplyr::filter(! is.na(ENSEMBL_ID)) %>%
@@ -113,15 +109,70 @@ org_db <- org_db %>%
                       by = c("HGNC_SYMBOL", "value"),
                       unmatched = "ignore")
 
+# None of the remaining NAs can be filled by grouping by HGNC_SYMBOL + ENTREZ_ID
 
+table(is.na(org_db$ENSEMBL_ID))
+# FALSE  TRUE
+# 65054  2391
+
+# ---------------------------------------------------------------------------
+# If Ensembl and Entrez disagree on mapping between IDs, set to NA?
+
+
+# Remove entries where Entrez and Ensembl disagree on mapping between
+# Entrez to HGNC or Ensembl to HGNC -----
+
+# Example where Entrez differs in official symbol: 100302652 / ENSG00000115239
+
+
+# Instances where e.g. Entrez ID or Ensembl ID is shared (not NA) and HGNC is
+# different
+
+x <- bm %>%
+    dplyr::filter(if_all(c(ENSEMBL_ID, ENTREZ_ID), ~!is.na(.x))) %>%
+    dplyr::anti_join(org_db, by = c("ENSEMBL_ID", "ENTREZ_ID", "HGNC_SYMBOL"))
+
+
+y <- org_db %>%
+    dplyr::filter(if_all(c(ENSEMBL_ID, ENTREZ_ID), ~!is.na(.x))) %>%
+    dplyr::anti_join(bm, by = c("ENSEMBL_ID", "ENTREZ_ID", "HGNC_SYMBOL"))
+
+
+
+
+x <- bm %>% dplyr::anti_join(org_db,
+                             by = c("ENSEMBL_ID", "ENTREZ_ID", "HGNC_SYMBOL"))
+# Things that disagree on "HGNC_SYMBOL"
+xx <- x %>% dplyr::anti_join(org_db, by = "HGNC_SYMBOL")
+
+
+xx <- bm %>% dplyr::semi_join(org_db,
+                             by = c("ENSEMBL_ID", "ENTREZ_ID", "HGNC_SYMBOL"))
+
+y <- org_db %>% dplyr::anti_join(bm,
+                             by = c("ENSEMBL_ID", "ENTREZ_ID", "HGNC_SYMBOL"))
+yy <- org_db %>% dplyr::semi_join(bm,
+                                 by = c("ENSEMBL_ID", "ENTREZ_ID", "HGNC_SYMBOL"))
+
+
+
+
+
+# ---------------------------------------------------------------------------
 # Select the aliases that aren't already present in hgnc -----
+
+bm_novel <- bm %>%
+    dplyr::mutate(symbol_type = "ALIAS") %>%
+    dplyr::rename(value = ALIAS) %>%
+    dplyr::filter(! value == "") %>%
+    dplyr::anti_join(hgnc, by = c("HGNC_SYMBOL", "value")) %>%
+    # Only keep if HGNC_SYMBOL/ENSEMBL_ID combinations are correct
+    dplyr::semi_join(hgnc, by = c("HGNC_SYMBOL", "ENSEMBL_ID"))
+
 org_db_novel <- org_db %>%
     dplyr::mutate(symbol_type = "ALIAS") %>%
     dplyr::anti_join(hgnc, by = c("HGNC_SYMBOL", "value")) %>%
     # Only want genes for which there is a HGNC / ENSEMBL combination in HGNC
     dplyr::semi_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID))
 
-
 # ---------------------------------------------------------------------------
-
-
