@@ -30,7 +30,8 @@ ncbi_genes <- readr::read_delim(f, na = c("", "NA", "-"))
 ncbi_genes <- ncbi_genes %>%
 
     dplyr::filter(type_of_gene == "protein-coding",
-                  if_all(.cols = c(HGNC_NAME, Other_designations),
+                  if_all(.cols = c(Full_name_from_nomenclature_authority,
+                                   Other_designations),
                          ~! grepl("pseudogene|uncharacterized|readthrough",
                                   .x))) %>%
     dplyr::rename(HGNC_SYMBOL = Symbol_from_nomenclature_authority,
@@ -40,7 +41,7 @@ ncbi_genes <- ncbi_genes %>%
                   ALIAS = Synonyms,
                   NCBI_NAME = description,
                   OTHER = Other_designations,
-                  ENTREZ_ID = NCBI_ID) %>%
+                  ENTREZ_ID = GeneID) %>%
 
     dplyr::mutate(HGNC_ID = stringr::str_extract_all(dbXrefs,
                                                     "(?<=HGNC:)HGNC:[0-9]+"),
