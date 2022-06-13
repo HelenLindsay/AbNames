@@ -86,5 +86,18 @@ hgnc <- hgnc %>%
     dplyr::select(-ngroups)
 
 
+# Add Entrez IDs if they are unambiguous
+library(org.Hs.eg.db)
+hs <- org.Hs.eg.db
+
+ens_to_eg <- AnnotationDbi::select(hs, keys = unique(hgnc$ENSEMBL_ID),
+                                   keytype = "ENSEMBL",
+                                   columns = c("ENTREZID", "SYMBOL"))
+sym_to_eg <- AnnotationDbi::select(hs, keys = unique(hgnc$HGNC_SYMBOL),
+                                   keytype = "SYMBOL",
+                                   columns = c("ENTREZID", "ENSEMBL"))
+
+
+
 hgnc <- as.data.frame(hgnc)
 usethis::use_data(hgnc, overwrite = TRUE, compress = "bzip2")
