@@ -35,10 +35,11 @@ chrs <- c(1:22, "X", "Y", "MT")
 ensembl <- useEnsembl(biomart = "genes", dataset = "hsapiens_gene_ensembl")
 
 bm <- getBM(mart = ensembl,
-            filters = c("chromosome_name", "with_hgnc", "biotype"),
-            values = list(chrs, TRUE, "protein_coding"),
+            filters = c("chromosome_name", "with_hgnc"),
+            values = list(chrs, TRUE),
             attributes = c("ensembl_gene_id", "external_gene_name",
-              "external_synonym", "hgnc_id", "entrezgene_id")) %>%
+                           "external_synonym", "hgnc_id", "entrezgene_id",
+                           "gene_biotype")) %>%
     tibble::as_tibble() %>%
     dplyr::rename(ENSEMBL_ID = ensembl_gene_id,
                   HGNC_SYMBOL = external_gene_name,
@@ -75,14 +76,16 @@ hs <- org.Hs.eg.db
 org_db <- AnnotationDbi::select(hs,
                  keys = keys(hs),
                  keytype = "ENTREZID",
-                 columns = c("SYMBOL", "ALIAS", "ENSEMBL", "GENETYPE")) %>%
+                 columns = c("SYMBOL", "ALIAS", "ENSEMBL",
+                             "GENETYPE", "UNIPROT")) %>%
     dplyr::as_tibble() %>%
-    dplyr::filter(GENETYPE == "protein-coding") %>%
-    dplyr::select(-GENETYPE) %>%
+    #dplyr::filter(GENETYPE == "protein-coding") %>%
+    #dplyr::select(-GENETYPE) %>%
     dplyr::rename(HGNC_SYMBOL = SYMBOL,
                   ENSEMBL_ID = ENSEMBL,
                   ENTREZ_ID = ENTREZID,
-                  value = ALIAS) %>%
+                  value = ALIAS,
+                  BIOTYPE = gene_biotype) %>%
 
     # Only keep entries with HGNC symbol (removes e.g. pseudogenes)
     dplyr::semi_join(hgnc, by = "HGNC_SYMBOL") %>%
@@ -98,7 +101,7 @@ org_db <- AnnotationDbi::select(hs,
     dplyr::select(-n_genes)
 
 # Fill in the Ensembl ID using hgnc if it is missing, require
-# matches between a symbol and (at least) one alias - TOO RESTRICTIVE?
+# matches between a symbol and (at least) one alias
 # Note that semi_join still matches if one value is NA
 # (None of the missing genes are in the biomart results)
 
