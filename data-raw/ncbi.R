@@ -82,7 +82,7 @@ ncbi_genes <- ncbi_genes %>%
     dplyr::group_by(value) %>%
     dplyr::mutate(n_genes = n_distinct(HGNC_SYMBOL)) %>%
     dplyr::filter(n_genes == 1) %>%
-    dplyr::select(-n_genes)
+    dplyr::select(-n_genes) %>%
 
     # Only keep genes for which there is a HGNC / ENSEMBL combination in HGNC
     # (Note that not all HGNC IDs are in hgnc data set, e.g. non-protein-coding)
@@ -102,7 +102,6 @@ ncbi_genes <- ncbi_genes %>%
 # (Regardless of what type of symbol it is considered to be)
 ncbi_novel <- ncbi_genes %>%
     dplyr::anti_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID, value))
-
 
 
 ncbi_genes <- as.data.frame(ncbi_genes)

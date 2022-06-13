@@ -19,6 +19,11 @@
 # 9560 / 388372
 
 # ---------------------------------------------------------------------------
+# Fill HGNC IDs using org.db if based on symbol and Ensembl
+
+
+# ---------------------------------------------------------------------------
+
 # Biomart -----
 
 library(tidyverse)
@@ -70,8 +75,10 @@ hs <- org.Hs.eg.db
 org_db <- AnnotationDbi::select(hs,
                  keys = keys(hs),
                  keytype = "ENTREZID",
-                 columns = c("SYMBOL", "ALIAS", "ENSEMBL")) %>%
+                 columns = c("SYMBOL", "ALIAS", "ENSEMBL", "GENETYPE")) %>%
     dplyr::as_tibble() %>%
+    dplyr::filter(GENETYPE == "protein-coding") %>%
+    dplyr::select(-GENETYPE) %>%
     dplyr::rename(HGNC_SYMBOL = SYMBOL,
                   ENSEMBL_ID = ENSEMBL,
                   ENTREZ_ID = ENTREZID,
@@ -97,7 +104,7 @@ org_db <- AnnotationDbi::select(hs,
 
 table(is.na(org_db$ENSEMBL_ID))
 # FALSE  TRUE
-# 61354  6091
+# 61355   113
 
 hgnc_patch <- hgnc %>%
     dplyr::filter(! is.na(ENSEMBL_ID)) %>%
@@ -110,52 +117,11 @@ org_db <- org_db %>%
                       unmatched = "ignore")
 
 # None of the remaining NAs can be filled by grouping by HGNC_SYMBOL + ENTREZ_ID
+# or by filling from NCBI
 
 table(is.na(org_db$ENSEMBL_ID))
 # FALSE  TRUE
-# 65054  2391
-
-# ---------------------------------------------------------------------------
-# If Ensembl and Entrez disagree on mapping between IDs, set to NA?
-
-
-# Remove entries where Entrez and Ensembl disagree on mapping between
-# Entrez to HGNC or Ensembl to HGNC -----
-
-# Example where Entrez differs in official symbol: 100302652 / ENSG00000115239
-
-
-# Instances where e.g. Entrez ID or Ensembl ID is shared (not NA) and HGNC is
-# different
-
-x <- bm %>%
-    dplyr::filter(if_all(c(ENSEMBL_ID, ENTREZ_ID), ~!is.na(.x))) %>%
-    dplyr::anti_join(org_db, by = c("ENSEMBL_ID", "ENTREZ_ID", "HGNC_SYMBOL"))
-
-
-y <- org_db %>%
-    dplyr::filter(if_all(c(ENSEMBL_ID, ENTREZ_ID), ~!is.na(.x))) %>%
-    dplyr::anti_join(bm, by = c("ENSEMBL_ID", "ENTREZ_ID", "HGNC_SYMBOL"))
-
-
-
-
-x <- bm %>% dplyr::anti_join(org_db,
-                             by = c("ENSEMBL_ID", "ENTREZ_ID", "HGNC_SYMBOL"))
-# Things that disagree on "HGNC_SYMBOL"
-xx <- x %>% dplyr::anti_join(org_db, by = "HGNC_SYMBOL")
-
-
-xx <- bm %>% dplyr::semi_join(org_db,
-                             by = c("ENSEMBL_ID", "ENTREZ_ID", "HGNC_SYMBOL"))
-
-y <- org_db %>% dplyr::anti_join(bm,
-                             by = c("ENSEMBL_ID", "ENTREZ_ID", "HGNC_SYMBOL"))
-yy <- org_db %>% dplyr::semi_join(bm,
-                                 by = c("ENSEMBL_ID", "ENTREZ_ID", "HGNC_SYMBOL"))
-
-
-
+# 61400    68
 
 
 # ---------------------------------------------------------------------------
