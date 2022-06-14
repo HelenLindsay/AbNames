@@ -474,6 +474,7 @@ missing <- citeseq %>%
 # uniprot?
 # Redocument data sets
 # HAO CD45 should have catalogue numbers!
+# union join back gene ID / get info by antigen
 
 
 # Session Info

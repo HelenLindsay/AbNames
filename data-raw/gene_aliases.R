@@ -22,6 +22,8 @@
 # ENSG00000203668: Entrez gene symbol CHML, HGNC symbol OPN3 -
 # both are valid HGNC symbols
 
+# Within hgnc, one Uniprot ID can map to multiple HGNC IDs, e.g. Q9GZY0
+
 # Setup -----
 
 library(tidyverse)
@@ -30,7 +32,12 @@ library(readxl)
 source("ncbi.R")
 source("org_db.R")
 
-# Merge HGNC, NCBI and org.db --------------------------------------
+
+# Add Ensembl_ID to HGNC where Ensembl matches but HGNC doesn't  -----
+
+
+
+# Merge HGNC, NCBI and org.db ---------------------------------------
 
 prep_merge <- function(df, hgnc){
     df %>%
@@ -231,11 +238,16 @@ protein_complexes <- protein_complexes %>%
 
 # Cell surface protein atlas ---------------------------------------
 
+# http://wlab.ethz.ch/cspa/#abstract
+
 # Notes:
 # Putative Ig-like domain-containing protein / 374383
 # ODZ3 / 55714 = TENM3 checked manually via gene cards
 
-# http://wlab.ethz.ch/cspa/#abstract
+# Most entries can be matched to HGNC via UNIPROT_ID / HGNC_SYMBOL
+# Those that can't include HLA and T-cell receptors
+
+# Does not appear to contain protein complex names
 
 
 # Table of validated surfaceome proteins
@@ -259,23 +271,50 @@ cspa <- #readxl::read_xlsx(cspa_fname) %>%
                   ENTREZ_ID = as.character(ENTREZ_ID)) %>%
     # Join by exact match to "value" in HGNC
     # (either official symbol or alias)
-    dplyr::left_join(hgnc %>% dplyr::select(HGNC_SYMBOL, value) %>% unique(),
+    dplyr::left_join(hgnc %>%
+                         dplyr::select(HGNC_SYMBOL, HGNC_ID, value) %>%
+                         unique(),
                      by = c("ENTREZ_SYMBOL" = "value"))
 
-# For the unmatched symbols, try to fill the HGNC_SYMBOL using the ENTREZ_ID
-cspa_missing <- cspa %>% dplyr::filter(is.na(HGNC_SYMBOL))
-org_db_patch <- org_db %>%
-    dplyr::select(ENTREZ_ID, HGNC_SYMBOL) %>%
-    unique() %>%
-    union_join(cspa_missing %>%
-                   dplyr::filter(! is.na(ENTREZ_ID)))
+# Patch via UNIPROT_ID, if it is unique within HGNC
+up_ids <- cspa %>%
+    dplyr::filter(is.na(HGNC_ID)) %>%
+    dplyr::pull(UNIPROT_ID)
 
-# Or fill using the Uniprot IDs
+hgnc_patch <- hgnc %>%
+    dplyr::filter(UNIPROT_ID %in% up_ids) %>%
+    dplyr::group_by(UNIPROT_ID) %>%
+    dplyr::filter(n_distinct(HGNC_ID) == 1) %>%
+    dplyr::ungroup() %>%
+    dplyr::select(HGNC_SYMBOL, HGNC_ID, UNIPROT_ID) %>%
+    unique()
+
+cspa <- cspa %>%
+    dplyr::rows_patch(hgnc_patch, by = "UNIPROT_ID") %>%
+    # 5 unmatched have only UNIPROT IDs, some are obsolete
+    dplyr::filter(! is.na(HGNC_ID))
+
+# Reformat cspa for joining to hgnc
+cspa <- cspa %>%
+    dplyr::mutate("CSPA" = TRUE,
+                  ENTREZ_SYMBOL =
+                      AbNames:::.noDups(ENTREZ_SYMBOL, HGNC_SYMBOL)) %>%
+    dplyr::rename(ALIAS = ENTREZ_SYMBOL) %>%
+    tidyr::pivot_longer(cols = c("UNIPROT_NAME", "Antigen", "ENTREZ_SYMBOL"),
+                        values_to = "value", names_to = "symbol_type") %>%
+    dplyr::filter(! is.na(value))
+
+# Check for inconsistencies -----
+# TO DO: HAVEN'T JOINED IN ENTREZ YET!
+
+cspa %>% dplyr::anti_join(hgnc,
+                          by = c("HGNC_ID", "ENTREZ_ID", "UNIPROT_ID"))
 
 
+# Add a column to hgnc indicating if gene is in CSPA
+hgnc <- hgnc %>%
+    dplyr::left_join(cspa %>% dplyr::select(HGNC_ID, CSPA))
 
-    # 6 ENTREZ_IDs were "0", these are HLA / IgM or T-cell receptor
-    #dplyr::filter(! (is.na(ENTREZ_ID) & is.na(ENTREZ_SYMBOL)) )
-
-
-
+cspa_novel <- cspa %>%
+    dplyr::anti_join(hgnc, by = c("HGNC_ID", "HGNC_SYMBOL",
+                                  "UNIPROT_ID", "value"))

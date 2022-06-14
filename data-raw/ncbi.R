@@ -18,12 +18,16 @@ data(hgnc)
 
 # Get NCBI genes and aliases
 
-fn <- file.path("https://ftp.ncbi.nlm.nih.gov/refseq/H_sapiens",
-                "Homo_sapiens.gene_info.gz")
-f <- tempfile()
-download.file(fn, destfile = f)
+#fn <- file.path("https://ftp.ncbi.nlm.nih.gov/refseq/H_sapiens",
+#                "Homo_sapiens.gene_info.gz")
+#f <- tempfile()
+#download.file(fn, destfile = f)
 
+f <- "~/Analyses/CITEseq_curation/data/Homo_sapiens.gene_info.gz"
 ncbi_genes <- readr::read_delim(f, na = c("", "NA", "-"))
+
+# Keywords for filtering "Other" column
+alias_grep <- "^CD|[Aa]ntigen|MHC|HLA|(T[- ]cell)|(B[- ]cell)|surface|immunoglo"
 
 # Make long format NCBI table
 
@@ -41,7 +45,8 @@ ncbi_genes <- ncbi_genes %>%
                   ALIAS = Synonyms,
                   NCBI_NAME = description,
                   OTHER = Other_designations,
-                  ENTREZ_ID = GeneID) %>%
+                  ENTREZ_ID = GeneID,
+                  BIOTYPE = type_of_gene) %>%
 
     dplyr::mutate(HGNC_ID = stringr::str_extract_all(dbXrefs,
                                                     "(?<=HGNC:)HGNC:[0-9]+"),
@@ -62,8 +67,8 @@ ncbi_genes <- ncbi_genes %>%
                   ENTREZ_ID = as.character(ENTREZ_ID)) %>%
 
     # Only keep columns of interest
-    dplyr::select(-`#tax_id`, -`map_location`, -`type_of_gene`,
-                  -`Modification_date`, -Feature_type, -chromosome, -LocusTag,
+    dplyr::select(-`#tax_id`, -`map_location`, -`Modification_date`,
+                  -Feature_type, -chromosome, -LocusTag,
                   -Nomenclature_status, -dbXrefs) %>%
 
     # Convert to long format, split aliases and other designations
@@ -72,8 +77,8 @@ ncbi_genes <- ncbi_genes %>%
     dplyr::filter(! is.na(value)) %>%
     AbNames::splitUnnest(ab = "value", "\\|") %>%
 
-    # Only keep "Other" column if it refers to an antigen or a CD molecule
-    dplyr::filter(symbol_type == "OTHER" & grepl("[Aa]ntigen|^CD", value) |
+    # Filter "Other" column for terms related to surface markers
+    dplyr::filter(symbol_type == "OTHER" & grepl(alias_grep, value) |
                       ! symbol_type == "OTHER") %>%
 
     dplyr::mutate(SOURCE = "NCBI") %>%

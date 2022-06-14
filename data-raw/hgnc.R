@@ -31,7 +31,7 @@ hgnc_proteins <- dplyr::rename(hgnc_proteins,
                                HGNC_ID = hgnc_id,
                                HGNC_NAME = name,
                                ENSEMBL_ID = ensembl_gene_id,
-                               UNIPROT_IDS = uniprot_ids,
+                               UNIPROT_ID = uniprot_ids,
                                HGNC_SYMBOL = symbol,
                                ALIAS = alias_symbol,
                                PREVIOUS_SYMBOL = prev_symbol,
@@ -57,8 +57,6 @@ hgnc <- dplyr::full_join(hgnc_proteins, hgnc_groups)
 
 
 # Create and save long version of the HGNC table for querying ----
-
-alias_grep <- "^CD|[Aa]ntigen|MHC|HLA|(T[- ]cell)|(B[- ]cell)|surface|immunoglo"
 
 hgnc <- hgnc %>%
     dplyr::mutate(HGNC_SYMBOL2 = HGNC_SYMBOL) %>%
