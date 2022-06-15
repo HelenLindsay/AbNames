@@ -136,5 +136,9 @@ all_to_eg <- all_to_eg %>%
 
 hgnc <- dplyr::full_join(hgnc, all_to_eg)
 
+
+# NOTE - check for consistency with other sources, see if unfilled can be
+# filled from another source
+
 hgnc <- as.data.frame(hgnc)
 usethis::use_data(hgnc, overwrite = TRUE, compress = "bzip2")
