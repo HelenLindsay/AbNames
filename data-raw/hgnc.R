@@ -31,7 +31,7 @@ hgnc_proteins <- dplyr::rename(hgnc_proteins,
                                HGNC_ID = hgnc_id,
                                HGNC_NAME = name,
                                ENSEMBL_ID = ensembl_gene_id,
-                               UNIPROT_IDS = uniprot_ids,
+                               UNIPROT_ID = uniprot_ids,
                                HGNC_SYMBOL = symbol,
                                ALIAS = alias_symbol,
                                PREVIOUS_SYMBOL = prev_symbol,
@@ -58,8 +58,6 @@ hgnc <- dplyr::full_join(hgnc_proteins, hgnc_groups)
 
 # Create and save long version of the HGNC table for querying ----
 
-alias_grep <- "^CD|[Aa]ntigen|MHC|HLA|(T[- ]cell)|(B[- ]cell)|surface|immunoglo"
-
 hgnc <- hgnc %>%
     dplyr::mutate(HGNC_SYMBOL2 = HGNC_SYMBOL) %>%
     tidyr::pivot_longer(c("HGNC_SYMBOL",
@@ -70,6 +68,7 @@ hgnc <- hgnc %>%
                           "PREVIOUS_NAME"),
                         names_to = "symbol_type") %>%
     dplyr::filter(! is.na(value)) %>%
+    # Make one row per alias
     AbNames::splitUnnest(ab = "value", split = "\\|") %>%
     tidyr::unnest(cols = value) %>%
     dplyr::mutate(SOURCE = "HGNC") %>%
@@ -85,60 +84,6 @@ hgnc <- hgnc %>%
     dplyr::filter(ngroups == 1 | symbol_type == "HGNC_SYMBOL") %>%
     dplyr::select(-ngroups)
 
-
-# Add Entrez IDs if they are unambiguous
-library(org.Hs.eg.db)
-hs <- org.Hs.eg.db
-
-filter_dups <- function(df, group_col, dup_col){
-    df %>%
-        dplyr::group_by({{ group_col }}) %>%
-        dplyr::mutate(n = n_distinct({{ dup_col }})) %>%
-        dplyr::filter(n == 1) %>%
-        dplyr::ungroup() %>%
-        dplyr::select(-n)
-}
-
-ens_to_eg <- AnnotationDbi::select(hs, keys = unique(hgnc$ENSEMBL_ID),
-                                   keytype = "ENSEMBL",
-                                   columns = c("ENTREZID", "SYMBOL")) %>%
-    filter_dups(ENSEMBL, SYMBOL)
-
-
-sym_to_eg <- AnnotationDbi::select(hs, keys = unique(hgnc$HGNC_SYMBOL),
-                                   keytype = "SYMBOL",
-                                   columns = c("ENTREZID", "ENSEMBL")) %>%
-    filter_dups(SYMBOL, ENSEMBL)
-
-all_to_eg <- dplyr::full_join(ens_to_eg, sym_to_eg) %>%
-    na.omit() %>%
-    dplyr::rename(ENSEMBL_ID = ENSEMBL,
-                  HGNC_SYMBOL = SYMBOL,
-                  ENTREZ_ID = ENTREZID) %>%
-    dplyr::semi_join(hgnc, by = c("ENSEMBL_ID", "HGNC_SYMBOL"))
-
-
-# Check for any mappings that aren't one-to-one
-all_to_eg <- all_to_eg %>%
-    dplyr::group_by(HGNC_SYMBOL) %>%
-    dplyr::mutate(n_sym_ens = n_distinct(ENSEMBL_ID),
-                  n_sym_eg = n_distinct(ENTREZ_ID)) %>%
-    dplyr::group_by(ENSEMBL_ID) %>%
-    dplyr::mutate(n_ens_sym = n_distinct(HGNC_SYMBOL),
-                  n_ens_eg = n_distinct(ENTREZ_ID)) %>%
-    dplyr::group_by(ENTREZ_ID) %>%
-    dplyr::mutate(n_eg_ens = n_distinct(ENSEMBL_ID),
-                  n_eg_sym = n_distinct(HGNC_SYMBOL)) %>%
-    dplyr::ungroup() %>%
-    dplyr::filter(if_any(c(n_sym_ens, n_sym_eg, n_ens_sym,
-                           n_ens_eg, n_eg_ens, n_eg_sym), ~ `==`(.x, 1))) %>%
-    dplyr::select(ENSEMBL_ID, ENTREZ_ID, HGNC_SYMBOL)
-
-hgnc <- dplyr::full_join(hgnc, all_to_eg)
-
-
-# NOTE - check for consistency with other sources, see if unfilled can be
-# filled from another source
 
 hgnc <- as.data.frame(hgnc)
 usethis::use_data(hgnc, overwrite = TRUE, compress = "bzip2")

@@ -14,13 +14,13 @@
 # NCBI genes has more cases where one HGNC symbol is mapped to several
 # ENSEMBL IDs
 
-# Prefer to use two matches (e.g. symbol + ensembl) if possible
-
 # Not all HGNC Ensembl IDs are in the biomaRt table
 # (some are not protein-coding)
 
 # ENSG00000203668: Entrez gene symbol CHML, HGNC symbol OPN3 -
 # both are valid HGNC symbols
+
+# Within hgnc, one Uniprot ID can map to multiple HGNC IDs, e.g. Q9GZY0
 
 # Setup -----
 
@@ -30,8 +30,124 @@ library(readxl)
 source("ncbi.R")
 source("org_db.R")
 
+# --------------------------------------------------------------------
+# Make HGNC/ENSEBML IDs from HGNC consistent with Ensembl -----
 
-# Merge HGNC, NCBI and org.db --------------------------------------
+# Two cases:
+# - ENSEMBL / HGNC disagree -> use ENSEMBL ID from ENSEMBL
+# - ENSEMBL has additional matches -> keep all protein-coding
+
+# Manually checked 15/06/22, usually disagreements are because
+# HGNC ENSEMBL_ID is obsolete
+
+bm_ids <- dplyr::select(bm, ENSEMBL_ID, HGNC_ID, HGNC_SYMBOL, BIOTYPE) %>%
+    unique()
+
+# 28 genes differ in HGNC_ID / ENSEMBL_ID combination
+bm_ens_diff <- dplyr::anti_join(bm_ids, hgnc_ids,
+                                by = c("HGNC_ID", "ENSEMBL_ID"))
+
+# Get the Ensembl IDs that HGNC assigns
+hgnc_ens_diff <- hgnc_ids %>%
+    union_join(bm_ens_diff %>% dplyr::select(-BIOTYPE))
+
+# Check if these are also in the biomart table
+# (2 ENSEMBL_IDs to 1 HGNC_SYMBOL)
+multi_gene <- bm_ids %>%
+    # HGNC_ID/ENSEMBL_ID agrees with HGNC
+    dplyr::semi_join(hgnc_ens_diff)
+
+# These are the genes where HGNC/ENSEMBL disagree
+ens_patch <- bm_ens_diff %>%
+    dplyr::filter(! HGNC_ID %in% multi_gene$HGNC_ID) %>%
+    dplyr::filter(BIOTYPE == "protein_coding") %>%
+    dplyr::select(-BIOTYPE)
+
+# Overwrite the Ensembl IDs in HGNC if HGNC/ENSEMBL disagree
+hgnc <- hgnc %>%
+    dplyr::rows_update(ens_patch, by = c("HGNC_ID", "HGNC_SYMBOL"))
+
+# Get both members where Ensembl gives two mappings to the same HGNC symbol
+multi_gene <- bm_ids %>%
+    dplyr::filter(HGNC_ID %in% multi_gene$HGNC_ID)
+
+# Add both copies into hgnc
+temp <- hgnc %>% dplyr::semi_join(multi_gene)
+multi_gene_patch <- multi_gene %>% dplyr::anti_join(temp)
+temp <- dplyr::rows_update(temp,
+                           multi_gene_patch %>% dplyr::select(-BIOTYPE),
+                           by = c("HGNC_ID", "HGNC_SYMBOL"))
+hgnc <- hgnc %>% bind_rows(temp)
+
+# Note that the mappings to non-protein-coding genes haven't been removed
+# e.g. ENSG00000271672 transcribed_processed_pseudogene
+
+# -----------------------------------------------------------------------
+# Add Entrez IDs -----
+
+prep_merge <- function(df, hgnc){
+    df %>%
+        dplyr::select(ENSEMBL_ID, ENTREZ_ID, HGNC_SYMBOL) %>%
+        dplyr::semi_join(hgnc) %>%
+        # Want Ensembl, Entrez and Symbol for merging
+        na.omit() %>%
+        unique()
+}
+
+common_or_missing <- function(x, y){
+    sj <- dplyr::semi_join(x, y)
+    aj <- dplyr::anti_join(x, y)
+    # Are the entries in the anti-join inconsistent or missing?
+
+    # Find entries in y where any column value is in the anti_join
+    uj <- union_join(y, aj)
+
+    # Find entries in the anti-join where any entry is in y (using above)
+    to_rm <- union_join(aj, uj)
+
+    aj <- anti_join(aj, to_rm)
+    return(dplyr::bind_rows(sj, aj))
+}
+
+
+bm_x <- prep_merge(bm, hgnc)
+ncbi_x <- prep_merge(ncbi_genes, hgnc)
+org_db_x <- prep_merge(org_db, hgnc)
+
+bm_ncbi <- common_or_missing(bm_x, ncbi_x)
+bm_orgdb <- common_or_missing(bm_x, org_db_x)
+ncbi_bm <- common_or_missing(ncbi_x, bm_x)
+ncbi_orgdb <- common_or_missing(ncbi_x, org_db_x)
+orgdb_bm <- common_or_missing(org_db_x, bm_x)
+orgdb_ncbi <- common_or_missing(org_db_x, ncbi_x)
+
+consistent <- Reduce(dplyr::full_join,
+                     list(bm_ncbi, bm_orgdb, ncbi_bm, ncbi_orgdb,
+                                  orgdb_bm, orgdb_ncbi))
+
+hgnc <- hgnc %>% dplyr::left_join(consistent)
+
+
+# ---------------------------------------------------------------------------
+# Select the aliases that aren't already present in hgnc -----
+
+bm_novel <- bm %>%
+    dplyr::mutate(symbol_type = "ALIAS") %>%
+    dplyr::rename(value = ALIAS) %>%
+    dplyr::filter(! value == "") %>%
+    dplyr::anti_join(hgnc, by = c("HGNC_SYMBOL", "value")) %>%
+    # Only keep if HGNC_SYMBOL/ENSEMBL_ID combinations are correct
+    dplyr::semi_join(hgnc, by = c("HGNC_SYMBOL", "ENSEMBL_ID"))
+
+org_db_novel <- org_db %>%
+    dplyr::mutate(symbol_type = "ALIAS") %>%
+    dplyr::anti_join(hgnc, by = c("HGNC_SYMBOL", "value")) %>%
+    # Only want genes for which there is a HGNC / ENSEMBL combination in HGNC
+    dplyr::semi_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID))
+
+# --------------------------------------------------------------------------
+
+# Add novel aliases -----
 
 # Add novel aliases from biomaRt and NCBI
 # (Note - have previously checked that HGNC_ID / ENSEMBL_ID combinations
@@ -60,322 +176,6 @@ hgnc <- hgnc %>%
     dplyr::select(-n_genes)
 
 
-
-
-
-# # Check if ncbi_genes and org_db agree on mapping between
-# # HGNC, ENTREZ and ENSEMBL -----
-#
-#
-# ncbi_id_map <- ncbi_genes %>%
-#     dplyr::select(ENTREZ_ID, ENSEMBL_ID, HGNC_SYMBOL) %>%
-#     unique()
-#
-# org_db_id_map <-  org_db %>%
-#     dplyr::select(ENTREZ_ID, ENSEMBL_ID, HGNC_SYMBOL) %>%
-#     unique()
-#
-#
-#
-# ncbi_patch <- ncbi_id_map %>%
-#     # Shares an ENTREZ id with org_db ...
-#     dplyr::semi_join(org_db_id_map, by = "ENTREZ_ID") %>%
-#     # ...but disagrees with "ENSEMBL_ID"
-#     dplyr::anti_join(org_db_id_map) %>%
-#     # Add the org_db IDs
-#     dplyr::left_join(org_db_id_map, by = c("ENTREZ_ID", "HGNC_SYMBOL")) %>%
-#     dplyr::rename("ENSEMBL_FROM_ORGDB" = "ENSEMBL_ID.y",
-#                   "ENSEMBL_FROM_NCBI" = "ENSEMBL_ID.x") %>%
-#     dplyr::left_join(hgnc %>%
-#                          dplyr::select("HGNC_SYMBOL", "ENSEMBL_ID") %>%
-#                          unique(),
-#                      by = "HGNC_SYMBOL") %>%
-#     # If one of ncbi_genes / org_db agrees with HGNC, keep that one
-#     # If both disagree, set to NA
-#     dplyr::mutate(ncbi = ENSEMBL_ID == ENSEMBL_FROM_NCBI,
-#                   orgdb = ENSEMBL_ID == ENSEMBL_FROM_ORGDB)
-#
-#     dplyr::mutate(ENSEMBL_ID =
-#                       ifelse(ENSEMBL_ID == ENSEMBL_FROM_ORGDB |
-#                                  ENSEMBL_ID == ENSEMBL_FROM_NCBI,
-#                              ENSEMBL_ID, NA)) %>%
-#     dplyr::select(-ENSEMBL_FROM_ORGDB, ENSEMBL_FROM_NCBI)
-#
-#
-#
-#
-#
-# org_db_patch <- org_db_id_map %>%
-#     dplyr::semi_join(ncbi_id_map, by = "ENTREZ_ID") %>%
-#     dplyr::anti_join(ncbi_id_map) %>%
-#     dplyr::left_join(ncbi_id_map, by = c("ENTREZ_ID", "HGNC_SYMBOL")) %>%
-#     dplyr::rename("ENSEMBL_FROM_ORGDB" = "ENSEMBL_ID.x",
-#                   "ENSEMBL_FROM_NCBI" = "ENSEMBL_ID.y") %>%
-#     dplyr::left_join(hgnc %>%
-#                          dplyr::select("HGNC_SYMBOL", "ENSEMBL_ID") %>%
-#                          unique(),
-#                      by = "HGNC_SYMBOL") %>%
-#     # If one of ncbi_genes / org_db agrees with HGNC, keep that one
-#     # If both disagree, set to NA
-#     dplyr::mutate(ENSEMBL_ID =
-#                       ifelse(ENSEMBL_ID == ENSEMBL_FROM_ORGDB |
-#                                  ENSEMBL_ID == ENSEMBL_FROM_NCBI,
-#                              ENSEMBL_ID, NA)) %>%
-#     dplyr::select(-ENSEMBL_FROM_ORGDB, ENSEMBL_FROM_NCBI)
-#
-#
-#
-#
-# # PATCH THE ENSEMBL ID - NA IF DISAGREES WITH HGNC
-#
-#
-# # Joining Entrez and Ensembl -----
-#
-# # Usually one ENSEMBL to one HGNC (occasional exceptions), e.g. TCBE
-# # TCBE appears to be multiple copies that produce the same protein
-# # ENTREZ can be several to one HGNC
-#
-# # Within org_db, one ENTREZ_ID can map to several ENSEMBL_IDs
-# # e.g. APOBEC3A_B / APOBEC3A BiomaRt only maps to one of the aliases
-#
-#
-#
-# # Sometimes biomaRt ENTREZ_IDs are NA.
-# # Fill these if the ENSEMBL_ID and HGNC_SYMBOL agree
-#
-# org_db_patch <- org_db %>%
-#     dplyr::select(ENSEMBL_ID, HGNC_SYMBOL, ENTREZ_ID) %>%
-#     dplyr::filter(! is.na(ENSEMBL_ID)) %>%
-#     unique()
-#
-# bm <- bm %>%
-#     dplyr::rows_patch(org_db_patch,
-#                       by = c("ENSEMBL_ID", "HGNC_SYMBOL"),
-#                       unmatched = "ignore")
-#
-#
-#
-#
-#
-
-
-
-
-#
-#
-# # There are cases where Biomart and org_db map the same
-# # ENSEMBL_ID / HGNC_SYMBOL to different ENTREZ_IDs,
-# # e.g. ENSG00000143702/CEP170 to 645455 (biomaRt) or 9859 (org_db)
-# # In this case, biomaRt mapping is to a pseudogene according to NCBI
-#
-#
-# # Just keep rows from org_db and Biomart where Entrez / Ensembl agree
-#
-# bm_minus_entrez <- dplyr::anti_join(bm, org_db,
-#                                     by = c("ENSEMBL_ID", "ENTREZ_ID"))
-#
-# ens_entrez <- dplyr::semi_join(bm, org_db,
-#                                by = c("ENSEMBL_ID", "ENTREZ_ID"))
-#
-#
-# # Two problems: one is mapping the IDs, the other is collecting the aliases
-#
-#
-#
-#
-# # Check for disagreements between org_db and NCBI ----
-# ncbi_not_org_db <- ncbi_genes %>%
-#     dplyr::select(ENTREZ_ID, ENSEMBL_ID) %>%
-#     unique() %>%
-#     dplyr::anti_join(org_db %>%
-#                          dplyr::select(ENTREZ_ID, ENSEMBL_ID) %>%
-#                          unique())
-#
-#
-
-
-# ---------------------------------------------------------------------------
-# # If Ensembl and Entrez disagree on mapping between IDs, set to NA?
-#
-#
-# # Remove entries where Entrez and Ensembl disagree on mapping between
-# # Entrez to HGNC or Ensembl to HGNC -----
-#
-# # Example where Entrez differs in official symbol: 100302652 / ENSG00000115239
-#
-#
-# # Instances where e.g. Entrez ID or Ensembl ID is shared (not NA) and HGNC is
-# # different
-#
-# x <- bm %>%
-#     dplyr::filter(if_all(c(ENSEMBL_ID, ENTREZ_ID), ~!is.na(.x))) %>%
-#     dplyr::anti_join(org_db, by = c("ENSEMBL_ID", "ENTREZ_ID", "HGNC_SYMBOL"))
-#
-#
-# y <- org_db %>%
-#     dplyr::filter(if_all(c(ENSEMBL_ID, ENTREZ_ID), ~!is.na(.x))) %>%
-#     dplyr::anti_join(bm, by = c("ENSEMBL_ID", "ENTREZ_ID", "HGNC_SYMBOL"))
-#
-#
-#
-#
-# x <- bm %>% dplyr::anti_join(org_db,
-#                              by = c("ENSEMBL_ID", "ENTREZ_ID", "HGNC_SYMBOL"))
-# # Things that disagree on "HGNC_SYMBOL"
-# xx <- x %>% dplyr::anti_join(org_db, by = "HGNC_SYMBOL")
-#
-#
-# xx <- bm %>% dplyr::semi_join(org_db,
-#                               by = c("ENSEMBL_ID", "ENTREZ_ID", "HGNC_SYMBOL"))
-#
-# y <- org_db %>% dplyr::anti_join(bm,
-#                                  by = c("ENSEMBL_ID", "ENTREZ_ID", "HGNC_SYMBOL"))
-# yy <- org_db %>% dplyr::semi_join(bm,
-#                                   by = c("ENSEMBL_ID", "ENTREZ_ID", "HGNC_SYMBOL"))
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Cell marker database ---------------------------------------------
-
-# Note: Isoform name may be mapped to gene name, e.g. CD45RO -> PTPRC
-# Some antigens have no annotation information, e.g. CD45.1
-
-# http://bio-bigdata.hrbmu.edu.cn/CellMarker/index.jsp
-
-gsubCellmarker <- function(x){
-    p1_matches <- stringr::str_extract_all(x, "\\[([^\\[]+)\\]")
-    p1_sub <- gsub(", ", "\\|", unlist(p1_matches))
-    p1_sub <- gsub("\\[|\\]", "", p1_sub)
-    p1_sub <- relist(p1_sub, p1_matches)
-    m <- gregexpr("\\[([^\\[]+)\\]", x)
-    regmatches(x, m) <- p1_sub
-    return(x)
-}
-
-# Cellmarker
-# To do: make sure that cellmarker cellMarker col mapped to same geneSymbol/ID
-# column is a correct, unambiguous alias
-
-cellmarker_loc <- paste0("http://bio-bigdata.hrbmu.edu.cn/CellMarker/download/",
-                         "Human_cell_markers.txt")
-cellmarker_fname <- "~/Analyses/CITEseq_curation/data/CellMarker_human.txt"
-download.file(cellmarker_loc, destfile = cellmarker_fname)
-
-cellmarker <- readr::read_delim(cellmarker_fname) %>%
-    dplyr::select(cellName, cellMarker, geneSymbol,
-                  geneID, proteinName, proteinID) %>%
-    dplyr::filter(if_all(c(geneID, proteinID), ~! is.na(.x))) %>%
-    unique() %>%
-    # Separate protein complexes with | instead of [a, b, c]
-    dplyr::mutate(across(c(geneSymbol, geneID, proteinName, proteinID),
-                         ~ gsubCellmarker(.x))) %>%
-    dplyr::mutate(across(c(cellMarker, geneSymbol, geneID,
-                         proteinName, proteinID), ~strsplit(.x, ", "))) %>%
-
-    # If there is not 1 marker per gene, something is wrong
-    dplyr::filter(lengths(cellMarker) == lengths(geneSymbol) &
-                      lengths(cellMarker) == lengths(proteinID) &
-                      lengths(geneSymbol) == lengths(geneID) &
-                      lengths(proteinID) == lengths(proteinName)) %>%
-    tidyr::unnest(cols = c(cellMarker, geneSymbol, geneID,
-                           proteinName, proteinID)) %>%
-    dplyr::rename(Antigen = cellMarker,
-                  ENTREZ_IDS = geneID,
-                  ENTREZ_SYMBOL = geneSymbol,
-                  UNIPROT_IDS = proteinID) %>%
-    dplyr::mutate(SOURCE = "CELLMARKER")
-
-
-protein_complexes <- cellmarker %>%
-    dplyr::filter(grepl("\\|", ENTREZ_SYMBOL)) %>%
-    dplyr::select(Antigen, ENTREZ_SYMBOL, ENTREZ_IDS,
-                  proteinName, UNIPROT_IDS) %>%
-    unique()
-
-# Using org.db, add ENSEMBL identifiers (one ENSEMBL may map to several ENTREZ?)
-# As this includes "ALIAS" column, rows may be added
-protein_complexes <- protein_complexes %>%
-    dplyr::mutate(across(c(ENTREZ_SYMBOL, ENTREZ_IDS,
-                           proteinName, UNIPROT_IDS), ~strsplit(.x, "\\|"))) %>%
-    tidyr::unnest(cols = c(ENTREZ_SYMBOL, ENTREZ_IDS,
-                           proteinName, UNIPROT_IDS)) %>%
-    dplyr::left_join(org_db %>% dplyr::select(-ALIAS) %>% unique(),
-                     by = c(ENTREZ_IDS = "ENTREZ_ID"))
-
-
-pc_long <- protein_complexes %>%
-    dplyr::mutate(across(c(ENTREZ_SYMBOL, ENTREZ_IDS, proteinName, UNIPROT_IDS),
-                         ~strsplit(.x, "\\|"))) %>%
-    tidyr::unnest(cols = c(ENTREZ_SYMBOL, ENTREZ_IDS, proteinName, UNIPROT_IDS))
-
-
-
-
-
-# When a single gene is mapped to several Antigens, check if cellName annotation
-# is also the same
-
-# Split into individual genes, check the symbols are official symbols,
-# add HGNC and ENSEMBL IDs.
-
-
-
-
-
-# Row Epithelial cell starting Adhesion molecules -
-# Number of cell markers is not equal to number of gene (groups),
-# is there an extra , Adhesion molecules, LFA1, Adhesion molecules LFA2?
-
-
-#dplyr::rename(ENTREZ_ID = geneID,
-#             UNIPROT_ID = proteinID) %>%
-
-
-# Cell surface protein atlas ---------------------------------------
-
-# http://wlab.ethz.ch/cspa/#abstract
-
-
-# Table of validated surfaceome proteins
-cspa_loc <- "http://wlab.ethz.ch/cspa/data/S2_File.xlsx"
-cspa_fname <- "~/Analyses/CITEseq_curation/data/cspa.xlsx"
-download.file(cspa_loc, destfile = cspa_fname)
-
-# Sheet A has human proteins and entrez IDs
-cspa <- readxl::read_xlsx(cspa_fname) %>%
-    dplyr::select(UP_Protein_name, UP_entry_name, CD, ENTREZ_gene_ID,
-                  `ENTREZ gene symbol`) %>%
-    dplyr::rename(UNIPROT_NAME = UP_Protein_name,
-                  ENTREZ_ID = ENTREZ_gene_ID,
-                  ENTREZ_SYMBOL = `ENTREZ gene symbol`,
-                  Antigen = CD)
-
-
+#> table(is.na(hgnc$ENTREZ_ID)) # Note - not the number of genes because aliases
+# 122569  36302
 
