@@ -89,3 +89,23 @@ showGroups <- function(df, i = 1, n = 1, max_rows = 50, interactive = TRUE){
     row_idxs <- unlist(row_idxs[i:min((i + n - 1), length(row_idxs))])
     return(df[row_idxs, ])
 }
+
+
+# Find an antibody in a data.frame and return all aliases
+# e.g. abAliases(df, "value == 'CD3'")
+abAliases <- function(df, ex, by = "HGNC"){
+    # Switch depending on whether ex is a string or an expression
+    enex <- rlang::enexpr(ex)
+
+    if (rlang::is_string(enex)){
+        ex <- rlang::parse_expr(ex) # Parse string into expression
+    } else {
+        ex <- enex
+    }
+
+    res <- union_join(df, df %>%
+                          dplyr::filter(!! ex) %>%
+                          dplyr::select( {{ by }} ) )
+
+    return(res)
+}
