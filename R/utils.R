@@ -153,3 +153,16 @@ union_join <- function(df, df2 = NULL, rows = NULL){
     x <- unlist(qdf, use.names = FALSE)
     df %>% dplyr::filter(if_any(.cols = everything(), ~.x %in% x))
 }
+
+
+# rm_ambiguous ----
+# note doesn't check temp col name
+# gp - name of column to group by
+# id - name of column to check for duplications
+rm_ambiguous <- function(df, gp, id){
+    df %>% dplyr::group_by({{ gp }}) %>%
+        dplyr::mutate(n_genes = n_distinct( {{ id }} )) %>%
+        dplyr::filter(n_genes == 1) %>%
+        dplyr::select(-n_genes) %>%
+        dplyr::ungroup()
+}
