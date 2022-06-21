@@ -16,6 +16,7 @@ Encoding: UTF-8
 Imports:
     dplyr,
     magrittr,
+    methods,
     purrr,
     rlang,
     stats,
@@ -29,6 +30,9 @@ Suggests:
     ontoProc,
     readr,
     rmarkdown,
+    Seurat,
+    SingleCellExperiment,
+    SummarizedExperiment,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 RoxygenNote: 7.2.0
