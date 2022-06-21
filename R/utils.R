@@ -3,12 +3,14 @@
 #' Warn if a column already exists in a data.frame
 #'
 #'@param df A data.frame or tibble
-#'@param new_col character(1) Name of a column to add to df
+#'@param new_col character(n) Name of a column(s) to add to df
 .warnIfColExists <- function(df, new_col){
-    # Check if new_col already exists in df, stop if so
+    # Check if new_col(s) already exists in df, stop if so
 
-    if (new_col %in% colnames(df)){
-        msg1 <- sprintf("Column %s already exists in data.frame.\n", new_col)
+    if (any(new_col %in% colnames(df))){
+        cols_exist <- toString(intersect(new_col, colnames(df)))
+        msg1 <- sprintf("Column(s) %s already exists in data.frame.\n",
+                        cols_exist)
         msg2 <- "Please supply a different value for new_col"
         stop(msg1, msg2)
     }
@@ -155,15 +157,13 @@ union_join <- function(df, df2 = NULL, rows = NULL){
 }
 
 
-
-
 # rm_ambiguous ----
 # note doesn't check temp col name
 # gp - name of column to group by
 # id - name of column to check for duplications
 rm_ambiguous <- function(df, gp, id){
     df %>% dplyr::group_by({{ gp }}) %>%
-        dplyr::mutate(n_genes = n_distinct( {{ id }} )) %>%
+        dplyr::mutate(n_genes = dplyr::n_distinct( {{ id }} )) %>%
         dplyr::filter(n_genes == 1) %>%
         dplyr::select(-n_genes) %>%
         dplyr::ungroup()

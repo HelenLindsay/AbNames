@@ -16,17 +16,35 @@
 nPerGroup <- function(df, group, col, nm = "n_per_group"){
     # To do? possible to vectorise col with n temp names
 
+    # CHECK IF NAMES EXIST IN DF
     tmp <- .tempColName(df, nm = nm)
+
     df <- splitMerge(df, complete.cases(!!!syms(group)),
-                     .addNPerGroup, group = group, nm = tmp, col = col)
+                     .addNPerGroup, group = group, nm = tmp, cols = col)
     return(df)
 }
 
 
-.addNPerGroup <- function(df, group, nm, col){
+# group must be unquoted, cols works quoted and unquoted
+.addNPerGroup <- function(df, group, cols){
+
     df <- df %>%
-        dplyr::group_by(!!!syms(group)) %>%
-        dplyr::mutate(!!nm := dplyr::n_distinct(!!!syms(col), na.rm = TRUE))
+        dplyr::group_by({{ group }}) %>%
+        dplyr::mutate(dplyr::across({{ cols }},
+                                    .fns = list(ndistinct =
+                                        ~dplyr::n_distinct(.x, na.rm = TRUE)),
+                                    .names = "n{.col}")
+                      )
     return(df)
 }
+
+
+
+#
+#x <- citeseq %>%
+#    dplyr::group_by(Cat_Number) %>%
+#    dplyr::mutate(nrrid = n_distinct(RRID, na.rm = TRUE),
+#                  nclone = n_distinct(tolower(Clone), na.rm = TRUE),
+#                  ntotalseq = n_distinct(TotalSeq_Cat, na.rm = TRUE),
+#                  noligo = n_distinct(Oligo_ID, na.rm = TRUE))
 
