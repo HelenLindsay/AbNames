@@ -113,18 +113,15 @@
 
 <span class="co"># Show the first entries of hgnc, where each row is the start of one column</span>
 <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="va">hgnc</span><span class="op">)</span> 
-<span class="co">#&gt; Rows: 30,123</span>
-<span class="co">#&gt; Columns: 10</span>
-<span class="co">#&gt; $ HGNC_ID      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "HGNC:5", "HGNC:24086", "HGNC:7", "HGNC:23336", "HGNC:300…</span>
-<span class="co">#&gt; $ HGNC_SYMBOL  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "A1BG", "A1CF", "A2M", "A2ML1", "A3GALT2", "A4GALT", "A4G…</span>
-<span class="co">#&gt; $ HGNC_NAME    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "alpha-1-B glycoprotein", "APOBEC1 complementation factor…</span>
-<span class="co">#&gt; $ alias_symbol <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> NA, "ACF, ASP, ACF64, ACF65, APOBEC1CF", "FWP007, S863-7,…</span>
-<span class="co">#&gt; $ prev_symbol  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> NA, NA, NA, "CPAMD9", "A3GALT2P", "P1", NA, NA, NA, NA, N…</span>
-<span class="co">#&gt; $ ENSEMBL_ID   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "ENSG00000121410", "ENSG00000148584", "ENSG00000175899", …</span>
-<span class="co">#&gt; $ Chromosome   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "19q13.43", "10q11.23", "12p13.31", "12p13.31", "1p35.1",…</span>
-<span class="co">#&gt; $ alias_name   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> NA, NA, NA, NA, "iGb3 synthase|isoglobotriaosylceramide s…</span>
-<span class="co">#&gt; $ prev_name    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> NA, NA, NA, "C3 and PZP-like, alpha-2-macroglobulin domai…</span>
-<span class="co">#&gt; $ UNIPROT_IDS  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "P04217", "Q9NQ94", "P01023", "A8K2U0", "U3KPV4", "Q9NPC4…</span>
+<span class="co">#&gt; Rows: 139,296</span>
+<span class="co">#&gt; Columns: 7</span>
+<span class="co">#&gt; $ HGNC_ID     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "HGNC:5", "HGNC:5", "HGNC:24086", "HGNC:24086", "HGNC:2408…</span>
+<span class="co">#&gt; $ ENSEMBL_ID  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "ENSG00000121410", "ENSG00000121410", "ENSG00000148584", "…</span>
+<span class="co">#&gt; $ UNIPROT_IDS <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "P04217", "P04217", "Q9NQ94", "Q9NQ94", "Q9NQ94", "Q9NQ94"…</span>
+<span class="co">#&gt; $ HGNC_SYMBOL <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "A1BG", "A1BG", "A1CF", "A1CF", "A1CF", "A1CF", "A1CF", "A…</span>
+<span class="co">#&gt; $ symbol_type <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "HGNC_SYMBOL", "HGNC_NAME", "HGNC_SYMBOL", "HGNC_NAME", "A…</span>
+<span class="co">#&gt; $ value       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "A1BG", "alpha-1-B glycoprotein", "A1CF", "APOBEC1 complem…</span>
+<span class="co">#&gt; $ SOURCE      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "HGNC", "HGNC", "HGNC", "HGNC", "HGNC", "HGNC", "HGNC", "H…</span>
 
 <span class="co"># (Note: it isn't necessary to use dplyr:: to call "glimpse" as dplyr is loaded</span>
 <span class="co"># with the library call above. This syntax is used to make it clear which</span>
@@ -318,18 +315,18 @@
     <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
     <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/sample_n.html" class="external-link">sample_n</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span>
 <span class="co">#&gt; <span style="color: #949494;"># A tibble: 10 × 4</span></span>
-<span class="co">#&gt;    ID                                               name       value symbol_type</span>
-<span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span>
-<span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> CD24__Lawlor_2021                                greek_word CD24  HGNC_SYMBOL</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> CD42b__Witkowski_2020                            Antigen|g… CD42b alias_symb…</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> CD209 (DC-SIGN)__Mimitou_2021_cite_and_dogma_seq greek_word CD209 HGNC_SYMBOL</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> CD314 (NKG2D)__Liu_2021                          Antigen|g… CD31… alias_symb…</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> CD69__Mair_2020                                  Antigen    CD69  HGNC_SYMBOL</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> CD138__Wu_2021_b                                 Antigen|g… CD138 alias_symb…</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> CD49d__Wu_2021_b                                 Antigen|g… CD49d alias_symb…</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> CD62L__Buus_2021                                 Antigen|g… CD62L alias_symb…</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> CD271 (NGFR)__Hao_2021                           greek_word NGFR  HGNC_SYMBOL</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">10</span> CD96 (TACTILE)__Mimitou_2021_cite_and_dogma_seq  Antigen    CD96  HGNC_SYMBOL</span></code></pre></div>
+<span class="co">#&gt;    ID                                     name                 value symbol_type</span>
+<span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> IgD__Kotliarov_2020                    Ig                   IGHD  HGNC_SYMBOL</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> CD59__Qian_2020                        greek_word           CD59  HGNC_SYMBOL</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> CD27__Kaufmann_2021                    greek_word           CD27  HGNC_SYMBOL</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> CD4__Hao_2021__2                       greek_word           CD4   HGNC_SYMBOL</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> CD163__Mimitou_2021_cite_and_dogma_seq greek_word           CD163 HGNC_SYMBOL</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> CD137 (4-1BB)__Kotliarov_2020          Antigen|greek_word|… CD13… alias_symb…</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> CD4__Qian_2020                         greek_word           CD4   HGNC_SYMBOL</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> CD8__Pont_2020                         Antigen|greek_word|… CD8   prev_symbol</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> CD184 (CXCR4)__Hao_2021                greek_word           CXCR4 HGNC_SYMBOL</span>
+<span class="co">#&gt; <span style="color: #BCBCBC;">10</span> CD274__Qi_2020                         greek_word           CD274 HGNC_SYMBOL</span></code></pre></div>
 <p>The results table above contains (just) the matches between the query table and the HGNC tables. In the example above, we see in the “name” column the formatting function that generated the string in the “value” column that was matched, and in the “symbol_type” column which column of the HGNC data was matched. If there are multiple matches for a given ID, the official symbol (“HGNC_SYMBOL”) is preferred over aliases or previous symbols.</p>
 <p>We may wish to review the matches before merging the results into the original table. For example, we can check for matches to different genes where the name was not guessed to be a multi-subunit protein.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
@@ -346,10 +343,22 @@
 <span class="co"># Look at the first group in multi_gene.</span>
 <span class="co"># Set interactive = FALSE for interactive exploration</span>
 <span class="fu"><a href="../reference/showGroups.html">showGroups</a></span><span class="op">(</span><span class="va">multi_gene</span>, <span class="fl">1</span>, interactive <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-<span class="co">#&gt; Group 1 of 101: 2 rows</span>
-<span class="co">#&gt;                      ID                            name value   HGNC_ID</span>
-<span class="co">#&gt; 1 CD11a.CD18__Wu_2021_b                   upper_no_dash CD11A HGNC:6148</span>
-<span class="co">#&gt; 2 CD11a.CD18__Wu_2021_b Antigen|greek_word|greek_letter  CD18 HGNC:6155</span>
+<span class="co">#&gt; Group 1 of 101: 14 rows</span>
+<span class="co">#&gt;                       ID                            name value   HGNC_ID</span>
+<span class="co">#&gt; 1  CD11a.CD18__Wu_2021_b                   upper_no_dash CD11A HGNC:6148</span>
+<span class="co">#&gt; 2  CD11a.CD18__Wu_2021_b                   upper_no_dash CD11A HGNC:6148</span>
+<span class="co">#&gt; 3  CD11a.CD18__Wu_2021_b                   upper_no_dash CD11A HGNC:6148</span>
+<span class="co">#&gt; 4  CD11a.CD18__Wu_2021_b                   upper_no_dash CD11A HGNC:6148</span>
+<span class="co">#&gt; 5  CD11a.CD18__Wu_2021_b                   upper_no_dash CD11A HGNC:6148</span>
+<span class="co">#&gt; 6  CD11a.CD18__Wu_2021_b                   upper_no_dash CD11A HGNC:6148</span>
+<span class="co">#&gt; 7  CD11a.CD18__Wu_2021_b                   upper_no_dash CD11A HGNC:6148</span>
+<span class="co">#&gt; 8  CD11a.CD18__Wu_2021_b Antigen|greek_word|greek_letter  CD18 HGNC:6155</span>
+<span class="co">#&gt; 9  CD11a.CD18__Wu_2021_b Antigen|greek_word|greek_letter  CD18 HGNC:6155</span>
+<span class="co">#&gt; 10 CD11a.CD18__Wu_2021_b Antigen|greek_word|greek_letter  CD18 HGNC:6155</span>
+<span class="co">#&gt; 11 CD11a.CD18__Wu_2021_b Antigen|greek_word|greek_letter  CD18 HGNC:6155</span>
+<span class="co">#&gt; 12 CD11a.CD18__Wu_2021_b Antigen|greek_word|greek_letter  CD18 HGNC:6155</span>
+<span class="co">#&gt; 13 CD11a.CD18__Wu_2021_b Antigen|greek_word|greek_letter  CD18 HGNC:6155</span>
+<span class="co">#&gt; 14 CD11a.CD18__Wu_2021_b Antigen|greek_word|greek_letter  CD18 HGNC:6155</span>
 
 <span class="co"># This is an example where the antibody is against a heterodimeric protein.</span>
 <span class="co"># We can confirm this by looking up the vendor catalogue number:</span>
@@ -382,7 +391,7 @@
 <p>For now I will remove all genes with multiple matches before merging the results into the citeseq data.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">hgnc_results</span><span class="op">)</span>
-<span class="co">#&gt; [1] 3588</span>
+<span class="co">#&gt; [1] 24414</span>
 
 <span class="co"># Remove matches to several genes, select just columns of interest</span>
 <span class="va">hgnc_results</span> <span class="op">&lt;-</span> <span class="va">hgnc_results</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
@@ -641,7 +650,7 @@
 <span class="co">#&gt;  [4] BiocManager_1.30.18 jquerylib_0.1.4     tools_4.2.0        </span>
 <span class="co">#&gt;  [7] digest_0.6.29       tibble_3.1.7        jsonlite_1.8.0     </span>
 <span class="co">#&gt; [10] evaluate_0.15       memoise_2.0.1       lifecycle_1.0.1    </span>
-<span class="co">#&gt; [13] pkgconfig_2.0.3     rlang_1.0.2         DBI_1.1.2          </span>
+<span class="co">#&gt; [13] pkgconfig_2.0.3     rlang_1.0.2         DBI_1.1.3          </span>
 <span class="co">#&gt; [16] cli_3.3.0           yaml_2.3.5          pkgdown_2.0.4      </span>
 <span class="co">#&gt; [19] xfun_0.31           fastmap_1.1.0       stringr_1.4.0      </span>
 <span class="co">#&gt; [22] knitr_1.39          desc_1.4.1          generics_0.1.2     </span>
