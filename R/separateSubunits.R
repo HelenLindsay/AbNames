@@ -109,21 +109,22 @@ separateSubunits <- function(df, ab = "Antigen", new_col = "subunit"){
 #'@param query_df A data.frame containing potential gene/protein names, one
 # per row
 #'@importFrom dplyr anti_join
+#'@importFrom rlang .data
 .checkSubunitMatches <- function(df, query_df){
     nms <- c("subunit", "TCR_long")
 
     nsubunits <- query_df %>%
-        dplyr::filter(name %in% nms) %>%
-        dplyr::group_by(ID, name) %>%
+        dplyr::filter(.data$name %in% nms) %>%
+        dplyr::group_by(.data$ID, .data$name) %>%
         dplyr::summarise(nexpected = dplyr::n())
 
     incomplete <- df %>%
-        dplyr::filter(ID %in% nsubunits$ID, name %in% nms) %>%
-        dplyr::group_by(ID, name) %>%
+        dplyr::filter(.data$ID %in% nsubunits$ID, .data$name %in% nms) %>%
+        dplyr::group_by(.data$ID, .data$name) %>%
         dplyr::summarise(nmatched = dplyr::n()) %>%
         dplyr::full_join(nsubunits, by = c("ID", "name")) %>%
-        dplyr::filter(! nmatched == nexpected) %>%
-        dplyr::select(-nmatched, -nexpected)
+        dplyr::filter(! .data$nmatched == .data$nexpected) %>%
+        dplyr::select(-.data$nmatched, -.data$nexpected)
 
     result <- df %>%
         dplyr::anti_join(incomplete, by = c("ID", "name"))

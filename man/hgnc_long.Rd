@@ -24,6 +24,7 @@ hgnc_long
 Contains the same data as hgnc, but aliases, previous aliases and names have
 been split to contain one entry per row, with an additional "symbol_type" column
 giving the source of the symbol (e.g. HGNC_SYMBOL, alias_symbol).  Chromosome
-data is not included
+data is not included.  CD3 was removed as the information in the totalseq
+tables doesn't match the information in on the vendor website.
 }
 \keyword{datasets}

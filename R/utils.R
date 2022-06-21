@@ -97,7 +97,7 @@ groupsWith <- function(df1, df2, col){
     # Only keep the columns in df2
     col_vals <- df1 %>%
         dplyr::pull(!!sym(col)) %>%
-        na.omit()
+        stats::na.omit()
 
     df2 <- df2 %>%
         dplyr::filter(!!sym(col) %in% col_vals)
@@ -151,8 +151,10 @@ union_join <- function(df, df2 = NULL, rows = NULL){
     if (! is.null(df2)) { qdf <- df2 }
     if (! is.null(rows)) qdf <- qdf[rows, ]
     x <- unlist(qdf, use.names = FALSE)
-    df %>% dplyr::filter(if_any(.cols = everything(), ~.x %in% x))
+    df %>% dplyr::filter(dplyr::if_any(.cols = dplyr::everything(), ~.x %in% x))
 }
+
+
 
 
 # rm_ambiguous ----
