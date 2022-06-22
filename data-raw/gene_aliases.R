@@ -90,7 +90,7 @@ prep_merge <- function(df, hgnc){
         dplyr::select(ENSEMBL_ID, ENTREZ_ID, HGNC_SYMBOL) %>%
         dplyr::semi_join(hgnc) %>%
         # Want Ensembl, Entrez and Symbol for merging
-        na.omit() %>%
+        stats::na.omit() %>%
         unique()
 }
 

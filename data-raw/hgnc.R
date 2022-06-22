@@ -85,5 +85,9 @@ hgnc <- hgnc %>%
     dplyr::select(-ngroups)
 
 
+# TO DO:
+# Remove genes that do not have a protein ID?
+
+
 hgnc <- as.data.frame(hgnc)
 usethis::use_data(hgnc, overwrite = TRUE, compress = "bzip2")

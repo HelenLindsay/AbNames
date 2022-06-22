@@ -51,9 +51,12 @@ bm <- getBM(mart = ensembl,
                   BIOTYPE = gene_biotype) %>%
     dplyr::group_by(HGNC_ID) %>%
     dplyr::mutate(ENTREZ_ID = as.character(ENTREZ_ID),
-                  SOURCE = "BIOMART")
+                  SOURCE = "BIOMART") %>%
+    # Remove pseudogenes
+    dplyr::filter(! grepl("pseudo", BIOTYPE))
 
-# Add the UNIPROT IDs ----
+
+# Add the UNIPROT IDs (SWISSPROT ONLY) ----
 
 ens_to_sp <- getBM(mart = ensembl,
             filters = c("chromosome_name", "with_hgnc"),
@@ -65,10 +68,15 @@ ens_to_sp <- getBM(mart = ensembl,
                   HGNC_SYMBOL = external_gene_name,
                   HGNC_ID = hgnc_id,
                   ALIAS = external_synonym) %>%
-    dplyr::mutate(UNIPROT_ID = na_if(UNIPROT_ID, ""))
+    dplyr::mutate(UNIPROT_ID = na_if(UNIPROT_ID, "")) %>%
+    dplyr::filter(! is.na(UNIPROT_ID))
+
+if (! all(ens_to_sp$ENSEMBL_ID) %in% bm$ENSEMBL_ID){
+    warning("Uniprot table contains genes missing from bm table")
+}
 
 bm <- bm %>%
-    dplyr::full_join(ens_to_sp) %>%
+    dplyr::left_join(ens_to_sp) %>%
     # Only select genes with a HGNC_ID in the hgnc data set
     dplyr::semi_join(hgnc, by = "HGNC_ID")
 
@@ -89,7 +97,7 @@ bm_patch <- bm %>%
 # Remove these rows from biomart
 bm <- bm %>% anti_join(bm_patch)
 
-# If the incorrect symbol is a known alias, fix and add back in
+# If the incorrect symbol is a known alias in HGNC, fix and add back in
 bm_patch <- bm_patch %>%
     # If the correct symbol is a known alias ...
     dplyr::semi_join(hgnc, by = c("HGNC_SYMBOL" = "value")) %>%
@@ -103,28 +111,16 @@ bm_patch <- bm_patch %>%
 # Add patched rows back into Biomart
 bm <- bm %>% dplyr::bind_rows(bm_patch)
 
-
-
-
 # --------
-
-
-# TO DO: COLLAPSE ROW DUPLICATED EXCEPT ON UNIPROT_ID IS NA e.g. ENSG00000289685
-
 
 # Remove aliases that map to more than one HGNC_SYMBOL ----
 bm <- bm %>%
+    dplyr::mutate(ALIAS = na_if(ALIAS, "")) %>%
     dplyr::group_by(ALIAS) %>%
     dplyr::mutate(n_genes = n_distinct(HGNC_SYMBOL)) %>%
     dplyr::filter(n_genes == 1 | is.na(ALIAS)) %>%
     dplyr::select(-n_genes) %>%
-    dplyr::ungroup() %>%
-
-    # Remove entries that don't match HGNC
-    dplyr::semi_join(hgnc, by = c("ENSEMBL_ID", "HGNC_SYMBOL", "HGNC_ID"))
-
-
-# TO DO: SET ALIAS TO NA, CAN BE "" AFTER JOINING PROTEIN ID
+    dplyr::ungroup()
 
 # ---------------------------------------------------------------------------
 # org.Hs.eg.db genes -----
@@ -152,7 +148,9 @@ org_db <- AnnotationDbi::select(hs,
     dplyr::mutate(SOURCE = "ORGDB") %>%
 
     # Only keep Ensembl ids that appear in the Biomart table (or missing)
-    dplyr::filter(ENSEMBL_ID %in% bm$ENSEMBL_ID | is.na(ENSEMBL_ID)) %>%
+    # Remove pseudogenes
+    dplyr::filter(ENSEMBL_ID %in% bm$ENSEMBL_ID | is.na(ENSEMBL_ID),
+                  ! grepl("pseudogene", BIOTYPE)) %>%
 
     # Remove aliases that map to more than one HGNC_SYMBOL
     dplyr::group_by(value) %>%
@@ -160,14 +158,15 @@ org_db <- AnnotationDbi::select(hs,
     dplyr::filter(n_genes == 1) %>%
     dplyr::select(-n_genes)
 
-# Fill in the Ensembl ID using hgnc if it is missing, require
+
+# Fill in the Ensembl ID using hgnc if it is missing, require ---
 # matches between a symbol and (at least) one alias
 # Note that semi_join still matches if one value is NA
 # (None of the missing genes are in the biomart results)
 
 table(is.na(org_db$ENSEMBL_ID))
 # FALSE  TRUE
-# 119715   6071
+# 127852   4482
 
 # Patch by symbol / alias
 hgnc_patch <- hgnc %>%

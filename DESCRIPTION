@@ -26,12 +26,14 @@ Imports:
 Suggests:
     BiocStyle,
     knitr,
+    MultiAssayExperiment,
     ontologyIndex,
     ontoProc,
     readr,
     rmarkdown,
     Seurat,
     SingleCellExperiment,
+    stringi,
     SummarizedExperiment,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

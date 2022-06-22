@@ -116,7 +116,7 @@ addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",
         dplyr::mutate(n = n(),
                       i = row_number(),
                       !!new_col := ifelse(n == 1, !!sym(new_col),
-                                     paste(!!sym(new_col), i, sep = sep)))
+                                     paste(!!sym(new_col), .data$i, sep = sep)))
 
     if (isTRUE(warn) & max(df[, "n"]) > 1){
         warning("ID columns do not uniquely identify rows, row numbers added.")
@@ -240,8 +240,8 @@ dashNotDot <- function(ab){
     result <- df %>%
         dplyr::mutate(greek_word = replaceGreekSyms(!!sym(ab), "sym2word"),
                       greek_letter = greekToLetter(!!sym(ab)),
-                      upper_no_dash = upperSquish(greek_letter),
-                      lower_no_dash = lowerNoDash(greek_letter),
-                      dash_not_dot = dashNotDot(greek_letter))
+                      upper_no_dash = upperSquish(.data$greek_letter),
+                      lower_no_dash = lowerNoDash(.data$greek_letter),
+                      dash_not_dot = dashNotDot(.data$greek_letter))
     return(result)
 }
