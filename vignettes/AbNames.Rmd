@@ -475,7 +475,7 @@ missing <- citeseq %>%
 # Redocument data sets
 # HAO CD45 should have catalogue numbers!
 # union join back gene ID / get info by antigen
-
+# Include clones when standardising names?
 
 # Session Info
 

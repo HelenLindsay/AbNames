@@ -19,7 +19,7 @@
 #'re-formatted immunoglobin names to add to df
 #'@export
 formatIg <- function(df, ig = "Antigen", new_col = "Ig"){
-    .warnIfColExists(df, new_col)
+    .stopIfColExists(df, new_col)
 
     df <- df %>%
         dplyr::ungroup() %>%

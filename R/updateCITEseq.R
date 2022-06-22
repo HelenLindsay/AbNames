@@ -204,6 +204,15 @@ fillCITEseq <- function(citeseq){
 
 
 
+#
+#x <- citeseq %>%
+#    dplyr::group_by(Cat_Number) %>%
+#    dplyr::mutate(nrrid = n_distinct(RRID, na.rm = TRUE),
+#                  nclone = n_distinct(tolower(Clone), na.rm = TRUE),
+#                  ntotalseq = n_distinct(TotalSeq_Cat, na.rm = TRUE),
+#                  noligo = n_distinct(Oligo_ID, na.rm = TRUE))
+
+
 
 
 # Bind to CITE-seq

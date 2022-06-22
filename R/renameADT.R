@@ -39,8 +39,13 @@ setMethod("renameADT", signature(obj = "SingleCellExperiment",
 
 
 # renameADT for signature MultiAssayExperiment ------
-setMethod("renameADT", signature(obj = "MultiAssayExperiment",
-                              assay = "character"),
+# https://stackoverflow.com/questions/57380044/
+# how-to-document-s4-methods-that-rely-on-classes-from-external-packages
+setMethod("renameADT", as(structure(.Data = c("MultiAssayExperiment",
+                                              "character"),
+                                     names = c("obj", "assay"),
+                                     package = c("MultiAssayExperiment", "")),
+                          "signature"),
     function(obj, assay, ...) {
         stopifnot(requireNamespace("SummarizedExperiment"),
                   requireNamespace("MultiAssayExperiment"))

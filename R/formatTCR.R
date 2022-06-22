@@ -16,7 +16,7 @@
 #'@importFrom dplyr rename
 #'@export
 formatTCR <- function(df, tcr = "TCR", new_col = "TCR_long"){
-    .warnIfColExists(df, new_col)
+    .stopIfColExists(df, new_col)
 
     # Operate on the column to avoid worrying about temporary column names
     tcr_t <- formatTCRv(df[[tcr]], new_col) %>%

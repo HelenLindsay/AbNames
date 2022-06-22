@@ -1,10 +1,10 @@
-# .warnIfColExists ----
+# .stopIfColExists ----
 #'
 #' Warn if a column already exists in a data.frame
 #'
 #'@param df A data.frame or tibble
 #'@param new_col character(n) Name of a column(s) to add to df
-.warnIfColExists <- function(df, new_col){
+.stopIfColExists <- function(df, new_col){
     # Check if new_col(s) already exists in df, stop if so
 
     if (any(new_col %in% colnames(df))){

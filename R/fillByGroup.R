@@ -17,12 +17,13 @@
 #'@importFrom utils capture.output
 #'@export
 fillByGroup <- function(df, group, fill, multiple = c("stop", "mode")){
+    .stopIfColExists(df, sprintf("n%s", fill))
+
     multiple = match.arg(multiple)
-    tmp <- .tempColName(df, 1, "ndistinct")
     original_nrows <- nrow(df)
 
     df <- AbNames::splitMerge(df, complete.cases(!!!syms(group)),
-                              .fillByGroup, group = group, tmp = tmp,
+                              .fillByGroup, group = group,
                               fill = fill, multiple = multiple)
 
     if (! nrow(df) == original_nrows){
@@ -34,23 +35,29 @@ fillByGroup <- function(df, group, fill, multiple = c("stop", "mode")){
 
 
 # .fillByGroup ----
-#' @importFrom dplyr across
-.fillByGroup <- function(df, group, tmp, fill, multiple){
+#' @importFrom dplyr across all_of if_any
+.fillByGroup <- function(df, group, fill, multiple){
     # Group data frame, check if there are multiple values per group
-    df <- .addNPerGroup(df, group, tmp, fill)
+    cn <- colnames(df)
+    df <- .addNPerGroup(df, group, fill)
+    n_per_gp <- setdiff(colnames(df), cn)
 
     # Case: multiple possible values in a fill group and we should stop
-    if (multiple == "stop" & any(df[, tmp] > 1)){
+    if (multiple == "stop" & any(df[, n_per_gp] > 1)){
         msg <- "Some fill columns have multiple values per group, e.g. \n"
-        fg <- .printGroupMatch(df, !!sym(tmp) > 1)
+        fg <- .printGroupMatch(df, if_any(all_of(n_per_gp), ~">"(.x, 1)))
+        #fg <- .printGroupMatch(df, !!sym(tmp) > 1)
         stop(msg, fg)
     }
 
     # Case: only one value per group
-    if (all(df[, tmp] <= 1)){
+    if (all(df[, n_per_gp] <= 1)){
         df <- tidyr::fill(df, !!!syms(fill), .direction = "updown") %>%
             dplyr::ungroup()
     }
+
+
+    # IS THIS VECTORISED?
 
     # Case: multiple values per group, select the most frequent one
     if (multiple == "mode"){
@@ -61,7 +68,7 @@ fillByGroup <- function(df, group, fill, multiple = c("stop", "mode")){
     #    df <- splitMerge(df, !!sym(tmp) == 1)
     #}
 
-    df <- dplyr::select(df, -all_of(tmp))
+    df <- dplyr::select(df, -all_of(n_per_gp))
     return(df)
 }
 

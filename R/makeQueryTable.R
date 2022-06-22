@@ -107,7 +107,7 @@ addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",
 
     # Check id_cols exist in df and new_col does not
     if (! all(id_cols %in% colnames(df))){ stop("All id_cols must be in df") }
-    .warnIfColExists(df, new_col)
+    .stopIfColExists(df, new_col)
 
     df <- df %>%
         dplyr::mutate(!!new_col :=
@@ -132,7 +132,7 @@ addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",
 #addID2 <- function(df, id_cols = c(Antigen, Study), new_col = ID,
 #                  warn = TRUE){
 #
-#    #.warnIfColExists(df, new_col)
+#    #.stopIfColExists(df, new_col)
 #
 #    df <- mutate(df, {{ new_col }} := do.call(paste,
 #                                             c(across({{id_cols}}), sep = "-")))
