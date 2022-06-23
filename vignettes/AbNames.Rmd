@@ -477,6 +477,10 @@ missing <- citeseq %>%
 # union join back gene ID / get info by antigen
 # Include clones when standardising names?
 
+# How can we match antibodies:
+# By an exact match in a query table
+# By an approximate match to the citeseq data
+
 # Session Info
 
 ```{r}

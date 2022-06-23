@@ -46,7 +46,6 @@ fillByGroup <- function(df, group, fill, multiple = c("stop", "mode")){
     if (multiple == "stop" & any(df[, n_per_gp] > 1)){
         msg <- "Some fill columns have multiple values per group, e.g. \n"
         fg <- .printGroupMatch(df, if_any(all_of(n_per_gp), ~">"(.x, 1)))
-        #fg <- .printGroupMatch(df, !!sym(tmp) > 1)
         stop(msg, fg)
     }
 
@@ -61,8 +60,11 @@ fillByGroup <- function(df, group, fill, multiple = c("stop", "mode")){
         df <- .freducePartial(df, groupMode, cls = "cl", cl = fill, gp = group)
     }
 
-    #if (multiple == "ignore" & any(df[, tmp] > 1)){
-    #    df <- splitMerge(df, !!sym(tmp) == 1)
+    # Does it work to set ambiguous groups to NA?
+    # No, because we don't know whether there is a single mode yet
+    #if (multiple == "ignore" & any(df[, n_per_gp] > 1)){
+    #
+    #        df <- splitMerge(df, !!!syms(n_per_gp) == 1)
     #}
 
     df <- dplyr::select(df, -all_of(n_per_gp))
@@ -79,18 +81,22 @@ fillByGroup <- function(df, group, fill, multiple = c("stop", "mode")){
 #' values, the first will be chosen.
 #'
 #'@param df a grouped tibble
-#'@param cl Name of column find mode
-
+#'@param cl Name of column to find mode
 #'@param new_cl Name of column to create.  If NA (default), col is modified
-
 #'@param gp Name(s) of columns to group by
 #'@param min_n (integer(1), default NA) Minimum number of occurrences of
 #'majority value.  If provided, the majority value will be set to NA when it
 #'occurs less than min_n times.
 #'@param n Name of column containing counts.
+#'@param keep_first (logical(1), default TRUE) If there are multiple modes,
+#'should the first (in order of the data.frame) be selected?  If FALSE,
+#'entries are set to NA
+#'@param overwrite (logical(1), default FALSE) If FALSE, new_cl will only
+#'replace NAs.  If TRUE, new_cl will contain the mode.
 #'@importFrom dplyr n
 #'@importFrom rlang .data
-groupMode <- function(df, cl, gp, new_cl = NA, min_n = NA, n = NA){
+groupMode <- function(df, cl, gp, new_cl = NA, min_n = NA, n = NA,
+                      keep_first = TRUE, overwrite = FALSE){
     n <- .tempColName(df, 1, "n")
     tmp <- .tempColName(df, 1)
 
@@ -110,13 +116,33 @@ groupMode <- function(df, cl, gp, new_cl = NA, min_n = NA, n = NA){
                                           NA, !!sym(tmp)))
     }
 
-    # Fill with the majority value if current value is NA
+
+
+    if (! isTRUE(keep_first)){
+        # Set tmp to NA if there are multiple valid modes
+        x <- .tempColName(df, 1, "x")
+        df <- df %>%
+            dplyr::mutate(!!x :=
+                          sum(.data[[n]] == max(.data[[n]])) == max(.data[[n]]),
+                      !!tmp := ifelse(.data[[x]] == TRUE, .data[[tmp]], NA)) %>%
+        dplyr::select(-.data[[x]])
+    }
+
+    if (isFALSE(overwrite)){
+        # Fill with the majority value if current value is NA
+        df <- df %>%
+            dplyr::mutate(!!new_cl :=
+                          dplyr::coalesce(.data[[cl]], .data[[tmp]]))
+    } else {
+        # Set new_cl to the actual mode
+        df <- df %>%
+            dplyr::mutate(!!new_cl := .data[[tmp]])
+    }
+
     df <- df %>%
-        dplyr::mutate(!!new_cl :=
-                          dplyr::coalesce(.data[[cl]], .data[[tmp]])) %>%
         dplyr::select(-.data[[tmp]], -.data[[n]]) %>%
         dplyr::ungroup()
-
     return(df)
+
 }
 

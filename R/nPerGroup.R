@@ -22,10 +22,11 @@ nPerGroup <- function(df, group, col){
 
 
 # group and col may be quoted or unquoted
+# since changing to across(all_of()) group must be quoted?
 .addNPerGroup <- function(df, group, cols){
     df <- df %>%
-        dplyr::group_by(across({{ group }})) %>%
-        dplyr::mutate(dplyr::across({{ cols }},
+        dplyr::group_by(across(all_of(group))) %>%
+        dplyr::mutate(dplyr::across(all_of(cols),
                                     .fns = list(ndistinct =
                                         ~dplyr::n_distinct(.x, na.rm = TRUE)),
                                     .names = "n{.col}")

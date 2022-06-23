@@ -6,7 +6,7 @@ df <- data.frame(A = rep(1:3, each = 2),
 
 test_that(".addNPerGroup works quoted or unquoted", {
     # One grouping column, two columns for n_distinct
-    exp1 <- cbind(df[,c("A","B","C","D")], data.frame(nB = 2,
+    exp1 <- cbind(df[, c("A","B","C","D")], data.frame(nB = 2,
                                  nC = rep(c(1,2,1), each = 2)))
 
     # Col unquoted
