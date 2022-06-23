@@ -25,7 +25,7 @@ updateCITEseq <- function(x, name = NULL, extra = FALSE){
         stop("Data to add must contain a column 'Antigen'")
     }
 
-    # Should columns not in citeseq be kept? ----
+    # Should columns not already in citeseq be kept? ----
     if (isFALSE(extra)){
         # Only keep columns already present in CITE-seq collection
         x <- unique(x[, intersect(colnames(x), colnames(citeseq))])

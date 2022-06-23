@@ -56,9 +56,6 @@ fillByGroup <- function(df, group, fill, multiple = c("stop", "mode")){
             dplyr::ungroup()
     }
 
-
-    # IS THIS VECTORISED?
-
     # Case: multiple values per group, select the most frequent one
     if (multiple == "mode"){
         df <- .freducePartial(df, groupMode, cls = "cl", cl = fill, gp = group)
