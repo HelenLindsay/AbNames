@@ -74,3 +74,36 @@ test_that("fillByGroup can fill majority value for multiple columns", {
     expect_equal(as.data.frame(res), exp_res)
 })
 
+
+test_that("fillByGroup can ignore multiple modes", {
+    # In the group A = "C" and B = "C", column "D" has 2 possible values,
+    # one entry each
+    df$D <- df_d
+    res <- fillByGroup(df, group = c("A", "B"),
+                       fill = c("C", "D"), multiple = "ignore")
+
+    exp_res <- data.frame(
+        A = c("A", "A", "B", "B", "B", "B", "C", "C", "C", "A", NA, NA),
+        B = c("A", "A", "B", "B", "B", "B", "C", "C", "C", NA, "A", NA),
+        C = c(1, 1, 2, 3, 2, 2, 4, 4, 4, 1, 1, 5),
+        D = c(6, 6, 8, 8, 8, 8, 9, 8, NA, 6, 7, 10))
+    expect_equal(as.data.frame(res), exp_res)
+})
+
+
+test_that("fillByGroup correctly overwrites if specified", {
+    # In the group A = "C" and B = "C", column "D" has 2 possible values,
+    # one entry each - these should stay NA, col C with a majority value
+    # should be overwritten
+
+    df$D <- df_d
+    res <- fillByGroup(df, group = c("A", "B"), fill = c("C", "D"),
+                       multiple = "ignore", method = "all")
+
+    exp_res <- data.frame(
+        A = c("A", "A", "B", "B", "B", "B", "C", "C", "C", "A", NA, NA),
+        B = c("A", "A", "B", "B", "B", "B", "C", "C", "C", NA, "A", NA),
+        C = c(1, 1, 2, 2, 2, 2, 4, 4, 4, 1, 1, 5),
+        D = c(6, 6, 8, 8, 8, 8, NA, NA, NA, 6, 7, 10))
+    expect_equal(as.data.frame(res), exp_res)
+})
