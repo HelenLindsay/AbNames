@@ -7,7 +7,7 @@ Authors@R:
     role = c("aut", "cre"))
 Description: Provides functions for matching antibody names, e.g. from an 
     antibody vendor website, to gene names using information from the Human
-    Genome Naming Consortium (HGNC) and the protein ontology.
+    Genome Naming Consortium (HGNC), NCBI, Ensembl, and the protein ontology.
 biocViews:
     AnnotationData,
     Homo_sapiens
@@ -25,10 +25,9 @@ Imports:
     utils
 Suggests:
     BiocStyle,
+    fuzzyjoin,
     knitr,
     MultiAssayExperiment,
-    ontologyIndex,
-    ontoProc,
     readr,
     rmarkdown,
     Seurat,
