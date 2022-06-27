@@ -49,9 +49,7 @@ bm <- getBM(mart = ensembl,
                   HGNC_ID = hgnc_id,
                   ENTREZ_ID = entrezgene_id,
                   BIOTYPE = gene_biotype) %>%
-    dplyr::group_by(HGNC_ID) %>%
-    dplyr::mutate(ENTREZ_ID = as.character(ENTREZ_ID),
-                  SOURCE = "BIOMART") %>%
+    dplyr::mutate(ENTREZ_ID = as.character(ENTREZ_ID)) %>%
     # Remove pseudogenes
     dplyr::filter(! grepl("pseudo", BIOTYPE))
 
@@ -71,12 +69,13 @@ ens_to_sp <- getBM(mart = ensembl,
     dplyr::mutate(UNIPROT_ID = na_if(UNIPROT_ID, "")) %>%
     dplyr::filter(! is.na(UNIPROT_ID))
 
-if (! all(ens_to_sp$ENSEMBL_ID) %in% bm$ENSEMBL_ID){
+if (! all(ens_to_sp$ENSEMBL_ID %in% bm$ENSEMBL_ID)){
     warning("Uniprot table contains genes missing from bm table")
 }
 
+# Rows will be gained as one gene may have multiple UNIPROT IDs
 bm <- bm %>%
-    dplyr::left_join(ens_to_sp) %>%
+    dplyr::full_join(ens_to_sp) %>%
     # Only select genes with a HGNC_ID in the hgnc data set
     dplyr::semi_join(hgnc, by = "HGNC_ID")
 
@@ -86,20 +85,19 @@ hgnc_ids <- hgnc %>%
     dplyr::select(ENSEMBL_ID, HGNC_ID, HGNC_SYMBOL) %>%
     unique()
 
-
 bm_patch <- bm %>%
     # Ensembl ID and HGNC ID are shared
     dplyr::semi_join(hgnc, by = c("ENSEMBL_ID", "HGNC_ID")) %>%
     # But symbol is incorrect
     dplyr::anti_join(hgnc, by = c("ENSEMBL_ID", "HGNC_SYMBOL", "HGNC_ID"))
-# length(unique(bm_patch$ENSEMBL_ID)) #88 genes
+# length(unique(bm_patch$ENSEMBL_ID)) 82 genes
 
 # Remove these rows from biomart
 bm <- bm %>% anti_join(bm_patch)
 
 # If the incorrect symbol is a known alias in HGNC, fix and add back in
 bm_patch <- bm_patch %>%
-    # If the correct symbol is a known alias ...
+    # If the correct symbol is a known HGNC alias ...
     dplyr::semi_join(hgnc, by = c("HGNC_SYMBOL" = "value")) %>%
     # Make the incorrect symbol an ALIAS
     dplyr::group_by(ENSEMBL_ID) %>%
@@ -120,7 +118,8 @@ bm <- bm %>%
     dplyr::mutate(n_genes = n_distinct(HGNC_SYMBOL)) %>%
     dplyr::filter(n_genes == 1 | is.na(ALIAS)) %>%
     dplyr::select(-n_genes) %>%
-    dplyr::ungroup()
+    dplyr::ungroup() %>%
+    dplyr::mutate(SOURCE = "BIOMART")
 
 # ---------------------------------------------------------------------------
 # org.Hs.eg.db genes -----
@@ -147,10 +146,10 @@ org_db <- AnnotationDbi::select(hs,
     dplyr::semi_join(hgnc, by = "HGNC_SYMBOL") %>%
     dplyr::mutate(SOURCE = "ORGDB") %>%
 
-    # Only keep Ensembl ids that appear in the Biomart table (or missing)
+    # Only keep Ensembl ids that appear in the Biomart table (or missing),
     # Remove pseudogenes
     dplyr::filter(ENSEMBL_ID %in% bm$ENSEMBL_ID | is.na(ENSEMBL_ID),
-                  ! grepl("pseudogene", BIOTYPE)) %>%
+                  ! grepl("pseudo", BIOTYPE)) %>%
 
     # Remove aliases that map to more than one HGNC_SYMBOL
     dplyr::group_by(value) %>%
@@ -166,7 +165,7 @@ org_db <- AnnotationDbi::select(hs,
 
 table(is.na(org_db$ENSEMBL_ID))
 # FALSE  TRUE
-# 127852   4482
+# 127882   6069
 
 # Patch by symbol / alias
 hgnc_patch <- hgnc %>%
@@ -181,6 +180,7 @@ org_db <- org_db %>%
 
 # Patch by symbol / uniprot id
 hgnc_patch <- hgnc %>%
+    splitUnnest(ab = "UNIPROT_ID", split = "\\|") %>%
     dplyr::filter(! is.na(ENSEMBL_ID)) %>%
     dplyr::select(HGNC_SYMBOL, UNIPROT_ID, ENSEMBL_ID) %>%
     unique()

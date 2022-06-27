@@ -29,3 +29,13 @@ test_that(".stopIfColExists is vectorised", {
                  regexp = "Column(s) A, B already|Please.*")
     expect_equal(.stopIfColExists(df, c("E")), NULL)
 })
+
+
+test_that("union_join works as expected", {
+    data(diamonds)
+    diamonds <- diamonds[1:20,] %>%
+        dplyr::mutate(across(c("cut", "color", "clarity"), as.character))
+    res1 <- union_join(diamonds, data.frame(cut = "Fair", color = "I"))
+    exp_res <- diamonds %>% dplyr::filter(color == "I" | cut == "Fair")
+
+})

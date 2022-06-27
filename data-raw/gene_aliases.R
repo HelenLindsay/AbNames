@@ -31,7 +31,7 @@ source("ncbi.R")
 source("org_db.R")
 
 # --------------------------------------------------------------------
-# Make HGNC/ENSEBML IDs from HGNC consistent with Ensembl -----
+# Make HGNC/ENSEMBL IDs from HGNC consistent with Ensembl -----
 
 # Two cases:
 # - ENSEMBL / HGNC disagree -> use ENSEMBL ID from ENSEMBL
@@ -57,7 +57,7 @@ multi_gene <- bm_ids %>%
     # HGNC_ID/ENSEMBL_ID agrees with HGNC
     dplyr::semi_join(hgnc_ens_diff)
 
-# These are the genes where HGNC/ENSEMBL disagree
+# These are the protein-coding genes where HGNC/ENSEMBL disagree
 ens_patch <- bm_ens_diff %>%
     dplyr::filter(! HGNC_ID %in% multi_gene$HGNC_ID) %>%
     dplyr::filter(BIOTYPE == "protein_coding") %>%
@@ -71,7 +71,8 @@ hgnc <- hgnc %>%
 multi_gene <- bm_ids %>%
     dplyr::filter(HGNC_ID %in% multi_gene$HGNC_ID)
 
-# Add both copies into hgnc
+# Create a data frame with the alternative ENSEMBL IDs and add both
+# copies into hgnc
 temp <- hgnc %>% dplyr::semi_join(multi_gene)
 multi_gene_patch <- multi_gene %>% dplyr::anti_join(temp)
 temp <- dplyr::rows_update(temp,
@@ -79,6 +80,7 @@ temp <- dplyr::rows_update(temp,
                            by = c("HGNC_ID", "HGNC_SYMBOL"))
 hgnc <- hgnc %>% bind_rows(temp)
 
+# TO DO? ADD BIOTYPE, FILTER PROTEIN-CODING?
 # Note that the mappings to non-protein-coding genes haven't been removed
 # e.g. ENSG00000271672 transcribed_processed_pseudogene
 

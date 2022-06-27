@@ -144,16 +144,27 @@ groupsWith <- function(df1, df2, col){
 # Select values from a data.frame df matching any column from another data.frame
 #
 # Either a second data.frame df2 can be provided, or a selection of rows indices
-# from the first data.frame
-union_join <- function(df, df2 = NULL, rows = NULL){
+# from the first data.frame.  If a second data frame and a selection of rows is
+# provided, values from df matching any value in df2[rows, ] are returned.
+# by = columns to select from df2
+union_join <- function(df, df2 = NULL, rows = NULL, by = NULL){
     if (! is.null(df2) & ! is.null(rows)){
         warning("Row selection will be made from df2")
     }
     qdf <- df
     if (! is.null(df2)) { qdf <- df2 }
     if (! is.null(rows)) qdf <- qdf[rows, ]
-    x <- unlist(qdf, use.names = FALSE)
-    df %>% dplyr::filter(dplyr::if_any(.cols = dplyr::everything(), ~.x %in% x))
+    if (is.null(by)) by <- colnames(qdf)
+    if (! all(by %in% colnames(df))){
+        warning("Not all columns in 'by' appear in df:",
+                toString(setdiff(by, colnames(df))))
+    }
+
+    by <- intersect(by, colnames(df))
+
+    #x <- unlist(qdf, use.names = FALSE)
+    df %>% dplyr::filter(dplyr::if_any(cols = by,
+                                .fns = ~.x %in% qdf[[dplyr::cur_column()]]))
 }
 
 
