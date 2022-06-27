@@ -20,12 +20,12 @@ updateCITEseq <- function(x, name = NULL, extra = FALSE){
         x$Study <- name
     }
 
-    # Antigen must be present ----
-    if (! "Antigen" %in% colnames(x)){
-        stop("Data to add must contain a column 'Antigen'")
+    # Antigen and Vendor columns must be present ----
+    if (any(! c("Antigen", "Vendor") %in% colnames(x))){
+        stop("Data to add must contain columns 'Antigen' and 'Vendor'")
     }
 
-    # Should columns not already in citeseq be kept? ----
+    # Should columns not in citeseq be kept? ----
     if (isFALSE(extra)){
         # Only keep columns already present in CITE-seq collection
         x <- unique(x[, intersect(colnames(x), colnames(citeseq))])
@@ -41,6 +41,7 @@ updateCITEseq <- function(x, name = NULL, extra = FALSE){
     # -------------------------------------------------------
 
     # Are there already ID columns present?
+    # TO DO: NOT CURRENTLY IN CITEseq data!
     id_cols <- c("HGNC_ID", "ENSEMBL_ID", "HGNC_SYMBOL", "ENTREZ_ID")
     id_cols <- intersect(id_cols, colnames(x))
 
@@ -56,59 +57,49 @@ updateCITEseq <- function(x, name = NULL, extra = FALSE){
         if (nrow(inconsistent) > 0){
             stop("ID rows are inconsistent")
         }
+        # Update with correct information
     }
 
-    # If vendor information is provided, fill missing and check consistency
+    # Update suggested antigen
+
+    # If vendor information is provided, fill missing and check consistency ----
     vendor_cols <- c("Cat_Number", "Vendor", "Oligo_ID", "Clone",
                      "RRID", "TotalSeq_Cat")
-    vendor_cols <- intersect(vendor_cols, colnames(x))
+    vendor_cols <- Reduce(intersect, list(vendor_cols,
+                                          colnames(x),
+                                          colnames(citeseq)))
 
+    # Format x vendor cols to match citeseq
     x <- x %>%
         dplyr::mutate(across(all_of(vendor_cols), as.character)) %>%
         # remove unnecessary whitespace
         dplyr::mutate(across(where(is.character), stringr::str_squish))
 
+    # Vendor must match, does x have multiple vendors?
 
-
-    # Expect Vendor, Cat_Number, Clone and Oligo_ID to be consistent
-
-    cs <- citeseq %>%
-        tidyr::drop_na(vendor_cols) %>%
-        union_join(x %>% dplyr::select(vendor_cols))
-
-    # Interested in the case where some are consistent but not all
-    # Vendor should be the same, if present
-
-
-
-    inconsistent <- dplyr::anti_join(x %>% tidyr::drop_na(vendor_cols),
-                                     cs, by = vendor_cols)
-
-
-
-
-    if (nrow(inconsistent) > 0){
-        # Should inconsistent values be patched?
-        # Oligo vendor cat_number
-
-    }
-
-
-    # Does any information need to be filled?
-
-
-
-
-
-
-
-
+    # Select complete cases from citeseq data where any column matches x
+    #cs <- citeseq %>%
+    #    tidyr::drop_na(dplyr::any_of(vendor_cols)) %>%
+    #    union_join(x %>% dplyr::select(vendor_cols))
 
 }
 
 
+
+
 checkCITEseq <- function(citeseq){
-    # Each Cat_Number should
+    # One Cat_Number should match one Oligo / Vendor / ID / Clone / RRID
+    # (but check e.g. Cat_Number is "custom made")
+
+    # 1 Cat_Number -> 1 combination of Vendor, Oligo_ID, Clone
+    # 1 RRID -> 1 combination of Vendor, Oligo_ID, Clone
+    #
+
+    # Same suggested Antigen / Clone / Vendor -> One Gene Id?
+
+    #dplyr::group_by(Suggested_Antigen, Oligo_ID, Clone, TotalSeq_Cat) %>%
+    #tidyr::fill(c(Cat_Number, Reactivity), .direction = "updown") %>%
+
     x <- citeseq %>%
         dplyr::group_by(Cat_Number) %>%
         dplyr::mutate(nrrid = n_distinct(RRID, na.rm = TRUE),
@@ -202,15 +193,6 @@ fillCITEseq <- function(citeseq){
 }
 
 
-
-
-#
-#x <- citeseq %>%
-#    dplyr::group_by(Cat_Number) %>%
-#    dplyr::mutate(nrrid = n_distinct(RRID, na.rm = TRUE),
-#                  nclone = n_distinct(tolower(Clone), na.rm = TRUE),
-#                  ntotalseq = n_distinct(TotalSeq_Cat, na.rm = TRUE),
-#                  noligo = n_distinct(Oligo_ID, na.rm = TRUE))
 
 
 

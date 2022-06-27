@@ -476,6 +476,7 @@ missing <- citeseq %>%
 # HAO CD45 should have catalogue numbers!
 # union join back gene ID / get info by antigen
 # Include clones when standardising names?
+# Put RRID into CITEseq
 
 # How can we match antibodies:
 # By an exact match in a query table
