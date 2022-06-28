@@ -151,6 +151,7 @@ union_join <- function(df, df2 = NULL, rows = NULL, by = NULL){
     if (! is.null(df2) & ! is.null(rows)){
         warning("Row selection will be made from df2")
     }
+    tmp <- .tempColName(df)
     qdf <- df
     if (! is.null(df2)) { qdf <- df2 }
     if (! is.null(rows)) qdf <- qdf[rows, ]
@@ -159,12 +160,11 @@ union_join <- function(df, df2 = NULL, rows = NULL, by = NULL){
         warning("Not all columns in 'by' appear in df:",
                 toString(setdiff(by, colnames(df))))
     }
-
     by <- intersect(by, colnames(df))
 
-    #x <- unlist(qdf, use.names = FALSE)
-    df %>% dplyr::filter(dplyr::if_any(cols = by,
-                                .fns = ~.x %in% qdf[[dplyr::cur_column()]]))
+    # Extra brackets needed, see https://github.com/tidyverse/dplyr/issues/6194
+    df %>% dplyr::filter((dplyr::if_any(.cols = by,
+                                .fns = ~.x %in% qdf[[dplyr::cur_column()]])))
 }
 
 

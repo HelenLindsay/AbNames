@@ -33,7 +33,7 @@ strdist_join <- function(x, y, by, max_dist = 2){
         dplyr::rename()
 
 
-         dplyr::rename(Antigen = `Antigen.x`) %>%
+         dplyr::rename(Antigen = `Antigen.x`) #%>%
     #     dplyr::select(-`Antigen.y`) %>%
     #     dplyr::relocate(Data_Name) %>%
     #     dplyr::group_by(Antigen) %>%
@@ -45,5 +45,8 @@ strdist_join <- function(x, y, by, max_dist = 2){
     #
     # cn <- colnames(triana)
     # triana <- triana %>%
-    #     dplyr::rows_patch(triana_um, by = setdiff(cn, "Data_Name"))        # dplyr::rows_patch(triana_um, by = setdiff(cn, "Data_Name"))        # dplyr::rows_patch(triana_um, by = setdiff(cn, "Data_Name"))        # dplyr::rows_patch(triana_um, by = setdiff(cn, "Data_Name"))
+    #     dplyr::rows_patch(triana_um, by = setdiff(cn, "Data_Name"))
+         # dplyr::rows_patch(triana_um, by = setdiff(cn, "Data_Name"))
+         # dplyr::rows_patch(triana_um, by = setdiff(cn, "Data_Name"))
+         # dplyr::rows_patch(triana_um, by = setdiff(cn, "Data_Name"))
 }

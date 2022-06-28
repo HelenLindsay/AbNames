@@ -85,11 +85,11 @@ hgnc <- hgnc %>% bind_rows(temp)
 # e.g. ENSG00000271672 transcribed_processed_pseudogene
 
 # -----------------------------------------------------------------------
-# Add Entrez IDs -----
+# Add Entrez IDs where NCBI / Ensembl / Org_db agree -----
 
 prep_merge <- function(df, hgnc){
     df %>%
-        dplyr::select(ENSEMBL_ID, ENTREZ_ID, HGNC_SYMBOL) %>%
+        dplyr::select(ENSEMBL_ID, ENTREZ_ID, HGNC_SYMBOL, BIOTYPE) %>%
         dplyr::semi_join(hgnc) %>%
         # Want Ensembl, Entrez and Symbol for merging
         stats::na.omit() %>%
@@ -128,7 +128,6 @@ consistent <- Reduce(dplyr::full_join,
                                   orgdb_bm, orgdb_ncbi))
 
 hgnc <- hgnc %>% dplyr::left_join(consistent)
-
 
 # ---------------------------------------------------------------------------
 # Select the aliases that aren't already present in hgnc -----
