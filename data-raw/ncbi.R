@@ -98,16 +98,5 @@ ncbi_genes <- ncbi_genes %>%
     dplyr::semi_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID))
 
 
-
-# Select the ncbi aliases that aren't already present in hgnc ----
-
-# NCBI and HGNC can differ in how they describe a symbol, e.g. previous
-# vs alias. Assume that HGNC annotations are correct, as HGNC is the
-# naming consortium.  Remove entries where the value is the same
-# (Regardless of what type of symbol it is considered to be)
-ncbi_novel <- ncbi_genes %>%
-    dplyr::anti_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID, value))
-
-
 ncbi_genes <- as.data.frame(ncbi_genes)
 usethis::use_data(ncbi_genes, overwrite = TRUE, compress = "bzip2")

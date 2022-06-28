@@ -30,6 +30,7 @@ library(readxl)
 source("ncbi.R")
 source("org_db.R")
 
+# TO DO: what happened to biotype?
 # --------------------------------------------------------------------
 # Make HGNC/ENSEMBL IDs from HGNC consistent with Ensembl -----
 
@@ -133,7 +134,6 @@ hgnc <- hgnc %>% dplyr::left_join(consistent)
 # Select the aliases that aren't already present in hgnc -----
 
 bm_novel <- bm %>%
-    dplyr::mutate(symbol_type = "ALIAS") %>%
     dplyr::rename(value = ALIAS) %>%
     dplyr::filter(! value == "") %>%
     dplyr::anti_join(hgnc, by = c("HGNC_SYMBOL", "value")) %>%
@@ -145,6 +145,13 @@ org_db_novel <- org_db %>%
     dplyr::anti_join(hgnc, by = c("HGNC_SYMBOL", "value")) %>%
     # Only want genes for which there is a HGNC / ENSEMBL combination in HGNC
     dplyr::semi_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID))
+
+# NCBI and HGNC can differ in how they describe a symbol, e.g. previous
+# vs alias. Assume that HGNC annotations are correct, as HGNC is the
+# naming consortium.  Remove entries where the value is the same
+# (Regardless of what type of symbol it is considered to be)
+ncbi_novel <- ncbi_genes %>%
+    dplyr::anti_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID, value))
 
 # --------------------------------------------------------------------------
 
@@ -158,14 +165,14 @@ hgnc <- hgnc %>%
 
     # Fill Entrez IDs from new aliases
     dplyr::group_by(HGNC_ID) %>%
-    tidyr::fill(ENTREZ_ID, HGNC_NAME, UNIPROT_IDS, .direction = "updown") %>%
+    tidyr::fill(ENTREZ_ID, HGNC_NAME, UNIPROT_ID, .direction = "updown") %>%
 
     # Fill HGNC IDs (missing from org_db)
     dplyr::group_by(ENSEMBL_ID) %>%
-    tidyr::fill(HGNC_ID, HGNC_NAME, UNIPROT_IDS, .direction = "updown") %>%
+    tidyr::fill(HGNC_ID, HGNC_NAME, UNIPROT_ID, .direction = "updown") %>%
 
     # New values may come from more than one source, aggregate
-    dplyr::group_by(HGNC_ID, ENSEMBL_ID, UNIPROT_IDS, HGNC_SYMBOL, ENTREZ_ID,
+    dplyr::group_by(HGNC_ID, ENSEMBL_ID, UNIPROT_ID, HGNC_SYMBOL, ENTREZ_ID,
                     symbol_type, value) %>%
     dplyr::summarise(SOURCE = toString(SOURCE), .groups = "keep") %>%
 
@@ -174,9 +181,14 @@ hgnc <- hgnc %>%
     dplyr::group_by(value) %>%
     dplyr::mutate(n_genes = n_distinct(HGNC_ID)) %>%
     dplyr::filter(n_genes == 1 | SOURCE == "HGNC") %>%
-    dplyr::select(-n_genes)
+    dplyr::select(-n_genes) %>%
 
+    # Aggregate the protein IDs
+    dplyr::group_by(HGNC_ID, HGNC_SYMBOL, ENSEMBL_ID, ENTREZ_ID) %>%
+    dplyr::mutate(UNIPROT_ID = paste0(sort(unique(UNIPROT_ID)),
+                                         collapse = "|")) %>%
+    ungroup() %>%
+    unique()
 
-#> table(is.na(hgnc$ENTREZ_ID)) # Note - not the number of genes because aliases
-# 122569  36302
-
+gene_aliases <- as.data.frame(hgnc)
+usethis::use_data(gene_aliases, overwrite = TRUE, compress = "bzip2")

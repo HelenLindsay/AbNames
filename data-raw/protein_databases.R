@@ -2,6 +2,7 @@
 
 # Note: Isoform name may be mapped to gene name, e.g. CD45RO -> PTPRC
 # Some antigens have no annotation information, e.g. CD45.1
+# Table contains annotation errors, e.g. row shift error in UNIPROT_IDs
 
 # http://bio-bigdata.hrbmu.edu.cn/CellMarker/index.jsp
 
@@ -17,7 +18,6 @@ gsubCellmarker <- function(x){
 
 # Cellmarker
 # Sometimes family name is listed under "ENTREZ_IDS"
-#
 
 # To do: make sure that cellmarker cellMarker col mapped to same geneSymbol/ID
 # column is a correct, unambiguous alias
@@ -32,7 +32,9 @@ download.file(cellmarker_loc, destfile = cellmarker_fname)
 cellmarker <- readr::read_delim(cellmarker_fname) %>%
     dplyr::select(cellName, cellMarker, geneSymbol,
                   geneID, proteinName, proteinID) %>%
-    dplyr::filter(if_all(c(geneID, proteinID), ~! is.na(.x))) %>%
+    dplyr::filter(if_all(c(geneID, proteinID), ~! is.na(.x)),
+                  # "x family" isn't useful as an ID
+                  ! grepl("family", geneID)) %>%
     unique() %>%
     # Separate protein complexes with | instead of [a, b, c]
     dplyr::mutate(across(c(geneSymbol, geneID, proteinName, proteinID),
@@ -48,13 +50,20 @@ cellmarker <- readr::read_delim(cellmarker_fname) %>%
     tidyr::unnest(cols = c(cellMarker, geneSymbol, geneID,
                            proteinName, proteinID)) %>%
     dplyr::rename(Antigen = cellMarker,
-                  ENTREZ_IDS = geneID,
+                  ENTREZ_ID = geneID,
                   ENTREZ_SYMBOL = geneSymbol,
-                  UNIPROT_IDS = proteinID) %>%
+                  UNIPROT_ID = proteinID) %>%
     dplyr::mutate(SOURCE = "CELLMARKER") %>%
-    dplyr::mutate(across(c(ENTREZ_SYMBOL, ENTREZ_IDS,
-                           proteinName, UNIPROT_IDS), ~na_if(., "NA"))) %>%
-    dplyr::mutate(across(everything(), ~stringr::str_squish(.x)))
+    dplyr::mutate(across(c(ENTREZ_SYMBOL, ENTREZ_ID,
+                           proteinName, UNIPROT_ID), ~na_if(., "NA"))) %>%
+    # Filter again, some cellNamers include an NA in a list of markers
+    dplyr::filter(if_all(c(ENTREZ_ID, UNIPROT_ID), ~! is.na(.x))) %>%
+    dplyr::mutate(across(everything(), ~stringr::str_squish(.x))) %>%
+    # Split the protein complexes
+    dplyr::mutate(across(c(ENTREZ_SYMBOL, ENTREZ_ID, proteinName, UNIPROT_ID),
+                         ~strsplit(.x, "\\|"))) %>%
+                               tidyr::unnest(cols = c(ENTREZ_SYMBOL, ENTREZ_ID,
+                                                      proteinName, UNIPROT_ID))
 
 
 # Exploration ----
@@ -66,44 +75,34 @@ cellmarker <- readr::read_delim(cellmarker_fname) %>%
 # e.g. "Calcitonin and Related Receptor Antagonists"
 # Because it's not very specific:
 # Stage Specific Embryonic Antigens
-# Because it's an RNA - C1orf61 (!)
+# Because it's an RNA - C1orf61
 # Because it matches a previous symbol
 # Because the antigen is the official symbol but there is no gene info
 # Because it's a pseudogene! EGFEM1P
 
-x <- cellmarker %>%
-    dplyr::select(-cellName) %>%
-    unique() %>%
-    dplyr::filter(! ENTREZ_SYMBOL %in% hgnc$HGNC_SYMBOL, !
-                      grepl("\\|", ENTREZ_SYMBOL),
-                  ! grepl("family", ENTREZ_SYMBOL))
-
-
-# -----
-
-
-
-
+# Demonstration of row shift error in UNIPROT_IDs
+#missing <- anti_join(cellmarker %>% dplyr::mutate(row_n = row_number()),
+#                     hgnc, by = c("ENTREZ_ID", "UNIPROT_ID"))
+#x <- missing$row_n - seq_along(missing$row_n)
+#rle(x)$lengths
 
 protein_complexes <- cellmarker %>%
     dplyr::filter(grepl("\\|", ENTREZ_SYMBOL)) %>%
-    dplyr::select(Antigen, ENTREZ_SYMBOL, ENTREZ_IDS,
-                  proteinName, UNIPROT_IDS) %>%
+    dplyr::select(Antigen, ENTREZ_SYMBOL, ENTREZ_ID,
+                  proteinName, UNIPROT_ID) %>%
     unique()
 
 # Using org.db, add ENSEMBL identifiers (one ENSEMBL may map to several ENTREZ?)
 # As this includes "ALIAS" column, rows may be added
-protein_complexes <- protein_complexes %>%
-    dplyr::mutate(across(c(ENTREZ_SYMBOL, ENTREZ_IDS,
-                           proteinName, UNIPROT_IDS), ~strsplit(.x, "\\|"))) %>%
-    tidyr::unnest(cols = c(ENTREZ_SYMBOL, ENTREZ_IDS,
-                           proteinName, UNIPROT_IDS)) %>%
-
-    dplyr::left_join(org_db %>% dplyr::select(-value) %>% unique(),
-                     by = c(ENTREZ_IDS = "ENTREZ_ID")) %>%
-
-    dplyr::group_by(Antigen) %>%
-
+#protein_complexes <- protein_complexes %>%
+#    dplyr::mutate(across(c(ENTREZ_SYMBOL, ENTREZ_ID,
+#                           proteinName, UNIPROT_ID), ~strsplit(.x, "\\|"))) %>%
+#    tidyr::unnest(cols = c(ENTREZ_SYMBOL, ENTREZ_ID,
+#                           proteinName, UNIPROT_ID)) %>%
+#    dplyr::left_join(org_db %>% dplyr::select(-value) %>% unique(),
+#                     by = c(ENTREZ_ID)) %>%
+#
+#    dplyr::group_by(Antigen) %>%
 
 
     # When a single gene is mapped to several Antigens, check if cellName annotation
@@ -113,6 +112,9 @@ protein_complexes <- protein_complexes %>%
     # add HGNC and ENSEMBL IDs.
 
 
+# Switch this to hgnc not org_db
+# for a complex, are all entrez ids / symbols correct?
+# Possible to get e.g. CD32, CD16, CD3 from other source?
 
 
 
