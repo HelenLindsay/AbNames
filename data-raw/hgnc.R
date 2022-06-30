@@ -40,17 +40,23 @@ hgnc_proteins <- dplyr::rename(hgnc_proteins,
 
 hgnc_groups <- readr::read_delim(hgnc_groups_f)
 
-hgnc_groups <- dplyr::select(hgnc_groups, -Status, -`Locus type`, -`Chromosome`,
-                             -`NCBI Gene ID`, -`Vega gene ID`,
-                             `Group ID`, -`Group name`, -`Group ID`)
+hgnc_groups <- hgnc_groups %>%
+    dplyr::rename(hgnc_groups,
+                  HGNC_ID = `HGNC ID`,
+                  HGNC_NAME = `Approved name`,
+                  ENSEMBL_ID = `Ensembl gene ID`,
+                  HGNC_SYMBOL = `Approved symbol`,
+                  ALIAS = `Alias symbols`,
+                  PREVIOUS_SYMBOL = `Previous symbols`,
+                  ENTREZ_ID = `NCBI Gene ID`,
+                  BIOTYPE = `Locus type`) %>%
+    # Filter out pseudogenes and RNAs
+    dplyr::filter(! grepl("^RNA|pseudogene|unknown", BIOTYPE)) %>%
+    dplyr::select(hgnc_groups, -Status, -`BIOTYPE`, -`Chromosome`,
+                             -`Vega gene ID`, `Group ID`, -`Group name`,
+                             -`Group ID`)
 
-hgnc_groups <- dplyr::rename(hgnc_groups,
-                             HGNC_ID = `HGNC ID`,
-                             HGNC_NAME = `Approved name`,
-                             ENSEMBL_ID = `Ensembl gene ID`,
-                             HGNC_SYMBOL = `Approved symbol`,
-                             ALIAS = `Alias symbols`,
-                             PREVIOUS_SYMBOL = `Previous symbols`) %>%
+hgnc_groups <-  %>%
     dplyr::mutate(across(c(PREVIOUS_SYMBOL, ALIAS), ~gsub(", ", "\\|", .x)))
 
 hgnc <- dplyr::full_join(hgnc_proteins, hgnc_groups)
