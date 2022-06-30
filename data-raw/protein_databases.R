@@ -136,13 +136,6 @@ cellmarker <- cellmarker %>%
 #x <- missing$row_n - seq_along(missing$row_n)
 #rle(x)$lengths
 
-protein_complexes <- cellmarker %>%
-    dplyr::filter(grepl("\\|", ENTREZ_SYMBOL)) %>%
-    dplyr::select(Antigen, ENTREZ_SYMBOL, ENTREZ_ID,
-                  proteinName, UNIPROT_ID) %>%
-    unique()
-
-
 # Notes:
 # Possible to get e.g. CD32, CD16, CD3 from other source?
 # Haven't checked if individual genes are filtered from protein complexes
@@ -180,46 +173,31 @@ cspa <- #readxl::read_xlsx(cspa_fname) %>%
                   Antigen = na_if(Antigen, "no"),
                   across(c(ENTREZ_SYMBOL, ENTREZ_ID), ~na_if(.x, "0")),
                   ENTREZ_ID = as.character(ENTREZ_ID)) %>%
+    dplyr::filter(! is.na(ENTREZ_SYMBOL)) %>%
     # Join by exact match to "value" in HGNC
     # (either official symbol or alias)
-    dplyr::left_join(hgnc %>%
-                         dplyr::select(HGNC_SYMBOL, HGNC_ID, value) %>%
-                         unique(),
-                     by = c("ENTREZ_SYMBOL" = "value"))
+    dplyr::inner_join(hgnc %>%
+                          dplyr::select(HGNC_SYMBOL, HGNC_ID,
+                                        ENTREZ_ID, value) %>%
+                          unique(),
+                      by = c("ENTREZ_SYMBOL" = "value", "ENTREZ_ID")) %>%
+    # Know from join that ENTREZ_SYMBOL must match an existing symbol or alias
+    dplyr::mutate(Antigen = ifelse(Antigen %in% hgnc$value, NA, Antigen)) %>%
+    dplyr::filter(! is.na(Antigen)) %>%
+    dplyr::select(HGNC_ID, HGNC_SYMBOL, ENTREZ_ID,
+                  UNIPROT_ID, Antigen, SOURCE) %>%
+    dplyr::rename(value = Antigen)
 
-# Patch via UNIPROT_ID, if it is unique within HGNC
-up_ids <- cspa %>%
-    dplyr::filter(is.na(HGNC_ID)) %>%
-    dplyr::pull(UNIPROT_ID)
-
-hgnc_patch <- hgnc %>%
-    dplyr::filter(UNIPROT_ID %in% up_ids) %>%
-    dplyr::group_by(UNIPROT_ID) %>%
-    dplyr::filter(n_distinct(HGNC_ID) == 1) %>%
-    dplyr::ungroup() %>%
-    dplyr::select(HGNC_SYMBOL, HGNC_ID, UNIPROT_ID) %>%
-    unique()
-
-cspa <- cspa %>%
-    dplyr::rows_patch(hgnc_patch, by = "UNIPROT_ID") %>%
-    # 5 unmatched have only UNIPROT IDs, some are obsolete
-    dplyr::filter(! is.na(HGNC_ID))
-
-# Reformat cspa for joining to hgnc
-cspa <- cspa %>%
-    dplyr::mutate("CSPA" = TRUE,
-                  ENTREZ_SYMBOL =
-                      AbNames:::.noDups(ENTREZ_SYMBOL, HGNC_SYMBOL)) %>%
-    dplyr::rename(ALIAS = ENTREZ_SYMBOL) %>%
-    tidyr::pivot_longer(cols = c("UNIPROT_NAME", "Antigen", "ENTREZ_SYMBOL"),
-                        values_to = "value", names_to = "symbol_type") %>%
-    dplyr::filter(! is.na(value))
 
 # Check for inconsistencies -----
-# TO DO: HAVEN'T JOINED IN ENTREZ YET!
+# Two entries from CSPA have Uniprot ID, NA in HGNC
+
 
 cspa %>% dplyr::anti_join(hgnc,
                           by = c("HGNC_ID", "ENTREZ_ID", "UNIPROT_ID"))
+
+
+
 
 
 # Add a column to hgnc indicating if gene is in CSPA
