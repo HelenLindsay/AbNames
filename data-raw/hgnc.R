@@ -6,31 +6,35 @@
 # Example of a multi-subunit protein - LFA-1 from ITGAL and ITGB2
 
 # HGNC proteins
-hgnc_proteins_fname <- paste(c("http://ftp.ebi.ac.uk/pub/databases/",
-                             "genenames/hgnc/tsv/locus_types/",
-                             "gene_with_protein_product.txt"),
-                           collapse = "")
-hgnc_proteins_f <- tempfile()
-download.file(hgnc_proteins_fname, destfile = hgnc_proteins_f)
-
+#hgnc_proteins_fname <- paste(c("http://ftp.ebi.ac.uk/pub/databases/",
+#                             "genenames/hgnc/tsv/locus_types/",
+#                             "gene_with_protein_product.txt"),
+#                           collapse = "")
+#hgnc_proteins_f <- tempfile()
+#download.file(hgnc_proteins_fname, destfile = hgnc_proteins_f)
+hgnc_proteins_f <- paste0("~/Analyses/CITEseq_curation/data/",
+                          "gene_with_protein_product.txt")
 
 # HGNC groups
-hgnc_groups_fname <- paste(c("https://www.genenames.org/cgi-bin/genegroup/",
-                             "download-all"), collapse = "")
-hgnc_groups_f <- tempfile()
-download.file(hgnc_groups_fname, destfile = hgnc_groups_f)
+#hgnc_groups_fname <- paste(c("https://www.genenames.org/cgi-bin/genegroup/",
+#                             "download-all"), collapse = "")
+#hgnc_groups_f <- tempfile()
+#download.file(hgnc_groups_fname, destfile = hgnc_groups_f)
+hgnc_groups_f <- "~/Analyses/CITEseq_curation/data/hgnc_all_groups.csv"
 
 # Select relevant columns, rename and merge tables ----
 hgnc_proteins <- readr::read_delim(hgnc_proteins_f)
 
 hgnc_proteins <- hgnc_proteins[, c("hgnc_id", "symbol", "name", "alias_symbol",
                                    "prev_symbol", "ensembl_gene_id",
-                                   "alias_name", "prev_name", "uniprot_ids")]
+                                   "entrez_id", "alias_name", "prev_name",
+                                   "uniprot_ids")]
 
 hgnc_proteins <- dplyr::rename(hgnc_proteins,
                                HGNC_ID = hgnc_id,
                                HGNC_NAME = name,
                                ENSEMBL_ID = ensembl_gene_id,
+                               ENTREZ_ID = entrez_id,
                                UNIPROT_ID = uniprot_ids,
                                HGNC_SYMBOL = symbol,
                                ALIAS = alias_symbol,
@@ -54,6 +58,11 @@ hgnc_groups <- dplyr::rename(hgnc_groups,
     dplyr::mutate(across(c(PREVIOUS_SYMBOL, ALIAS), ~gsub(", ", "\\|", .x)))
 
 hgnc <- dplyr::full_join(hgnc_proteins, hgnc_groups)
+
+# Check that one symbol maps to one ID ----
+temp <- hgnc %>%
+    nPerGroup(group = "HGNC_ID", col = c("ENTREZ_ID", "ENSEMBL_ID")) %>%
+    dplyr::filter(nENTREZ_ID > 1 | nENSEMBL_ID > 1)
 
 
 # Create and save long version of the HGNC table for querying ----
