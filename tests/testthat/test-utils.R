@@ -1,3 +1,5 @@
+# Tests for .tempColName -----
+
 test_that(".tempColName returns a column name that doesn't already exist", {
     expect_equal(.tempColName(data.frame(x = 1)), "TEMP")
     expect_equal(.tempColName(data.frame(TEMP = 1)), "TEMP1")
@@ -7,6 +9,8 @@ test_that(".tempColName returns a column name that doesn't already exist", {
                  c("TEMP1", "TEMP3"))
 })
 
+
+# Tests for .wordGrep -----
 
 test_that(".wordGrep handles pattern at all positions", {
     expect_equal(.wordGrep("CD3", "CD33"), FALSE)
@@ -18,6 +22,8 @@ test_that(".wordGrep handles pattern at all positions", {
     expect_equal(.wordGrep("CD3", "Sentence with CD3.A"), FALSE)
 })
 
+
+# Tests for .stopIfColExists -----
 
 test_that(".stopIfColExists is vectorised", {
     df <- setNames(data.frame(as.list(1:3)), LETTERS[1:3])
@@ -31,13 +37,18 @@ test_that(".stopIfColExists is vectorised", {
 })
 
 
-test_that("union_join works as expected", {
-    data(diamonds)
-    diamonds <- diamonds[1:20,] %>%
-        dplyr::mutate(across(c("cut", "color", "clarity"), as.character))
+# Tests for union_join -----
+
+data(diamonds)
+diamonds <- diamonds[1:20,] %>%
+    dplyr::mutate(across(c("cut", "color", "clarity"), as.character))
+
+exp_res1 <- diamonds %>% dplyr::filter(color == "I" | cut == "Fair")
+
+
+test_that("union_join selects the correct rows", {
     res1 <- union_join(diamonds, data.frame(cut = "Fair", color = "I"))
-    exp_res <- diamonds %>% dplyr::filter(color == "I" | cut == "Fair")
-    expect_equal(res1, exp_res)
+    expect_equal(res1, exp_res1)
 
     # Value 4.05 appears in columns x and y.
     # union_join should respect column
@@ -62,5 +73,19 @@ test_that("union_join works as expected", {
     # Using "by" to subset should be equivalent to explicitly subsetting df2
     res6 <- union_join(diamonds, diamonds[9:10,], by = c("cut", "color"))
     expect_equal(res5, res6)
+})
 
+
+test_that("union_join correctly handles names in 'by' argument", {
+    res1 <- union_join(diamonds, data.frame(Cut = "Fair", color = "I"),
+                      by = c(cut = "Cut", "color"))
+    expect_equal(res1, exp_res1)
+
+    # Error if names of 'by' not in df
+    expect_error(union_join(diamonds, data.frame(Cut = "Fair", color = "I"),
+                                        by = c(fish = "Cut", "color")))
+
+    # Error if values of 'by' not in df
+    expect_error(union_join(diamonds, data.frame(Cut = "Fair", color = "I"),
+                            by = c(cut = "Cut", "fish")))
 })

@@ -22,6 +22,8 @@
 
 # Within hgnc, one Uniprot ID can map to multiple HGNC IDs, e.g. Q9GZY0
 
+# TO DO: FILTER OR FILL MISSING HGNC ENSEMBL_IDS
+
 # Setup -----
 
 library(tidyverse)

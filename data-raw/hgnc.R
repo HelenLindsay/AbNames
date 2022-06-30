@@ -28,7 +28,7 @@ hgnc_proteins <- readr::read_delim(hgnc_proteins_f)
 hgnc_proteins <- hgnc_proteins[, c("hgnc_id", "symbol", "name", "alias_symbol",
                                    "prev_symbol", "ensembl_gene_id",
                                    "entrez_id", "alias_name", "prev_name",
-                                   "uniprot_ids")]
+                                   "uniprot_ids", "locus_type")]
 
 hgnc_proteins <- dplyr::rename(hgnc_proteins,
                                HGNC_ID = hgnc_id,
@@ -40,13 +40,14 @@ hgnc_proteins <- dplyr::rename(hgnc_proteins,
                                ALIAS = alias_symbol,
                                PREVIOUS_SYMBOL = prev_symbol,
                                ALIAS_NAME = alias_name,
-                               PREVIOUS_NAME = prev_name)
+                               PREVIOUS_NAME = prev_name,
+                               BIOTYPE = locus_type) %>%
+    dplyr::mutate()
 
 hgnc_groups <- readr::read_delim(hgnc_groups_f)
 
 hgnc_groups <- hgnc_groups %>%
-    dplyr::rename(hgnc_groups,
-                  HGNC_ID = `HGNC ID`,
+    dplyr::rename(HGNC_ID = `HGNC ID`,
                   HGNC_NAME = `Approved name`,
                   ENSEMBL_ID = `Ensembl gene ID`,
                   HGNC_SYMBOL = `Approved symbol`,
@@ -55,12 +56,11 @@ hgnc_groups <- hgnc_groups %>%
                   ENTREZ_ID = `NCBI Gene ID`,
                   BIOTYPE = `Locus type`) %>%
     # Filter out pseudogenes and RNAs
-    dplyr::filter(! grepl("^RNA|pseudogene|unknown", BIOTYPE)) %>%
-    dplyr::select(hgnc_groups, -Status, -`BIOTYPE`, -`Chromosome`,
-                             -`Vega gene ID`, `Group ID`, -`Group name`,
-                             -`Group ID`)
-
-hgnc_groups <-  %>%
+    dplyr::filter(! grepl("^RNA|pseudogene|unknown|retrovirus|readthrough",
+                          BIOTYPE),
+                  ! grepl("^MT-", HGNC_SYMBOL)) %>%
+    dplyr::select(-Status, -`Chromosome`, -`Vega gene ID`,
+                  `Group ID`, -`Group name`, -`Group ID`) %>%
     dplyr::mutate(across(c(PREVIOUS_SYMBOL, ALIAS), ~gsub(", ", "\\|", .x)))
 
 hgnc <- dplyr::full_join(hgnc_proteins, hgnc_groups)
@@ -70,6 +70,7 @@ temp <- hgnc %>%
     nPerGroup(group = "HGNC_ID", col = c("ENTREZ_ID", "ENSEMBL_ID")) %>%
     dplyr::filter(nENTREZ_ID > 1 | nENSEMBL_ID > 1)
 
+stopifnot(nrow(temp) == 0)
 
 # Create and save long version of the HGNC table for querying ----
 
@@ -86,7 +87,9 @@ hgnc <- hgnc %>%
     # Make one row per alias
     AbNames::splitUnnest(ab = "value", split = "\\|") %>%
     tidyr::unnest(cols = value) %>%
-    dplyr::mutate(SOURCE = "HGNC") %>%
+    dplyr::mutate(SOURCE = "HGNC",
+                  BIOTYPE = ifelse(BIOTYPE == "gene with protein product",
+                                   "protein_coding", BIOTYPE)) %>%
     dplyr::rename(HGNC_SYMBOL = HGNC_SYMBOL2) %>%
     unique() %>%
 
@@ -97,12 +100,14 @@ hgnc <- hgnc %>%
     dplyr::group_by(value) %>%
     dplyr::mutate(ngroups = n_distinct(HGNC_ID)) %>%
     dplyr::filter(ngroups == 1 | symbol_type == "HGNC_SYMBOL") %>%
-    dplyr::select(-ngroups)
+    dplyr::select(-ngroups) %>%
 
-
-# TO DO:
-# Remove genes that do not have a protein ID?
-
+    # Make ENTREZ ID a character for joining with other tables
+    dplyr::mutate(ENTREZ_ID = as.character(ENTREZ_ID))
 
 hgnc <- as.data.frame(hgnc)
 usethis::use_data(hgnc, overwrite = TRUE, compress = "bzip2")
+
+# Possible changes:
+# Remove genes that do not have a protein ID?
+# Filter ambiguous previous symbols then recheck for ambiguity?

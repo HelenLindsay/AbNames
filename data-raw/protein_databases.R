@@ -1,8 +1,14 @@
+data(hgnc)
+
 # Cell marker database ---------------------------------------------
 
 # Note: Isoform name may be mapped to gene name, e.g. CD45RO -> PTPRC
 # Some antigens have no annotation information, e.g. CD45.1
 # Table contains annotation errors, e.g. row shift error in UNIPROT_IDs
+
+# Row Epithelial cell starting Adhesion molecules -
+# Number of cell markers is not equal to number of gene (groups),
+# is there an extra , Adhesion molecules, LFA1, Adhesion molecules LFA2?
 
 # http://bio-bigdata.hrbmu.edu.cn/CellMarker/index.jsp
 
@@ -24,10 +30,11 @@ gsubCellmarker <- function(x){
 # Is ENTREZ symbol the HGNC symbol? - No, sometimes it's previous symbol
 # or not found
 
-cellmarker_loc <- paste0("http://bio-bigdata.hrbmu.edu.cn/CellMarker/download/",
-                         "Human_cell_markers.txt")
+#cellmarker_loc <- paste0("http://bio-bigdata.hrbmu.edu.cn/CellMarker/download/",
+#                         "Human_cell_markers.txt")
 cellmarker_fname <- "~/Analyses/CITEseq_curation/data/CellMarker_human.txt"
-download.file(cellmarker_loc, destfile = cellmarker_fname)
+#download.file(cellmarker_loc, destfile = cellmarker_fname)
+
 
 cellmarker <- readr::read_delim(cellmarker_fname) %>%
     dplyr::select(cellName, cellMarker, geneSymbol,
@@ -56,14 +63,57 @@ cellmarker <- readr::read_delim(cellmarker_fname) %>%
     dplyr::mutate(SOURCE = "CELLMARKER") %>%
     dplyr::mutate(across(c(ENTREZ_SYMBOL, ENTREZ_ID,
                            proteinName, UNIPROT_ID), ~na_if(., "NA"))) %>%
-    # Filter again, some cellNamers include an NA in a list of markers
+    # Filter again, some cellNames include an NA in a list of markers
     dplyr::filter(if_all(c(ENTREZ_ID, UNIPROT_ID), ~! is.na(.x))) %>%
     dplyr::mutate(across(everything(), ~stringr::str_squish(.x))) %>%
     # Split the protein complexes
     dplyr::mutate(across(c(ENTREZ_SYMBOL, ENTREZ_ID, proteinName, UNIPROT_ID),
                          ~strsplit(.x, "\\|"))) %>%
-                               tidyr::unnest(cols = c(ENTREZ_SYMBOL, ENTREZ_ID,
-                                                      proteinName, UNIPROT_ID))
+                               tidyr::unnest(cols = c(ENTREZ_SYMBOL,
+                                                      ENTREZ_ID,
+                                                      proteinName,
+                                                      UNIPROT_ID)) %>%
+    # Not useful if antigen already exists
+    dplyr::filter(! Antigen == ENTREZ_SYMBOL,
+                  ! Antigen %in% hgnc$value)
+
+# There are 13 markers that don't match HGNC_SYMBOL / ENTREZ_ID combo
+# Removing, but probably safe to keep them
+cellmarker <- cellmarker %>%
+    dplyr::semi_join(hgnc, by = c("ENTREZ_SYMBOL" = "HGNC_SYMBOL",
+                                  "ENTREZ_ID")) %>%
+    # Patch the uniprot IDs
+    dplyr::rename(HGNC_SYMBOL = ENTREZ_SYMBOL) %>%
+    dplyr::rows_update(hgnc %>%
+                           dplyr::select(HGNC_SYMBOL, ENTREZ_ID, UNIPROT_ID) %>%
+                           unique(),
+                       unmatched = "ignore") %>%
+
+    # Re-aggregate the protein complexes
+    unique() %>%
+    dplyr::group_by(Antigen, cellName) %>%
+    dplyr::mutate(across(c(HGNC_SYMBOL, ENTREZ_ID, proteinName, UNIPROT_ID),
+                         ~ paste(.x, collapse = "|"))) %>%
+    dplyr::ungroup() %>%
+    dplyr::select(-cellName) %>%
+    unique() %>%
+
+    # Protein names will be added as an alias if they don't already exist
+    dplyr::mutate(proteinName = ifelse(proteinName == HGNC_SYMBOL,
+                                       NA, proteinName),
+                  proteinName = ifelse(proteinName %in% hgnc$value,
+                                       NA, proteinName)) %>%
+
+    # Pivot longer for merging with hgnc
+    dplyr::rename(CELLMARKER_ANTIGEN = Antigen,
+                  CELLMARKER_PROTEIN = proteinName) %>%
+    tidyr::pivot_longer(cols = c("CELLMARKER_ANTIGEN", "CELLMARKER_PROTEIN"),
+                        names_to = "symbol_type", values_to = "value") %>%
+    # Aggregated protein names probably aren't useful
+    dplyr::filter(! is.na(value), ! grepl("\\|", value))
+
+# To do: check for same antigen to multiple genes (e.g. CD45RO)
+
 
 
 # Exploration ----
@@ -92,35 +142,10 @@ protein_complexes <- cellmarker %>%
                   proteinName, UNIPROT_ID) %>%
     unique()
 
-# Using org.db, add ENSEMBL identifiers (one ENSEMBL may map to several ENTREZ?)
-# As this includes "ALIAS" column, rows may be added
-#protein_complexes <- protein_complexes %>%
-#    dplyr::mutate(across(c(ENTREZ_SYMBOL, ENTREZ_ID,
-#                           proteinName, UNIPROT_ID), ~strsplit(.x, "\\|"))) %>%
-#    tidyr::unnest(cols = c(ENTREZ_SYMBOL, ENTREZ_ID,
-#                           proteinName, UNIPROT_ID)) %>%
-#    dplyr::left_join(org_db %>% dplyr::select(-value) %>% unique(),
-#                     by = c(ENTREZ_ID)) %>%
-#
-#    dplyr::group_by(Antigen) %>%
 
-
-    # When a single gene is mapped to several Antigens, check if cellName annotation
-    # is also the same
-
-    # Split into individual genes, check the symbols are official symbols,
-    # add HGNC and ENSEMBL IDs.
-
-
-# Switch this to hgnc not org_db
-# for a complex, are all entrez ids / symbols correct?
+# Notes:
 # Possible to get e.g. CD32, CD16, CD3 from other source?
-
-
-
-# Row Epithelial cell starting Adhesion molecules -
-# Number of cell markers is not equal to number of gene (groups),
-# is there an extra , Adhesion molecules, LFA1, Adhesion molecules LFA2?
+# Haven't checked if individual genes are filtered from protein complexes
 
 # Cell surface protein atlas ---------------------------------------
 

@@ -141,26 +141,58 @@ groupsWith <- function(df1, df2, col){
 
 
 # union_join ----
-# Select values from a data.frame df matching any column from another data.frame
-#
-# Either a second data.frame df2 can be provided, or a selection of rows indices
-# from the first data.frame.  If a second data frame and a selection of rows is
-# provided, values from df matching any value in df2[rows, ] are returned.
-# by = columns to select from df2
+# Note: names in "by" won't work as this isn't actually a join
+#'@title Select rows matching any column in another data.frame
+#'
+#'@description Select values from a data.frame df matching any
+#'column from another data.frame or a selection of row indices.  If a second
+#'data frame and a selection of rows is provided, values from df matching
+#'any value in df2[rows, ] are returned.  If only rows indices are provided,
+#'rows matching any value in df[rows, ] are returned.
+#'
+#'@param df A data.frame from which to select matching rows
+#'@param df2 Optional, a second data
+#'@param rows Row indices for subsetting, either df2 if present or df
+#'@param by = columns to select from df2
+#'@keywords internal
 union_join <- function(df, df2 = NULL, rows = NULL, by = NULL){
     if (! is.null(df2) & ! is.null(rows)){
-        warning("Row selection will be made from df2")
+        message("Row selection will be made from df2")
     }
     tmp <- .tempColName(df)
     qdf <- df
     if (! is.null(df2)) { qdf <- df2 }
     if (! is.null(rows)) qdf <- qdf[rows, ]
     if (is.null(by)) by <- colnames(qdf)
+
+    # If there are names, assume they use dplyr join syntax, i.e. names
+    # refer to columns in df, values to columns in df2
+    if (! is.null(names(by))){
+        no_name <- names(by) == ""
+        names(by)[no_name] <- by[no_name]
+
+        # Check that names of "by" exist in df
+        if (! all(names(by) %in% colnames(df))){
+            stop("Not all columns in 'by' appear in df:",
+                    toString(setdiff(names(by), colnames(df))))
+        }
+
+        # Check that values of by exist in qdf
+        if (! all(by %in% colnames(qdf))){
+            stop("Not all columns in 'by' appear in df2:",
+                 toString(setdiff(by, colnames(qdf))))
+        }
+
+        # Rename columns in qdf to match "by", set by to equal names of by
+        qdf <- qdf[, by]
+        colnames(qdf) <- names(by)
+        by <- names(by)
+    }
+
     if (! all(by %in% colnames(df))){
         warning("Not all columns in 'by' appear in df:",
                 toString(setdiff(by, colnames(df))))
     }
-    by <- intersect(by, colnames(df))
 
     # Extra brackets needed, see https://github.com/tidyverse/dplyr/issues/6194
     df %>% dplyr::filter((dplyr::if_any(.cols = by,
