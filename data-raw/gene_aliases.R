@@ -30,7 +30,7 @@ library(tidyverse)
 library(readxl)
 
 source("ncbi.R")
-source("org_db.R")
+source("entrez_ensembl.Rs")
 
 # TO DO: what happened to biotype?
 # --------------------------------------------------------------------
@@ -46,7 +46,7 @@ source("org_db.R")
 bm_ids <- dplyr::select(bm, ENSEMBL_ID, HGNC_ID, HGNC_SYMBOL, BIOTYPE) %>%
     unique()
 
-# 28 genes differ in HGNC_ID / ENSEMBL_ID combination
+# 15 genes differ in HGNC_ID / ENSEMBL_ID combination
 bm_ens_diff <- dplyr::anti_join(bm_ids, hgnc_ids,
                                 by = c("HGNC_ID", "ENSEMBL_ID"))
 
@@ -60,7 +60,7 @@ multi_gene <- bm_ids %>%
     # HGNC_ID/ENSEMBL_ID agrees with HGNC
     dplyr::semi_join(hgnc_ens_diff)
 
-# These are the protein-coding genes where HGNC/ENSEMBL disagree
+# These are protein-coding genes where HGNC/ENSEMBL disagree (not multi-gene)
 ens_patch <- bm_ens_diff %>%
     dplyr::filter(! HGNC_ID %in% multi_gene$HGNC_ID) %>%
     dplyr::filter(BIOTYPE == "protein_coding") %>%
@@ -76,61 +76,17 @@ multi_gene <- bm_ids %>%
 
 # Create a data frame with the alternative ENSEMBL IDs and add both
 # copies into hgnc
-temp <- hgnc %>% dplyr::semi_join(multi_gene)
-multi_gene_patch <- multi_gene %>% dplyr::anti_join(temp)
-temp <- dplyr::rows_update(temp,
-                           multi_gene_patch %>% dplyr::select(-BIOTYPE),
-                           by = c("HGNC_ID", "HGNC_SYMBOL"))
+temp <- hgnc %>%
+    dplyr::semi_join(multi_gene,
+                     by = c("ENSEMBL_ID", "HGNC_ID", "HGNC_SYMBOL")) %>%
+    dplyr::select(-BIOTYPE, -ENSEMBL_ID)
+
+hgnc <- hgnc %>% anti_join(temp)
+
+temp <- full_join(temp, multi_gene)
+
 hgnc <- hgnc %>% bind_rows(temp)
 
-# TO DO? ADD BIOTYPE, FILTER PROTEIN-CODING?
-# Note that the mappings to non-protein-coding genes haven't been removed
-# e.g. ENSG00000271672 transcribed_processed_pseudogene
-
-# -----------------------------------------------------------------------
-# Add Entrez IDs where NCBI / Ensembl / Org_db agree -----
-
-prep_merge <- function(df, hgnc){
-    df %>%
-        dplyr::select(ENSEMBL_ID, ENTREZ_ID, HGNC_SYMBOL, BIOTYPE) %>%
-        dplyr::semi_join(hgnc) %>%
-        # Want Ensembl, Entrez and Symbol for merging
-        stats::na.omit() %>%
-        unique()
-}
-
-common_or_missing <- function(x, y){
-    sj <- dplyr::semi_join(x, y)
-    aj <- dplyr::anti_join(x, y)
-    # Are the entries in the anti-join inconsistent or missing?
-
-    # Find entries in y where any column value is in the anti_join
-    uj <- union_join(y, aj)
-
-    # Find entries in the anti-join where any entry is in y (using above)
-    to_rm <- union_join(aj, uj)
-
-    aj <- anti_join(aj, to_rm)
-    return(dplyr::bind_rows(sj, aj))
-}
-
-
-bm_x <- prep_merge(bm, hgnc)
-ncbi_x <- prep_merge(ncbi_genes, hgnc)
-org_db_x <- prep_merge(org_db, hgnc)
-
-bm_ncbi <- common_or_missing(bm_x, ncbi_x)
-bm_orgdb <- common_or_missing(bm_x, org_db_x)
-ncbi_bm <- common_or_missing(ncbi_x, bm_x)
-ncbi_orgdb <- common_or_missing(ncbi_x, org_db_x)
-orgdb_bm <- common_or_missing(org_db_x, bm_x)
-orgdb_ncbi <- common_or_missing(org_db_x, ncbi_x)
-
-consistent <- Reduce(dplyr::full_join,
-                     list(bm_ncbi, bm_orgdb, ncbi_bm, ncbi_orgdb,
-                                  orgdb_bm, orgdb_ncbi))
-
-hgnc <- hgnc %>% dplyr::left_join(consistent)
 
 # ---------------------------------------------------------------------------
 # Select the aliases that aren't already present in hgnc -----

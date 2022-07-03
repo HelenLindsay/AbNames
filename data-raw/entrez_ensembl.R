@@ -90,7 +90,7 @@ bm_patch <- bm %>%
     dplyr::semi_join(hgnc, by = c("ENSEMBL_ID", "HGNC_ID")) %>%
     # But symbol is incorrect
     dplyr::anti_join(hgnc, by = c("ENSEMBL_ID", "HGNC_SYMBOL", "HGNC_ID"))
-# length(unique(bm_patch$ENSEMBL_ID)) 82 genes
+# length(unique(bm_patch$ENSEMBL_ID)) 66 genes
 
 # Remove these rows from biomart
 bm <- bm %>% anti_join(bm_patch)
@@ -98,11 +98,12 @@ bm <- bm %>% anti_join(bm_patch)
 # If the incorrect symbol is a known alias in HGNC, fix and add back in
 bm_patch <- bm_patch %>%
     # If the correct symbol is a known HGNC alias ...
-    dplyr::semi_join(hgnc, by = c("HGNC_SYMBOL" = "value")) %>%
+    dplyr::semi_join(hgnc, by = c("ENSEMBL_ID", "HGNC_SYMBOL" = "value")) %>%
     # Make the incorrect symbol an ALIAS
     dplyr::group_by(ENSEMBL_ID) %>%
     tidyr::pivot_longer(cols = c(HGNC_SYMBOL, ALIAS), values_to = "ALIAS",
                         names_to = NULL) %>%
+    unique() %>%
     # Add the HGNC_SYMBOL from hgnc table
     dplyr::left_join(hgnc_ids)
 
@@ -149,7 +150,7 @@ org_db <- AnnotationDbi::select(hs,
     # Only keep Ensembl ids that appear in the Biomart table (or missing),
     # Remove pseudogenes
     dplyr::filter(ENSEMBL_ID %in% bm$ENSEMBL_ID | is.na(ENSEMBL_ID),
-                  ! grepl("pseudo", BIOTYPE)) %>%
+                  ! grepl("pseudo|unknown|ncRNA", BIOTYPE)) %>%
 
     # Remove aliases that map to more than one HGNC_SYMBOL
     dplyr::group_by(value) %>%
@@ -165,36 +166,22 @@ org_db <- AnnotationDbi::select(hs,
 
 table(is.na(org_db$ENSEMBL_ID))
 # FALSE  TRUE
-# 127882   6069
+# 117602    206
 
-# Patch by symbol / alias
+
+# Patch Ensembl ID by symbol / Entrez ID
 hgnc_patch <- hgnc %>%
     dplyr::filter(! is.na(ENSEMBL_ID)) %>%
-    dplyr::select(HGNC_SYMBOL, value, ENSEMBL_ID) %>%
+    dplyr::select(HGNC_SYMBOL, ENSEMBL_ID, ENTREZ_ID) %>%
     unique()
 
 org_db <- org_db %>%
     dplyr::rows_patch(hgnc_patch,
-                      by = c("HGNC_SYMBOL", "value"),
-                      unmatched = "ignore")
-
-# Patch by symbol / uniprot id
-hgnc_patch <- hgnc %>%
-    splitUnnest(ab = "UNIPROT_ID", split = "\\|") %>%
-    dplyr::filter(! is.na(ENSEMBL_ID)) %>%
-    dplyr::select(HGNC_SYMBOL, UNIPROT_ID, ENSEMBL_ID) %>%
-    unique()
-
-org_db <- org_db %>%
-    dplyr::rows_patch(hgnc_patch,
-                      by = c("HGNC_SYMBOL", "UNIPROT_ID"),
+                      by = c("HGNC_SYMBOL", "ENTREZ_ID"),
                       unmatched = "ignore")
 
 
-# None of the remaining NAs can be filled by grouping by HGNC_SYMBOL + ENTREZ_ID
-# or by filling from NCBI
-
-table(is.na(org_db$ENSEMBL_ID))
-# FALSE  TRUE
-# 134278   2075
+#table(is.na(org_db$ENSEMBL_ID))
+# FALSE   TRUE
+# 117706    106
 

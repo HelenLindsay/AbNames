@@ -79,7 +79,9 @@ ncbi_genes <- ncbi_genes %>%
 
     # Filter "Other" column for terms related to surface markers
     dplyr::filter(symbol_type == "OTHER" & grepl(alias_grep, value) |
-                      ! symbol_type == "OTHER") %>%
+                      ! symbol_type == "OTHER",
+                  # Remove entries such as "antigen-like", "immunoglobulin like"
+                  ! (symbol_type == "OTHER" & grepl("like", value))) %>%
 
     dplyr::mutate(SOURCE = "NCBI") %>%
 
@@ -89,13 +91,13 @@ ncbi_genes <- ncbi_genes %>%
     dplyr::filter(n_genes == 1) %>%
     dplyr::select(-n_genes) %>%
 
-    # Only keep genes for which there is a HGNC / ENSEMBL combination in HGNC
+    # Only keep genes for which there is a HGNC / ENSEMBL / ENTREZ comb in HGNC
     # (Note that not all HGNC IDs are in hgnc data set, e.g. non-protein-coding)
 
     # There are some differences in which ENSEMBL_ID is mapped to which HGNC_ID,
     # e.g. in HGNC HGNC:4883 -> ENSG00000000971 (official gene)
     #      in NCBI HGNC:4883 -> ENSG00000289697 (novel gene)
-    dplyr::semi_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID))
+    dplyr::semi_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID, ENTREZ_ID))
 
 
 ncbi_genes <- as.data.frame(ncbi_genes)
