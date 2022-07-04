@@ -6,6 +6,54 @@ library(readr)
 library(AbNames)
 library(stringr)
 
+# Download TotalSeq Barcode lookup information ----
+
+# (Manually downloaded from
+# https://www.biolegend.com/en-us/totalseq/barcode-lookup
+# and converted to csv due to import error)
+
+# Note: "NA" antigens are isotype controls and streptavidin conjugates
+
+dest <- "~/Analyses/CITEseq_curation/data/totalseq_barcodes"
+dest_fnames <- c("totalseq_a_antibodies.csv", "totalseq_b_antibodies.csv",
+                 "totalseq_c_antibodies.csv", "totalseq_d_antibodies.csv")
+dest_fnames <- file.path(dest, dest_fnames)
+
+totalseq_cat <- c("A", "B", "C", "D")
+
+ts_barcodes <- lapply(seq_along(dest_fnames), function(i){
+    readr::read_delim(dest_fnames[i]) %>%
+        dplyr::mutate(TotalSeq_Cat = totalseq_cat[i])
+})
+
+ts_barcodes <- do.call(bind_rows, ts_barcodes) %>%
+    dplyr::rename(Barcode_Sequence = Sequence,
+                  ENSEMBL_ID = `Ensembl Gene Id`,
+                  Date_Released = `Date Released`,
+                  Cat_Number = `Catalog`,
+                  Oligo_ID = Barcode,
+                  Antigen = Description) %>%
+    dplyr::relocate(TotalSeq_Cat, .after = Clone) %>%
+    tidyr::separate(Reactivity, into = c("Reactivity", "Cross_Reactivity"),
+                    sep =
+            ", (<[Bb]>|<strong>)?Cross-Reactivity:(</[Bb]>|</strong>)? ",
+            fill = "right") %>%
+    dplyr::mutate(across(where(is.character), ~ stringr::str_squish(.x)))
+
+# Check if one oligo is assigned to exactly one
+# Antigen / Clone / TotalSeq_Cat comb
+
+# (The only entry is same antigen written differently TCR Vα2 / TCR V&alpha;2)
+x <- ts_barcodes %>%
+    nPerGroup(group = "Oligo_ID",
+              col = c("Antigen", "Clone", "TotalSeq_Cat")) %>%
+    filter(if_any(c(nAntigen, nClone), ~.x > 1))
+
+# From this information, it appears that Antigen / Oligo / TotalSeq_Cat is
+# enough to fill in Cat_Number and Clone
+
+
+
 # Download TotalSeq cocktail information ----
 
 bl <- "https://www.biolegend.com/Files/Images/BioLegend/totalseq/"
@@ -158,6 +206,45 @@ totalseq <- totalseq %>%
 totalseq_cocktails <- as.data.frame(totalseq)
 usethis::use_data(totalseq_cocktails, overwrite = TRUE, compress = "bzip2")
 
+# Check consistency between totalseq barcode lookup and totalseq cocktails ----
+
+# Reactivity is more thoroughly described in ts_barcodes
+# totalseq_cocktails often use longer antigen names
+
+# Jaro Winkler distance is an edit distance with matches at the start given
+# higher scores
+library(reclin)
+
+p <- pair_blocking(totalseq_cocktails,
+                   ts_barcodes %>% dplyr::filter(! is.na(Antigen)),
+                   blocking_var = c("Oligo_ID", "TotalSeq_Cat")) %>%
+    compare_pairs(by = c("Antigen", "Clone", "Oligo_ID", "Barcode_Sequence"),
+                  default_comparator = jaro_winkler(0.9), overwrite = TRUE)
+
+
+
+
+
+ts_f <- totalseq_cocktails %>%
+    dplyr::as_tibble()
+    dplyr::select(Antigen, Clone, ENSEMBL_ID, Oligo_ID,
+                  TotalSeq_Cat, Barcode_Sequence)
+
+ts_no_exact <- ts_f %>%
+    dplyr::anti_join(ts_barcodes, by = c("Clone", "Oligo_ID", "ENSEMBL_ID",
+                                         "Barcode_Sequence"))
+
+
+ts_barcodes_no_exact <- ts_barcodes %>%
+    dplyr::anti_join(ts_f)
+
+
+x <- totalseq_cocktails %>%
+    # ts_barcodes doesn't (usually) include alternative names
+    dplyr::select(Antigen, Clone, ENSEMBL_ID, Oligo_ID,
+                  TotalSeq_Cat, Barcode_Sequence) %>%
+    fuzzyjoin::fuzzy_anti_join(ts_barcodes)
+
 
 # TO CHECK:
 # CD158 (KIR2DL1/S1/S3/S5)
@@ -172,3 +259,7 @@ usethis::use_data(totalseq_cocktails, overwrite = TRUE, compress = "bzip2")
 #totalseq %>%
 #    semi_join(genes, by = c(Antigen = "value")) %>%
 #    anti_join(genes, by = c(ENSEMBL_ID = "ENSEMBL_ID", Antigen = "value")
+
+
+
+
