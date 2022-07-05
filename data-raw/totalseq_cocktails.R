@@ -213,17 +213,34 @@ usethis::use_data(totalseq_cocktails, overwrite = TRUE, compress = "bzip2")
 
 # Jaro Winkler distance is an edit distance with matches at the start given
 # higher scores
+
+# https://github.com/djvanderlaan/reclin
+
 library(reclin)
 
 p <- pair_blocking(totalseq_cocktails,
                    ts_barcodes %>% dplyr::filter(! is.na(Antigen)),
                    blocking_var = c("Oligo_ID", "TotalSeq_Cat")) %>%
     compare_pairs(by = c("Antigen", "Clone", "Oligo_ID", "Barcode_Sequence"),
-                  default_comparator = jaro_winkler(0.9), overwrite = TRUE)
+                  default_comparator = jaro_winkler(0.9), overwrite = TRUE) %>%
+    score_simsum(var = "simsum") %>%
+    select_greedy("simsum", var = "greedy", threshold = 0)
 
 
+q <- pair_blocking(totalseq_cocktails,
+                   ts_barcodes %>% dplyr::filter(! is.na(Antigen)),
+                   blocking_var = c("Oligo_ID", "TotalSeq_Cat")) %>%
+    compare_pairs(by = c("Antigen", "Clone", "Oligo_ID", "Barcode_Sequence"),
+                  default_comparator = jaro_winkler(0.9), overwrite = TRUE) %>%
+    score_simsum(var = "simsum") %>%
+    select_greedy("simsum", var = "select_n_to_m", threshold = 0)
 
+# Problem in problink_em - mprobs become 1 leading to div by zero
 
+# For this data.set, it doesn't make a difference if greedy or n_to_m is used
+p <- data.frame( p[,c("x", "y")])
+q <- data.frame( q[,c("x", "y")])
+base::identical(p,q)
 
 ts_f <- totalseq_cocktails %>%
     dplyr::as_tibble()
