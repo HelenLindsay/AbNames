@@ -1,15 +1,13 @@
 #'@importFrom methods setGeneric
-setGeneric("renameADT", signature = c("obj", "assay"),
-           function(obj, assay, ...) {
+setGeneric("renameADT", signature = c("obj", "names"),
+           function(obj, names, ...) {
     standardGeneric("renameADT")
 })
 
 
 # renameADT for signature vector ------
-setMethod("renameADT", signature(obj = "character", assay = "missing"),
-    function(obj, assay){
-
-
+setMethod("renameADT", signature(obj = "character", names = "character"),
+    function(obj, names){
 
 })
 
@@ -18,8 +16,9 @@ setMethod("renameADT", signature(obj = "character", assay = "missing"),
 # renameADT for signature SingleCellExperiment ------
 #'@importFrom methods setMethod signature
 setMethod("renameADT", signature(obj = "SingleCellExperiment",
-                                 assay = "character"),
-    function(obj, assay, ...) {
+                                 names = "character"),
+    function(obj, names, assay = "counts", ...) {
+
         # For a SingleCellExperiment, the ADT may either be the main assay
         # or an altExp.
         # May need to replace the row data too
@@ -43,7 +42,7 @@ setMethod("renameADT", signature(obj = "SingleCellExperiment",
 # how-to-document-s4-methods-that-rely-on-classes-from-external-packages
 setMethod("renameADT", as(structure(.Data = c("MultiAssayExperiment",
                                               "character"),
-                                     names = c("obj", "assay"),
+                                     names = c("obj", "names"),
                                      package = c("MultiAssayExperiment", "")),
                           "signature"),
     function(obj, assay, ...) {

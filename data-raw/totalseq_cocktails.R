@@ -38,7 +38,9 @@ ts_barcodes <- do.call(bind_rows, ts_barcodes) %>%
                     sep =
             ", (<[Bb]>|<strong>)?Cross-Reactivity:(</[Bb]>|</strong>)? ",
             fill = "right") %>%
-    dplyr::mutate(across(where(is.character), ~ stringr::str_squish(.x)))
+    dplyr::mutate(across(where(is.character), ~ stringr::str_squish(.x)),
+                  ENSEMBL_ID = gsub(";|:|nbsp", "", ENSEMBL_ID)) %>%
+    dplyr::filter(! (is.na(Antigen) & is.na(Clone)))
 
 # Check if one oligo is assigned to exactly one
 # Antigen / Clone / TotalSeq_Cat comb
@@ -52,6 +54,7 @@ x <- ts_barcodes %>%
 # From this information, it appears that Antigen / Oligo / TotalSeq_Cat is
 # enough to fill in Cat_Number and Clone
 
+# Is Clone enough to fill in Antigen?
 
 
 # Download TotalSeq cocktail information ----
@@ -206,6 +209,24 @@ totalseq <- totalseq %>%
 totalseq_cocktails <- as.data.frame(totalseq)
 usethis::use_data(totalseq_cocktails, overwrite = TRUE, compress = "bzip2")
 
+
+# Fill in missing ts_barcode Antigens using totalseq_cocktails -----
+# ts_barcodes have NA for Antigen for isotype control.
+# Fill in control name using totalseq_cocktails table
+temp <- totalseq_cocktails %>%
+    dplyr::select(Antigen, Clone) %>%
+    unique() %>%
+    group_by(Clone) %>%
+    # If there is more than one antigen per clone, select the first
+    # (checked manually, they are the same with different names)
+    dplyr::slice_head(n = 1) %>%
+    ungroup()
+
+ts_barcodes <- ts_barcodes %>%
+    dplyr::rows_patch(temp, unmatched = "ignore", by = c("Clone")) %>%
+    dplyr::filter(! is.na(Antigen))
+
+
 # Check consistency between totalseq barcode lookup and totalseq cocktails ----
 
 # Reactivity is more thoroughly described in ts_barcodes
@@ -218,49 +239,26 @@ usethis::use_data(totalseq_cocktails, overwrite = TRUE, compress = "bzip2")
 
 library(reclin)
 
-p <- pair_blocking(totalseq_cocktails,
-                   ts_barcodes %>% dplyr::filter(! is.na(Antigen)),
+p <- pair_blocking(totalseq_cocktails, ts_barcodes,
                    blocking_var = c("Oligo_ID", "TotalSeq_Cat")) %>%
     compare_pairs(by = c("Antigen", "Clone", "Oligo_ID", "Barcode_Sequence"),
                   default_comparator = jaro_winkler(0.9), overwrite = TRUE) %>%
     score_simsum(var = "simsum") %>%
     select_greedy("simsum", var = "greedy", threshold = 0)
 
-
-q <- pair_blocking(totalseq_cocktails,
-                   ts_barcodes %>% dplyr::filter(! is.na(Antigen)),
-                   blocking_var = c("Oligo_ID", "TotalSeq_Cat")) %>%
-    compare_pairs(by = c("Antigen", "Clone", "Oligo_ID", "Barcode_Sequence"),
-                  default_comparator = jaro_winkler(0.9), overwrite = TRUE) %>%
-    score_simsum(var = "simsum") %>%
-    select_greedy("simsum", var = "select_n_to_m", threshold = 0)
-
 # Problem in problink_em - mprobs become 1 leading to div by zero
 
 # For this data.set, it doesn't make a difference if greedy or n_to_m is used
 p <- data.frame( p[,c("x", "y")])
-q <- data.frame( q[,c("x", "y")])
-base::identical(p,q)
-
-ts_f <- totalseq_cocktails %>%
-    dplyr::as_tibble()
-    dplyr::select(Antigen, Clone, ENSEMBL_ID, Oligo_ID,
-                  TotalSeq_Cat, Barcode_Sequence)
-
-ts_no_exact <- ts_f %>%
-    dplyr::anti_join(ts_barcodes, by = c("Clone", "Oligo_ID", "ENSEMBL_ID",
-                                         "Barcode_Sequence"))
 
 
-ts_barcodes_no_exact <- ts_barcodes %>%
-    dplyr::anti_join(ts_f)
+x <- totalseq_cocktails[q$x,]
+y <- ts_barcodes[q$y,]
+# (Isotype controls and 5 where oligo ID doesn't match)
+x_unmatched <- totalseq_cocktails[setdiff(seq_len(nrow(totalseq_cocktails)),
+                                          p$x), ]
 
 
-x <- totalseq_cocktails %>%
-    # ts_barcodes doesn't (usually) include alternative names
-    dplyr::select(Antigen, Clone, ENSEMBL_ID, Oligo_ID,
-                  TotalSeq_Cat, Barcode_Sequence) %>%
-    fuzzyjoin::fuzzy_anti_join(ts_barcodes)
 
 
 # TO CHECK:
