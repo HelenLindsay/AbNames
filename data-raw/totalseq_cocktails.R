@@ -1,3 +1,8 @@
+# Notes ----
+
+# TotalSeq_Barcodes is more complete than TotalSeq_Cocktails.
+# TotalSeq_Cocktails just used to fill in missing isotype control names.
+
 # Setup ----
 
 library(readxl)
@@ -205,10 +210,6 @@ totalseq <- totalseq %>%
     dplyr::filter(! Antigen == "CD3")
 
 
-# Create totalseq_cocktails data set ----
-totalseq_cocktails <- as.data.frame(totalseq)
-usethis::use_data(totalseq_cocktails, overwrite = TRUE, compress = "bzip2")
-
 
 # Fill in missing ts_barcode Antigens using totalseq_cocktails -----
 # ts_barcodes have NA for Antigen for isotype control.
@@ -224,10 +225,25 @@ temp <- totalseq_cocktails %>%
 
 ts_barcodes <- ts_barcodes %>%
     dplyr::rows_patch(temp, unmatched = "ignore", by = c("Clone")) %>%
-    dplyr::filter(! is.na(Antigen))
+    dplyr::filter(! is.na(Antigen),
+                  # When "Clone" is na it's Biotin
+                  ! is.na(Clone))
 
 
-# Check consistency between totalseq barcode lookup and totalseq cocktails ----
+
+# Create totalseq data set ----
+totalseq <- as.data.frame(ts_barcodes)
+usethis::use_data(totalseq, overwrite = TRUE, compress = "bzip2")
+
+
+# Genes to check annotation: -----
+# CD158 (KIR2DL1/S1/S3/S5)
+# CD158b (KIR2DL2/L3, NKAT2)
+# CD158e1 (KIR3DL1, NKB1)
+# CD169
+# CD3
+
+# Exploration with inexact join (not necessary for this data set) -----
 
 # Reactivity is more thoroughly described in ts_barcodes
 # totalseq_cocktails often use longer antigen names
@@ -237,43 +253,19 @@ ts_barcodes <- ts_barcodes %>%
 
 # https://github.com/djvanderlaan/reclin
 
-library(reclin)
-
-p <- pair_blocking(totalseq_cocktails, ts_barcodes,
-                   blocking_var = c("Oligo_ID", "TotalSeq_Cat")) %>%
-    compare_pairs(by = c("Antigen", "Clone", "Oligo_ID", "Barcode_Sequence"),
-                  default_comparator = jaro_winkler(0.9), overwrite = TRUE) %>%
-    score_simsum(var = "simsum") %>%
-    select_greedy("simsum", var = "greedy", threshold = 0)
-
-# Problem in problink_em - mprobs become 1 leading to div by zero
-
-# For this data.set, it doesn't make a difference if greedy or n_to_m is used
-p <- data.frame( p[,c("x", "y")])
-
-
-x <- totalseq_cocktails[q$x,]
-y <- ts_barcodes[q$y,]
-# (Isotype controls and 5 where oligo ID doesn't match)
-x_unmatched <- totalseq_cocktails[setdiff(seq_len(nrow(totalseq_cocktails)),
-                                          p$x), ]
-
-
-
-
-# TO CHECK:
-# CD158 (KIR2DL1/S1/S3/S5)
-# CD158b (KIR2DL2/L3, NKAT2)
-# CD158e1 (KIR3DL1, NKB1)
-# CD169
-# CD3
-
-
-# Testing for differences between totalseq and HGNC annotation
-# (Where antigen name is shared)
-#totalseq %>%
-#    semi_join(genes, by = c(Antigen = "value")) %>%
-#    anti_join(genes, by = c(ENSEMBL_ID = "ENSEMBL_ID", Antigen = "value")
+#library(reclin)
+#
+#p <- pair_blocking(totalseq_cocktails, ts_barcodes,
+#                   blocking_var = c("Oligo_ID", "TotalSeq_Cat")) %>%
+#    compare_pairs(by = c("Antigen", "Clone", "Oligo_ID", "Barcode_Sequence"),
+#                  default_comparator = jaro_winkler(0.9), overwrite = TRUE) %>%
+#    score_simsum(var = "simsum") %>%
+#    select_greedy("simsum", var = "greedy", threshold = 0)
+#
+## Problem in problink_em - mprobs become 1 leading to div by zero
+#
+## For this data.set, it doesn't make a difference if greedy or n_to_m is used
+#p <- data.frame( p[,c("x", "y")])
 
 
 
