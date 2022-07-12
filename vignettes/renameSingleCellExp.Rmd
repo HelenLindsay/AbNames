@@ -1,0 +1,34 @@
+---
+title: "Standardize a SingleCellExperiment"
+output: html_document
+date: '2022-07-11'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This vignette shows how to standardize the names of the antibody-derived tags in
+a CITE-seq experiment in SingleCellExperiment format.
+
+To demonstrate, we will use the "cord_blood" dataset available in the package
+"SingleCellMultiModal".  
+
+
+```{r, message = FALSE}
+
+#library(SingleCellMultiModal)
+#cord_blood <- CITEseq(DataType="cord_blood", modes="scADT_Counts",
+#                      dry.run=FALSE, DataClass = "SingleCellExperiment")
+#cord_blood
+
+# May not need much renaming....
+library(scRNAseq)
+kotliarov <- KotliarovPBMCData(mode = "adt")
+rownames(kotliarov)
+
+#library(CiteFuse)
+#data("CITEseq_example", package = "CiteFuse")
+#sce_citeseq <- preprocessing(CITEseq_example)
+#rownames(altExp(sce_citeseq, "ADT"))
+```

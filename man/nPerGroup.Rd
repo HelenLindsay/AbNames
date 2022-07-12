@@ -11,7 +11,7 @@ nPerGroup(df, group, col)
 
 \item{group}{character(n) Character vector of name(s) of grouping columns}
 
-\item{col}{character(n) Name of column(s) in which to count distinct values}
+\item{col}{character(n) Name(s) of column(s) in which to count distinct values}
 }
 \description{
 Grouping columns containing NAs are not considered.

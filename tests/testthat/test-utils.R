@@ -89,3 +89,13 @@ test_that("union_join correctly handles names in 'by' argument", {
     expect_error(union_join(diamonds, data.frame(Cut = "Fair", color = "I"),
                             by = c(cut = "Cut", "fish")))
 })
+
+
+# Tests for group_by_any ----
+
+test_that("group_by_any works", {
+    df <- data.frame(A = c("a", "b", "c", "c", "d", "e"),
+                     B = c("f", "g", "g", "h", "i", "j"),
+                     C = c("k", "k", "l", "m", "n", "o"))
+    group_by_any(df, c("A","B","C"))
+})

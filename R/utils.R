@@ -86,16 +86,16 @@
 }
 
 
-# groupsWith ----
+# .groupsWith ----
 #
-# Select rows from a data.frame containing values in from another
+# Select rows from a data.frame containing values from another
 #
 #
 #@param df1 Filtered data.frame
 #@param df2 Unfiltered data.frame
 #@param col character(n) Name of column to use for selecting rows from df1
 #'@importFrom dplyr pull
-groupsWith <- function(df1, df2, col){
+.groupsWith <- function(df1, df2, col){
     # Only keep the columns in df2
     col_vals <- df1 %>%
         dplyr::pull(!!sym(col)) %>%
@@ -200,8 +200,47 @@ union_join <- function(df, df2 = NULL, rows = NULL, by = NULL){
 }
 
 
+# group_by_any ----
+#
+# Not tested on more than 2 groups
+# Pairwise comparison necessary?
+#
+# df - data.frame
+# groups - character vector of grouping columns
+group_by_any <- function(df, groups, new_col = "group"){
+    if (length(groups) < 2){
+        stop("This function only makes sense for at least 2 groups")
+    }
+
+    idx <- purrr::map(groups,
+                      ~dplyr::group_by(df, !!sym(.x)) %>%
+                          dplyr::group_indices())
+
+    idx <- do.call(dplyr::bind_cols, idx)
+    colnames(idx) <- groups
+    idx[is.na(df[,groups])] <- NA
+
+    new_idxs <- idx[[ groups[1] ]]
+    curr_idxs <- idx[[ groups[1] ]]
+    for (gp in groups[2:length(groups)]){
+        merge_idxs <- idx[[gp]]
+        for (val in sort(unique(na.omit(new_idxs)))){
+            merge_vals <- na.omit(unique(merge_idxs[curr_idxs == val]))
+            v_to_replace <- new_idxs[merge_idxs %in% merge_vals]
+            if (any(v_to_replace)) {
+              new_idxs[merge_idxs %in% merge_vals |
+                           new_idxs %in% v_to_replace] <- min(v_to_replace)
+            }
+        }
+    }
+
+    df[[new_col]] <- new_idxs
+    df %>% group_by(!!sym(new_col))
+}
+
+
 # rm_ambiguous ----
-# note doesn't check temp col name
+# For adding new data into gene alias table.  Note doesn't check temp col name
 # gp - name of column to group by
 # id - name of column to check for duplications
 rm_ambiguous <- function(df, gp, id){
@@ -211,3 +250,5 @@ rm_ambiguous <- function(df, gp, id){
         dplyr::select(-n_genes) %>%
         dplyr::ungroup()
 }
+
+

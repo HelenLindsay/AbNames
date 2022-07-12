@@ -4,7 +4,13 @@
 \alias{fillByGroup}
 \title{Fill NAs in data.frame by grouping}
 \usage{
-fillByGroup(df, group, fill, multiple = c("stop", "mode"))
+fillByGroup(
+  df,
+  group,
+  fill,
+  method = c("only_na", "all"),
+  multiple = c("stop", "mode", "ignore")
+)
 }
 \arguments{
 \item{df}{A data.frame or tibble with missing (NA) values to be filled}
@@ -13,9 +19,13 @@ fillByGroup(df, group, fill, multiple = c("stop", "mode"))
 
 \item{fill}{(character(n)) Name(s) of column(s) to fill}
 
+\item{method}{Either "only_na", of only missing entries should be filled,
+or "all", if all entries should be replaced with their group mode}
+
 \item{multiple}{(Default: "stop") How should multiple values in columns to
-be filled be handled?  Either "stop" (raise an error) or "mode" (select
-the most common value)}
+be filled be handled?  Either "stop" (raise an error), "mode" (select
+the most common value) or "ignore" (entries with multiple possible modes are
+set to NA).}
 }
 \description{
 Wrapper of tidyr::fill with checks for NAs in grouping values and the option
