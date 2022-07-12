@@ -227,8 +227,8 @@ ts_barcodes <- ts_barcodes %>%
     dplyr::rows_patch(temp, unmatched = "ignore", by = c("Clone")) %>%
     dplyr::filter(! is.na(Antigen),
                   # When "Clone" is na it's Biotin
-                  ! is.na(Clone))
-
+                  ! is.na(Clone)) %>%
+    dplyr::mutate(Cat_Number = as.character(Cat_Number))
 
 
 # Create totalseq data set ----

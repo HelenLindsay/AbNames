@@ -44,25 +44,27 @@
 "hgnc_long"
 
 
-# totalseq_cocktails ----
+# totalseq ----
 
-#' Antibody and gene information for TotalSeq cocktails from BioLegend
+#' Antibody and gene information for TotalSeq antibodies from BioLegend
 #'
 #' This table contains information downloaded from www.biolegend.com and
-#' preprocessed into a consistent format.  The TotalSeq A, B, C and D
-#' (Heme Oncology) cocktails are included.
+#' preprocessed into a consistent format.  Note that discontinued antibodies
+#' do not appear in this table.
 #'
-#'@format A data frame with 485 rows and 8 variables:
+#'@format A data frame with 1466 rows and 9 variables:
 #' \describe{
+#'     \item{Cat_Number}{BioLegend catalogue number}
 #'     \item{Oligo_ID}{BioLegend identifier for the oligo Barcode_Sequence}
 #'     \item{Antigen}{Name of the antigen (antibody name minus "anti-" prefix)}
 #'     \item{Clone}{Name of the cell line that produced the antibody}
-#'     \item{Ensembl_ID}{Ensembl gene identifier}
-#'     \item{Gene_Symbol}{Ensembl gene symbol}
-#'     \item{TotalSeq_Cat}{Identifier for the TotalSeq cocktail}
+#'     \item{TotalSeq_Cat}{TotalSeq sequencing chemistry.  A, B, C or D.}
+#'     \item{Reactivity}{Species in which the antibody will bind, usually Human}
+#'     \item{Cross_Reactivity}{Species in which the antibody shows,
+#'     cross-reactivity, where known}
 #'     \item{Barcode_Sequence}{Sequence of DNA oligo conjuated to the antibody}
-#'     \item{Reactivity}{Species in which the antibody will bind, usually human}
+#'     \item{ENSEMBL_ID}{Ensembl gene identifier}
 #' }
 #'
 #'@source \url{"https://www.biolegend.com/"}
-"totalseq_cocktails"
+"totalseq"
