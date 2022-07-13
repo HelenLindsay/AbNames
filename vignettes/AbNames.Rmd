@@ -72,14 +72,14 @@ dplyr::glimpse(hgnc)
 ## BioLegend antibodies
 
 BioLegend is a major supplier of antibodies, and provides several antibody
-panels for CITE-seq analyses.  The data set "totalseq_cocktails" is a
-re-formatted version of the TotalSeq cocktails data sheets available from the
+panels for CITE-seq analyses.  The data set "totalseq" is a
+re-formatted version of the TotalSeq barcodes data sheets available from the
 BioLegend website, including BioLegend antibody names and Ensembl gene IDs.  The isotypes of the antibodies are not included in the TotalSeq data sheets.
 
 Load using:
 ```{r}
-data("totalseq_cocktails", package = "AbNames")
-dplyr::glimpse(totalseq_cocktails)
+data("totalseq", package = "AbNames")
+dplyr::glimpse(totalseq)
 ```
 
 Note that the "Antigen" column here refers to antibody names with prefixes such
@@ -335,18 +335,18 @@ head(citeseq)
 
 # Filling missing information
 
-## Filling using the TotalSeq cocktails
+## Filling using the TotalSeq dataset
 
 We can annotate some of the antibodies that could not be annotated using the
-HGNC by using the totalseq_cocktails table:
+HGNC by using the totalseq table:
 
 ```{r}
 count_missing <- function(df){
     dplyr::filter(df, is.na(HGNC_ID)) %>% nrow()
 }
 
-data(totalseq_cocktails)
-ts <- totalseq_cocktails %>%
+data(totalseq)
+ts <- totalseq %>%
     dplyr::select(any_of(colnames(citeseq)))
 
 missing <- count_missing(citeseq)

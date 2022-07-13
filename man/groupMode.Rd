@@ -4,12 +4,21 @@
 \alias{groupMode}
 \title{Find the most common value per group}
 \usage{
-groupMode(df, cl, gp, new_cl = NA, min_n = NA, n = NA)
+groupMode(
+  df,
+  cl,
+  gp,
+  new_cl = NA,
+  min_n = NA,
+  n = NA,
+  keep_first = TRUE,
+  overwrite = FALSE
+)
 }
 \arguments{
 \item{df}{a grouped tibble}
 
-\item{cl}{Name of column find mode}
+\item{cl}{Name of column to find mode}
 
 \item{gp}{Name(s) of columns to group by}
 
@@ -20,6 +29,15 @@ majority value.  If provided, the majority value will be set to NA when it
 occurs less than min_n times.}
 
 \item{n}{Name of column containing counts.}
+
+\item{keep_first}{(logical(1), default TRUE) If there are multiple modes,
+should the first (in order of the data.frame) be selected?  If FALSE,
+entries are set to NA}
+
+\item{overwrite}{(logical(1), default FALSE) If FALSE, new_cl will only
+replace NAs.  If TRUE, new_cl will contain the mode.  Note that
+keep_first = FALSE with overwrite = TRUE may lead to values being replaced
+with NA.}
 }
 \description{
 Given a grouped data.frame, count values per group and return a vector with

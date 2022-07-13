@@ -45,7 +45,7 @@ setMethod("renameADT", as(structure(.Data = c("MultiAssayExperiment",
                                      names = c("obj", "names"),
                                      package = c("MultiAssayExperiment", "")),
                           "signature"),
-    function(obj, assay, ...) {
+    function(obj, names, ...) {
         stopifnot(requireNamespace("SummarizedExperiment"),
                   requireNamespace("MultiAssayExperiment"))
         nms <- rownames(experiments(obj)[[assay]])
