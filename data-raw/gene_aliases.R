@@ -82,9 +82,7 @@ temp <- hgnc %>%
     dplyr::select(-BIOTYPE, -ENSEMBL_ID)
 
 hgnc <- hgnc %>% anti_join(temp)
-
 temp <- full_join(temp, multi_gene)
-
 hgnc <- hgnc %>% bind_rows(temp)
 
 
