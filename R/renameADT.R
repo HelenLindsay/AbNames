@@ -15,8 +15,11 @@ setMethod("renameADT", signature(obj = "character", names = "character"),
 
 # renameADT for signature SingleCellExperiment ------
 #'@importFrom methods setMethod signature
-setMethod("renameADT", signature(obj = "SingleCellExperiment",
-                                 names = "character"),
+setMethod("renameADT", as(structure(.Data = c("SingleCellExperiment",
+                                              "character"),
+                                    names = c("obj", "names"),
+                                    package = c("SingleCellExperiment", "")),
+                          "signature"),
     function(obj, names, assay = "counts", ...) {
 
         # For a SingleCellExperiment, the ADT may either be the main assay
