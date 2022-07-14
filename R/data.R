@@ -1,56 +1,48 @@
 # HGNC ----
-#' Gene names, symbols and IDs from HGNC
+#' @title Gene names, symbols and IDs from HGNC, in long format
 #'
+#' @description
 #' A table of gene ids, symbols, aliases, previous aliases, and names
 #' from the Human Genome Naming Consortium, corresponding to genome build
-#' GRCh38.
+#' GRCh38.  Data is from the HGNC gene groups and protein-coding genes tables.
+#' Aliases, previous aliases and names have been split to contain one
+#' entry per row, with an additional "symbol_type" column giving the source of
+#' the symbol (e.g. HGNC_SYMBOL, alias_symbol).
 #'
-#' @format A data frame with 30123 rows and 10 variables:
+#' The HGNC table has been filtered by BIOTYPE to remove pseudogenes,
+#' read-through genes, RNA genes, mitochondrial genes and genes of unknown
+#' biotype.
+#'
+#' @format A data frame with 109313 rows and 9 variables:
 #' \describe{
 #'     \item{HGNC_ID}{HGNC gene IDs}
+#'     \item{ENSEMBL_ID}{Ensembl gene ID, from HGNC}
+#'     \item{ENTREZ_ID}{ENTREZ (NCBI gene) ID, from HGNC}
+#'     \item{UNIPROT_ID}{UNIPROT ID, from HGNC}
+#'     \item{BIOTYPE}{Type of gene}
 #'     \item{HGNC_SYMBOL}{HGNC gene symbol}
-#'     \item{HGNC_NAME}{HGNC gene name (short description in words)}
-#'     \item{alias_symbol}{comma separated list of current gene symbol aliases}
-#'     \item{prev_symbol}{comma separated list of formerly used symbol aliases}
-#'     \item{ENSEMBL_ID}{Ensembl gene ID corresponding to HGNC_ID}
-#'     \item{Chromosome}{Chromosomal location of the gene}
-#'     \item{alias_name}{Names for gene aliases, separated by "|"}
-#'     \item{prev_name}{Names for former gene aliases, separated by "|"}
-#'     \item{UNIPROT_IDS}{Uniprot ID(s) corresponding to HGNC_ID}
+#'     \item{symbol_type}{Source of the "value" column, e.g. "HGNC_SYMBOL",
+#'     "HGNC_NAME"}
+#'     \item{value}{A gene symbol, symbol alias, or name}
+#'     \item{SOURCE}{Source of the data.  Here always "HGNC"}
 #' }
-#' @source \url{"https://www.genenames.org/cgi-bin/genegroup/download-all"}
+#' @source \url{https://www.genenames.org/cgi-bin/genegroup/download-all}
+#' @source \url{http://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/tsv/locus_types/gene_with_protein_product.txt}
 "hgnc"
-
-# HGNC (long format) ----
-#' Gene ids, names and aliases from HGNC, in long format
-#'
-#' Contains the same data as hgnc, but aliases, previous aliases and names have
-#' been split to contain one entry per row, with an additional "symbol_type" column
-#' giving the source of the symbol (e.g. HGNC_SYMBOL, alias_symbol).  Chromosome
-#' data is not included.  CD3 was removed as the information in the totalseq
-#' tables doesn't match the information in on the vendor website.
-#'
-#'@format A data frame with 90788 rows and 7 variables:
-#' \describe{
-#'     \item{HGNC_ID}{HGNC gene IDs}
-#'     \item{ENSEMBL_ID}{Ensembl gene ID corresponding to HGNC_ID}
-#'     \item{alias_name}{Names for gene aliases, separated by "|"}
-#'     \item{prev_name}{Names for former gene aliases, separated by "|"}
-#'     \item{UNIPROT_IDS}{Uniprot ID(s) corresponding to HGNC_ID}
-#'     \item{symbol_type}{Source of the "value" column, e.g. "HGNC_SYMBOL"}
-#'     \item{value}{A gene symbol or name}
-#'
-#' }
-"hgnc_long"
 
 
 # totalseq ----
-
 #' Antibody and gene information for TotalSeq antibodies from BioLegend
 #'
 #' This table contains information downloaded from www.biolegend.com and
-#' preprocessed into a consistent format.  Note that discontinued antibodies
-#' do not appear in this table.
+#' preprocessed into a consistent format.  Discontinued antibodies
+#' do not appear in this table, and non-human gene identifiers have been
+#' discarded.
+#'
+#' Note that we do not consider the mapping between antibodies and gene
+#' identifiers to be very reliable.  We have removed cases where the same
+#' antibody clone was mapped to different gene identifiers, but have not
+#' checked that the mapping agrees with the HGNC information.
 #'
 #'@format A data frame with 1466 rows and 9 variables:
 #' \describe{

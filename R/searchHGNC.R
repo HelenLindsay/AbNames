@@ -26,10 +26,9 @@ searchHGNC <- function(query_df, multisubunit = c("TCR_long", "subunit")){
 
     official_nms <- c("HGNC_SYMBOL", "HGNC_NAME")
 
-    utils::data("hgnc_long", envir = environment())
     utils::data("hgnc", envir = environment())
 
-    res <- dplyr::left_join(query_df, hgnc_long) %>%
+    res <- dplyr::left_join(query_df, hgnc) %>%
         dplyr::filter(! is.na(HGNC_ID)) %>%
 
         # If it is a multi-subunit protein, we expect all subunits to match
@@ -61,10 +60,7 @@ searchHGNC <- function(query_df, multisubunit = c("TCR_long", "subunit")){
 
         dplyr::group_by(ID) %>%
         dplyr::mutate(n_matches = length(unique(value))) %>%
-        dplyr::ungroup() %>%
-
-        # Add the HGNC symbols
-        dplyr::left_join(hgnc %>% dplyr::select(HGNC_ID, HGNC_SYMBOL))
+        dplyr::ungroup()
 
     return(res)
 }

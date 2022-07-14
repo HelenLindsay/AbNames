@@ -46,12 +46,8 @@ names.
 
 ## HGNC gene names
 
-The `hgnc` data set is a reformatted version of the protein-coding gene
-information downloaded from the Human Gene Names Consortium. This includes
-previous (obsolete) gene names and aliases, which in our experience have been
-useful for matching to antibody names.  The `hgnc_long` data set contains the
-same seq of gene identifiers as the `hgnc` data set, in long format (one alias
-per row).
+The `hgnc` data set is a consistently formatted version of the protein-coding
+and gene groups tables from the Human Gene Names Consortium. This includes previous (obsolete) gene names and aliases, which in our experience have been useful for matching to antibody names.  The `hgnc` data set is in long format (one alias per row).
 
 Load using:
 
@@ -59,7 +55,7 @@ Load using:
 library(AbNames)
 library(dplyr)
 
-data("hgnc", package = "AbNames") # hgnc_long is loaded similarly
+data("hgnc", package = "AbNames") 
 
 # Show the first entries of hgnc, where each row is the start of one column
 dplyr::glimpse(hgnc) 
@@ -186,7 +182,7 @@ the names of antibodies against the T-cell receptor to their gene IDs.  (An
 alternative method is to search for the gene symbol.)
 
 We will start with a data.frame of antibodies against the T-cell receptor from
-the CITE-seq data set. We have already done some fomatting of these names, e.g. 
+the CITE-seq data set. We have already done some formatting of these names, e.g. 
 for "TCR Va24-Ja18 (iNKT cell)" we have removed the section in brackets. We wish
 to create a query data.frame where each subunit of the TCR complex appears on a
 separate line. 
@@ -254,7 +250,7 @@ hgnc_results %>%
     dplyr::sample_n(10)
 ```
 
-The results table above contains (just) the matches between the query table and the HGNC tables.  In the example above, we see in the "name" column the formatting function that generated the string in the "value" column that was matched, and in the "symbol_type" column which column of the HGNC data was matched.  If there are multiple matches for a given ID, the official symbol ("HGNC_SYMBOL") is preferred over aliases or previous symbols.
+The results table above contains (just) the matches between the query table and the HGNC table.  In the example above, we see in the "name" column the formatting function that generated the string in the "value" column that was matched, and in the "symbol_type" column which column of the HGNC data was matched.  If there are multiple matches for a given ID, the official symbol ("HGNC_SYMBOL") is preferred over aliases or previous symbols.
 
 We may wish to review the matches before merging the results into the original table.
 For example, we can check for matches to different genes where the name was not guessed to be a multi-subunit protein.
@@ -282,32 +278,16 @@ citeseq %>%
 
 ```
 
-However, there are also cases where the results table contains false matches, for example:
-
-```{r}
-hgnc_results %>%
-    dplyr::filter(ID == "CD270 (HVEM, TR2)-Hao_2021") %>%
-    data.frame()
-```
-
-In the above table, we see from the "value" column that the gene "ENSG00000157873" has alias symbols "CD270", "HVEM" and "TR2".  The next two
-rows show genes that have alias symbols for only "TR2".  Here we could guess
-that the gene with the most matches is the correct one. 
 
 NOTE: I haven't written a convenience function for merging back into the original table yet.
 TODO:
-
-* Add official HGNC symbols back into to the HGNC data set
 * QUERY FOR CD11/CD18 in protein ontology
 * Remove redundant results because of Antigen/greek_letter e.g. "KLRG1 (MAFA)-Qian_2020" 
 
-Other examples to discuss?
+Examples to discuss?
 
 *"KIR2DL5" matches two genes HGNC:16345 HGNC:16346
-
-*"CD279 (PD-1)-Mimitou_2021_cite_and_dogma_seq"
-
-*"DR3 (TRAMP)-Liu_2021"
+*"DR3 (TRAMP)__Liu_2021" - tramp alias is ambiguous
 
 For now I will remove all genes with multiple matches before merging the results into the citeseq data.
 
@@ -317,11 +297,13 @@ nrow(hgnc_results)
 # Remove matches to several genes, select just columns of interest
 hgnc_results <- hgnc_results %>%
     dplyr::filter(n_ids == 1 | all(name %in% c("TCR_long", "subunit"))) %>%
-    dplyr::select(ID, HGNC_ID, HGNC_SYMBOL, ENSEMBL_ID, UNIPROT_IDS) %>%
+    dplyr::select(matches("ID|HGNC"), name) %>% # Select ID and HGNC columns
     unique() %>% # Collapse results with same ID from different queries
+    # Collapse multi-subunit entries
     dplyr::summarise(dplyr::across(c(HGNC_ID, HGNC_SYMBOL,
-                                     ENSEMBL_ID, UNIPROT_IDS),
-                                   toString)) # Collapse multi-subunit entries
+                                     ENSEMBL_ID, UNIPROT_ID),
+                                   ~ toString(unique(.x))))
+
 
 nrow(hgnc_results)
 
@@ -337,8 +319,9 @@ head(citeseq)
 
 ## Filling using the TotalSeq dataset
 
-We can annotate some of the antibodies that could not be annotated using the
-HGNC by using the totalseq table:
+We can try to annotate antibodies that could not be annotated using the
+HGNC by using the totalseq table.  This could also be done as a first matching
+step.  Here, we cannot add any more annotations. 
 
 ```{r}
 count_missing <- function(df){
@@ -406,7 +389,7 @@ In the above example, we can see that for antibodies with catalogue number "3004
 ```{r}
 fill_demo <- AbNames::fillByGroup(fill_demo, "Cat_Number",
                                   fill = c("HGNC_ID", "TotalSeq_Cat", "Vendor",
-                                           "ENSEMBL_ID", "UNIPROT_IDS")) %>%
+                                           "ENSEMBL_ID", "UNIPROT_ID")) %>%
     dplyr::group_by(Cat_Number) # Re-group as fillByGroup ungroups
 
 # Print out the first group again
@@ -421,7 +404,7 @@ how many antibodies have not been matched.
 citeseq <- citeseq %>%
      AbNames::fillByGroup("Cat_Number", multiple = "mode",
                           fill = c("HGNC_ID", "TotalSeq_Cat", "Vendor",
-                                           "ENSEMBL_ID", "UNIPROT_IDS"))
+                                   "ENSEMBL_ID", "UNIPROT_ID"))
 
 nmatched_after_fill <- count_missing(citeseq)
 
@@ -432,8 +415,6 @@ nmatched_after_fill
 
 
 ```
-
-
 
 
 
@@ -487,3 +468,6 @@ missing <- citeseq %>%
 ```{r}
 sessionInfo()
 ```
+
+
+AbNames has two parts - a collection of gene names and aliases, and information about CITE-seq antibodies.  You could use the first part for mapping CYTOF antibodies to gene identifiers.   

@@ -1,7 +1,14 @@
 ---
 title: "Standardize a SingleCellExperiment"
-output: html_document
+author: "Helen Lindsay"
+package: AbNames
 date: '2022-07-11'
+output:
+  BiocStyle::html_document
+vignette: >
+  %\VignetteIndexEntry{AbNames_SCE}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
@@ -23,7 +30,7 @@ To demonstrate, we will use the "cord_blood" dataset available in the package
 #cord_blood
 
 # May not need much renaming....
-library(scRNAseq)
+library("scRNAseq")
 kotliarov <- KotliarovPBMCData(mode = "adt")
 rownames(kotliarov)
 
