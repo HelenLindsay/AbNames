@@ -48,6 +48,10 @@
     return(.noDups(res, x, no_match))
 }
 
+
+
+
+
 # .wordGrep ----
 #
 # Grep requiring search string is a word
@@ -83,6 +87,19 @@
     any_na <- apply(data.frame(dots), 1, function(y) any(is.na(y)))
     res[any_na] <- NA
     return(res)
+}
+
+
+# .toString ----
+#'
+#' Wrapper for toString, doesn't convert NA to character and
+#' only concatenates unique values
+#'
+#'@param x Character vector for toString
+.toString <- function(x){
+    res <- toString(unique(x[! is.na(x)]))
+    res <- dplyr::na_if(res, "")
+    res
 }
 
 

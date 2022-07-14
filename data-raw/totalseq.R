@@ -11,7 +11,8 @@ library(readr)
 library(AbNames)
 library(stringr)
 
-# Download TotalSeq Barcode lookup information ----
+#---------------------------------------------------------------------------
+# Format TotalSeq barcode tables ----
 
 # (Manually downloaded from
 # https://www.biolegend.com/en-us/totalseq/barcode-lookup
@@ -56,12 +57,24 @@ x <- ts_barcodes %>%
               col = c("Antigen", "Clone", "TotalSeq_Cat")) %>%
     filter(if_any(c(nAntigen, nClone), ~.x > 1))
 
+# Filter to remove non-human gene identifiers
+ts_barcodes <- ts_barcodes %>%
+    splitUnnest(ab = "ENSEMBL_ID", split = ", ") %>%
+    dplyr::mutate(ENSEMBL_ID = gsub("^NSG", "ENSG", ENSEMBL_ID),
+                  ENSEMBL_ID = gsub("\\.[0-9]$", "", ENSEMBL_ID),
+                  ENSEMBL_ID = ifelse(grepl("ENSG[0-9]+$", ENSEMBL_ID),
+                                      ENSEMBL_ID, NA)) %>%
+    dplyr::group_by(Cat_Number) %>%
+    dplyr::mutate(ENSEMBL_ID = .toString(ENSEMBL_ID)) %>%
+    unique()
+
 # From this information, it appears that Antigen / Oligo / TotalSeq_Cat is
 # enough to fill in Cat_Number and Clone
-
 # Is Clone enough to fill in Antigen?
 
-
+#---------------------------------------------------------------------------
+# Format TotalSeq cocktail tables
+#---------------------------------------------------------------------------
 # Download TotalSeq cocktail information ----
 
 bl <- "https://www.biolegend.com/Files/Images/BioLegend/totalseq/"
@@ -136,41 +149,71 @@ totalseq <- totalseq %>%
 totalseq <- totalseq %>%
     dplyr::mutate(Antigen = ifelse(Antigen == "Fc?RI?", "FceRIA", Antigen))
 
+
 # Some TotalSeq B Ensembl_IDs are duplicated barcode sequences, set to NA ----
 totalseq <- totalseq %>%
     dplyr::mutate(ENSEMBL_ID = ifelse(grepl("^ENSG", ENSEMBL_ID),
                                       ENSEMBL_ID, NA))
 
-# Check that there is only one Ensembl_ID per Antigen-Clone combo ----
+#---------------------------------------------------------------------------
+# Fill barcodes using cocktails ----
 
+# ts_barcodes have NA for Antigen for isotype control.
+# Fill in Antigen name for controls using totalseq_cocktails table
+temp <- totalseq %>%
+    dplyr::select(Antigen, Clone) %>%
+    unique() %>%
+    group_by(Clone) %>%
+    # If there is more than one antigen per clone, select the first
+    # (checked manually, they are the same with different names)
+    dplyr::slice_head(n = 1) %>%
+    ungroup()
+
+ts_barcodes <- ts_barcodes %>%
+    dplyr::rows_patch(temp, unmatched = "ignore", by = c("Clone")) %>%
+    dplyr::filter(! is.na(Antigen),
+                  # When "Clone" is na it's Biotin
+                  ! is.na(Clone)) %>%
+    dplyr::mutate(Cat_Number = as.character(Cat_Number))
+
+totalseq <- ts_barcodes
+
+#---------------------------------------------------------------------------
+# Checks
+#---------------------------------------------------------------------------
+# Check that there is only one Ensembl_ID per Antigen ----
+
+# First fix CD209 - according to TotalSeq website, annotation in tables
+# is incomplete, below is from the website
+fixes <- tibble::tribble(~Antigen, ~Clone,
+                         "CD209 (DC-SIGN)", "9E9A8",
+                         "CD209/CD299 (DC-SIGN/L-SIGN)", "14E3G7")
+
+totalseq <- totalseq %>% dplyr::rows_update(fixes, by = "Clone")
+
+# Now set ENSEMBL_ID to NA if there are multiple for the same antigen
 totalseq <- totalseq %>%
-    AbNames:::nPerGroup(group = c("Antigen", "Clone"), "ENSEMBL_ID")
+    # Check for multiple ENSEMBL_IDs with the same Antigen
+    AbNames:::nPerGroup(group = c("Antigen"), "ENSEMBL_ID") %>%
+    # If there is more than one value of ENSEMBL_ID per Antigen set to zero
+    dplyr::mutate(ENSEMBL_ID = ifelse(nENSEMBL_ID <= 1, ENSEMBL_ID, NA)) %>%
+    dplyr::select(-nENSEMBL_ID)
 
-if (max(totalseq$n_per_group) > 1){
-    warning("More than one value of Ensembl_ID per Antigen/Clone combo")
-}
-
-totalseq <- totalseq %>% dplyr::select(-n_per_group)
 
 # Fill in missing genes if Antigen, Clone, and Oligo_ID match ----
-# Note that by adding "Reactivity", controls will be removed as reactivity was
-# only defined for human
 totalseq <- totalseq %>%
-    AbNames::fillByGroup(group = c("Antigen", "Clone", "Reactivity"),
-                         fill = c("ENSEMBL_ID", "HGNC_SYMBOL"))
+    AbNames::fillByGroup(group = c("Antigen", "Clone"),
+                         fill = c("ENSEMBL_ID"))
 
-# Fill in the missing gene symbols and reactivity if Ensembl ID is given
-# (isotype controls do not have Ensembl IDs given)
-totalseq <- totalseq %>%
-    AbNames::fillByGroup(group = "ENSEMBL_ID",
-                         fill = c("HGNC_SYMBOL", "Reactivity")) %>%
-    dplyr::ungroup()
-
-# Check that HGNC_SYMBOL in totalseq matches hgnc data set ----
+# Add HGNC_SYMBOL from hgnc data set ----
 data(hgnc)
 hgnc <- hgnc %>%
-    dplyr::select(HGNC_ID, HGNC_SYMBOL, ENSEMBL_ID) %>%
-    dplyr::filter(! is.na(ENSEMBL_ID))
+    dplyr::select(HGNC_ID, HGNC_SYMBOL, ENSEMBL_ID, value) %>%
+    dplyr::filter(! is.na(ENSEMBL_ID)) %>%
+    unique()
+
+
+
 
 hgnc_to_ts <- hgnc$HGNC_SYMBOL[match(totalseq$ENSEMBL_ID, hgnc$ENSEMBL_ID)]
 df <- tibble(hgnc = hgnc_to_ts, ts = totalseq$HGNC_SYMBOL)
@@ -211,24 +254,28 @@ totalseq <- totalseq %>%
 
 
 
-# Fill in missing ts_barcode Antigens using totalseq_cocktails -----
-# ts_barcodes have NA for Antigen for isotype control.
-# Fill in control name using totalseq_cocktails table
-temp <- totalseq_cocktails %>%
-    dplyr::select(Antigen, Clone) %>%
-    unique() %>%
-    group_by(Clone) %>%
-    # If there is more than one antigen per clone, select the first
-    # (checked manually, they are the same with different names)
-    dplyr::slice_head(n = 1) %>%
-    ungroup()
 
-ts_barcodes <- ts_barcodes %>%
-    dplyr::rows_patch(temp, unmatched = "ignore", by = c("Clone")) %>%
-    dplyr::filter(! is.na(Antigen),
-                  # When "Clone" is na it's Biotin
-                  ! is.na(Clone)) %>%
-    dplyr::mutate(Cat_Number = as.character(Cat_Number))
+
+
+
+
+
+
+# Remove ENSEMBL ID if there is more than one per Antigen-Clone combination ----
+
+# ts_barcodes....
+totalseq <- totalseq %>%
+    AbNames:::nPerGroup(group = c("Antigen", "Clone"), "ENSEMBL_ID")
+
+if (max(totalseq$nENSEMBL_ID) > 1){
+    warning("More than one value of Ensembl_ID per Antigen/Clone combo")
+}
+
+totalseq <- totalseq %>% dplyr::select(-nENSEMBL_ID)
+
+
+
+
 
 
 # Create totalseq data set ----
