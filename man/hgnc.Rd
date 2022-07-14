@@ -20,9 +20,9 @@ A data frame with 109313 rows and 9 variables:
 }
 }
 \source{
-\url{"https://www.genenames.org/cgi-bin/genegroup/download-all"}
+\url{https://www.genenames.org/cgi-bin/genegroup/download-all}
 
-\url{"http://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/tsv/locus_types/gene_with_protein_product.txt"}
+\url{http://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/tsv/locus_types/gene_with_protein_product.txt}
 }
 \usage{
 hgnc

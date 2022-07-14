@@ -32,12 +32,17 @@
 
 
 # totalseq ----
-
 #' Antibody and gene information for TotalSeq antibodies from BioLegend
 #'
 #' This table contains information downloaded from www.biolegend.com and
-#' preprocessed into a consistent format.  Note that discontinued antibodies
-#' do not appear in this table.
+#' preprocessed into a consistent format.  Discontinued antibodies
+#' do not appear in this table, and non-human gene identifiers have been
+#' discarded.
+#'
+#' Note that we do not consider the mapping between antibodies and gene
+#' identifiers to be very reliable.  We have removed cases where the same
+#' antibody clone was mapped to different gene identifiers, but have not
+#' checked that the mapping agrees with the HGNC information.
 #'
 #'@format A data frame with 1466 rows and 9 variables:
 #' \describe{

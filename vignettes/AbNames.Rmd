@@ -299,9 +299,11 @@ hgnc_results <- hgnc_results %>%
     dplyr::filter(n_ids == 1 | all(name %in% c("TCR_long", "subunit"))) %>%
     dplyr::select(matches("ID|HGNC"), name) %>% # Select ID and HGNC columns
     unique() %>% # Collapse results with same ID from different queries
+    # Collapse multi-subunit entries
     dplyr::summarise(dplyr::across(c(HGNC_ID, HGNC_SYMBOL,
                                      ENSEMBL_ID, UNIPROT_ID),
-                                   toString)) # Collapse multi-subunit entries
+                                   ~ toString(unique(.x))))
+
 
 nrow(hgnc_results)
 
@@ -317,8 +319,9 @@ head(citeseq)
 
 ## Filling using the TotalSeq dataset
 
-We can annotate some of the antibodies that could not be annotated using the
-HGNC by using the totalseq table:
+We can try to annotate antibodies that could not be annotated using the
+HGNC by using the totalseq table.  This could also be done as a first matching
+step.  Here, we cannot add any more annotations. 
 
 ```{r}
 count_missing <- function(df){
@@ -386,7 +389,7 @@ In the above example, we can see that for antibodies with catalogue number "3004
 ```{r}
 fill_demo <- AbNames::fillByGroup(fill_demo, "Cat_Number",
                                   fill = c("HGNC_ID", "TotalSeq_Cat", "Vendor",
-                                           "ENSEMBL_ID", "UNIPROT_IDS")) %>%
+                                           "ENSEMBL_ID", "UNIPROT_ID")) %>%
     dplyr::group_by(Cat_Number) # Re-group as fillByGroup ungroups
 
 # Print out the first group again
@@ -401,7 +404,7 @@ how many antibodies have not been matched.
 citeseq <- citeseq %>%
      AbNames::fillByGroup("Cat_Number", multiple = "mode",
                           fill = c("HGNC_ID", "TotalSeq_Cat", "Vendor",
-                                           "ENSEMBL_ID", "UNIPROT_IDS"))
+                                   "ENSEMBL_ID", "UNIPROT_ID"))
 
 nmatched_after_fill <- count_missing(citeseq)
 
@@ -412,8 +415,6 @@ nmatched_after_fill
 
 
 ```
-
-
 
 
 
@@ -467,3 +468,6 @@ missing <- citeseq %>%
 ```{r}
 sessionInfo()
 ```
+
+
+AbNames has two parts - a collection of gene names and aliases, and information about CITE-seq antibodies.  You could use the first part for mapping CYTOF antibodies to gene identifiers.   
