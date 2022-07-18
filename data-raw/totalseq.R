@@ -143,7 +143,10 @@ totalseq <- totalseq %>%
                   Oligo_ID = substr(Oligo_ID, 2, nchar(Oligo_ID)),
                   Antigen = AbNames::replaceGreekSyms(Antigen, "sym2letter"))%>%
     dplyr::relocate(Antigen, Clone, ENSEMBL_ID, HGNC_SYMBOL, Oligo_ID,
-                    TotalSeq_Cat, Barcode_Sequence, Reactivity)
+                    TotalSeq_Cat, Barcode_Sequence, Reactivity) %>%
+    # CHECK THIS NEXT ROUND!
+    # Remove mouse antibodies.  (Isotype controls have Reactivity NA)
+    dplyr::filter(is.na(Reactivity) | grepl("Human", Reactivity))
 
 # Fix an importing error
 totalseq <- totalseq %>%
@@ -185,9 +188,39 @@ totalseq <- ts_barcodes
 
 # First fix CD209 - according to TotalSeq website, annotation in tables
 # is incomplete, below is from the website
-fixes <- tibble::tribble(~Antigen, ~Clone,
-                         "CD209 (DC-SIGN)", "9E9A8",
-                         "CD209/CD299 (DC-SIGN/L-SIGN)", "14E3G7")
+fixes <- tibble::tribble(
+    ~Antigen, ~Clone, ~ENSEMBL_ID,
+    # Update Antigen with more information
+    "CD209 (DC-SIGN)", "9E9A8", "ENSG00000090659",
+    "CD209/CD299 (DC-SIGN/L-SIGN)", "14E3G7",
+       "ENSG00000090659, ENSG00000104938",
+    "CD85g", "17G10.2", "ENSG00000239961",
+
+    # From totalseq website - clone SK1 recognises the alpha chain
+    "CD8a", "SK1", "ENSG00000153563",
+
+    # Add (NCAM) for consistency with other clone
+    "CD56 (NCAM)", "QA17A16", "ENSG00000149294",
+
+    # Overwrite incorrect ENSEMBL_ID
+    # (discovered by multiple antigens to same gene id)
+    # (verified via BioLegend / genenames websites)
+    "CD6", "BL-CD6", "ENSG00000013725",
+    "CD164", "67D2", "ENSG00000135535",
+    "CD31", "WM59", "ENSG00000261371",
+    "CD140a", "16A1", "ENSG00000134853",
+    "CD24", "M1/69" ,"ENSG00000272398",
+    "TCR Vγ9", "B3","ENSG00000211695",
+
+    # Totalseq website: H1R2 reacts with common epitope of CD235a and CD235b
+    "CD235ab", "HIR2", "ENSG00000170180, ENSG00000250361")
+
+# CD3, CD45RA, CD45RB, CD45R0, CD66a/c/e, HLA-A,B,C, HLA-A2, HLA-DR (?HLA-DRA),
+# HLA-DR, DP, DQ , MICA / MICB, TRAV24, TCR vgamma9 != KLRK1?
+# TRA-1-60-R != POXDL? TRA-1-81 != PODXL
+# (from abcam) TRA-1-60 - a carbohydrate epitope associated with podocalyxin
+# (from stemcell) TRA1-81 is a carbohydrate epitope associated with podocalyxin
+
 
 totalseq <- totalseq %>% dplyr::rows_update(fixes, by = "Clone")
 
@@ -212,6 +245,19 @@ hgnc <- hgnc %>%
     dplyr::filter(! is.na(ENSEMBL_ID)) %>%
     unique()
 
+
+# Antigens that have ENSEMBL ID in hgnc but do not share an alias
+#aj <- semi_join(totalseq, hgnc, by = c("ENSEMBL_ID")) %>%
+#    anti_join(hgnc, by = c("Antigen" = "value"))
+#aj <- aj %>% left_join(hgnc, by = "ENSEMBL_ID") %>%
+#    dplyr::select(Antigen, HGNC_SYMBOL, value, Clone, ENSEMBL_ID) %>%
+#    group_by(Antigen)
+
+
+# Check different antigen mapped to same gene
+sg <- totalseq %>%
+    group_by(ENSEMBL_ID) %>%
+    dplyr::filter(n_distinct(Antigen) > 1)
 
 
 
