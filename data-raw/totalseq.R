@@ -60,8 +60,8 @@ x <- ts_barcodes %>%
 # Filter to remove non-human gene identifiers
 ts_barcodes <- ts_barcodes %>%
     splitUnnest(ab = "ENSEMBL_ID", split = ", ") %>%
-    dplyr::mutate(ENSEMBL_ID = gsub("^NSG", "ENSG", ENSEMBL_ID),
-                  ENSEMBL_ID = gsub("\\.[0-9]$", "", ENSEMBL_ID),
+    dplyr::mutate(ENSEMBL_ID = gsub("^NSG", "ENSG", ENSEMBL_ID), # missing E
+                  ENSEMBL_ID = gsub("\\.[0-9]$", "", ENSEMBL_ID), # suffix
                   ENSEMBL_ID = ifelse(grepl("ENSG[0-9]+$", ENSEMBL_ID),
                                       ENSEMBL_ID, NA)) %>%
     dplyr::group_by(Cat_Number) %>%
@@ -97,7 +97,6 @@ totalseq <- lapply(totalseq_fnames, function(fn){
     download.file(fn, destfile = f)
     readxl::read_xlsx(f)
 })
-
 
 nrows <- sapply(totalseq, nrow)
 
@@ -143,15 +142,7 @@ totalseq <- totalseq %>%
                   Oligo_ID = substr(Oligo_ID, 2, nchar(Oligo_ID)),
                   Antigen = AbNames::replaceGreekSyms(Antigen, "sym2letter"))%>%
     dplyr::relocate(Antigen, Clone, ENSEMBL_ID, HGNC_SYMBOL, Oligo_ID,
-                    TotalSeq_Cat, Barcode_Sequence, Reactivity) %>%
-    # CHECK THIS NEXT ROUND!
-    # Remove mouse antibodies.  (Isotype controls have Reactivity NA)
-    dplyr::filter(is.na(Reactivity) | grepl("Human", Reactivity))
-
-# Fix an importing error
-totalseq <- totalseq %>%
-    dplyr::mutate(Antigen = ifelse(Antigen == "Fc?RI?", "FceRIA", Antigen))
-
+                    TotalSeq_Cat, Barcode_Sequence, Reactivity)
 
 # Some TotalSeq B Ensembl_IDs are duplicated barcode sequences, set to NA ----
 totalseq <- totalseq %>%
@@ -177,17 +168,32 @@ ts_barcodes <- ts_barcodes %>%
     dplyr::filter(! is.na(Antigen),
                   # When "Clone" is na it's Biotin
                   ! is.na(Clone)) %>%
-    dplyr::mutate(Cat_Number = as.character(Cat_Number))
+    dplyr::mutate(Cat_Number = as.character(Cat_Number),
+                  ENSEMBL_ID = na_if(ENSEMBL_ID, "")) %>%
+    dplyr::ungroup()
 
 totalseq <- ts_barcodes
+
+# Fix importing errors
+imp_err <- c("TCR V&alpha;2" = "TCR Vα2", "Fc?RI?" = "FceRIA")
+
+totalseq <- totalseq %>%
+    dplyr::mutate(Antigen = stringr::str_replace_all(Antigen,
+                                                     imp_err,
+                                                     names(imp_err))) %>%
+    # Select human or isotype control (Isotype controls have Reactivity NA)
+    dplyr::filter(if_any(c(Reactivity, Cross_Reactivity), ~grepl("Human", .x)) |
+                         (is.na(Reactivity) & is.na(ENSEMBL_ID)))
 
 #---------------------------------------------------------------------------
 # Checks
 #---------------------------------------------------------------------------
 # Check that there is only one Ensembl_ID per Antigen ----
 
-# First fix CD209 - according to TotalSeq website, annotation in tables
-# is incomplete, below is from the website
+# These were manually identified by anti_joining totalseq to hgnc,
+# by looking at one antigen -> multiple genes or one gene -> multiple antigens,
+# and checking the information on the biolegend website.n
+# Note: "CDw" stands for "workshop", insufficiently characterised
 fixes <- tibble::tribble(
     ~Antigen, ~Clone, ~ENSEMBL_ID,
     # Update Antigen with more information
@@ -195,6 +201,9 @@ fixes <- tibble::tribble(
     "CD209/CD299 (DC-SIGN/L-SIGN)", "14E3G7",
        "ENSG00000090659, ENSG00000104938",
     "CD85g", "17G10.2", "ENSG00000239961",
+    "EGFR", "AY13", "ENSG00000146648",
+    "GARP (LRRC32)", "7B11", "ENSG00000137507",
+    "VEGFR-3 (FLT-4)", "9D9F9", "ENSG00000037280",
 
     # From totalseq website - clone SK1 recognises the alpha chain
     "CD8a", "SK1", "ENSG00000153563",
@@ -219,29 +228,42 @@ fixes <- tibble::tribble(
     "CD98","MEM-108","ENSG00000103257, ENSG00000168003",
 
     # Totalseq website: 6D4 antibody reacts with common epitope of MICA/MICB
-    "MICA/MICB", "6D4", "ENSG00000204516, ENSG00000204520")
+    "MICA/MICB", "6D4", "ENSG00000204516, ENSG00000204520",
+
+    # Totalseq website: CD158 HP-MA4 rx with KIR2DL1, KIR2DS1, KIR2DS3, KIR2DS5
+    # TO DO: KIR2DS3 AND KIR2DS5 missing from hgnc table!!
+    "CD158", "HP-MA4", "ENSG00000125498, ENSG00000276387",
+
+    # Totalseq website: CD16 3G8 interacts with FcGRIIa and FGγRIIIb receptors
+    "CD16", "3G8", "ENSG00000203747"
+
+    # Totalseq website: CD66a/c/e binds epitope shared by CD66a, c and e
+    "CD66a/c/e", "ASL-32", "ENSG00000079385"
+
+    # Totalseq website: M1310G05 has higher affinity for
+    # IgG1 and IgG3 than IgG2 and IgG4
+    "IgG FC", "M1310G05", "ENSG00000211896, "
+
+    "TCR Vα24-Jα18", "6B11", "ENSG00000211805",
 
 
+    )
 
-# CD3, CD45RA, CD45RB, CD45R0, CD66a/c/e, HLA-A,B,C, HLA-A2, HLA-DR (?HLA-DRA),
-# HLA-DR, DP, DQ , MICA / MICB, TRAV24, TCR vgamma9 != KLRK1?
-# TRA-1-60-R != POXDL? TRA-1-81 != PODXL
-# (from abcam) TRA-1-60 - a carbohydrate epitope associated with podocalyxin
-# (from stemcell) TRA1-81 is a carbohydrate epitope associated with podocalyxin
+totalseq <- totalseq %>%
+    dplyr::rows_update(fixes, by = "Clone", unmatched = "ignore")
 
-
-totalseq <- totalseq %>% dplyr::rows_update(fixes, by = "Clone")
 
 # Now set ENSEMBL_ID to NA if there are multiple for the same antigen
 totalseq <- totalseq %>%
     # Check for multiple ENSEMBL_IDs with the same Antigen
     AbNames:::nPerGroup(group = c("Antigen"), "ENSEMBL_ID") %>%
     # If there is more than one value of ENSEMBL_ID per Antigen set to zero
+    # (18/7/22) - this is just CD3 mapped to CD3E and CD3D
     dplyr::mutate(ENSEMBL_ID = ifelse(nENSEMBL_ID <= 1, ENSEMBL_ID, NA)) %>%
     dplyr::select(-nENSEMBL_ID)
 
 
-# Fill in missing genes if Antigen, Clone, and Oligo_ID match ----
+# Fill in missing gene IDs if Antigen, Clone, and Oligo_ID match ----
 totalseq <- totalseq %>%
     AbNames::fillByGroup(group = c("Antigen", "Clone"),
                          fill = c("ENSEMBL_ID"))
@@ -254,12 +276,27 @@ hgnc <- hgnc %>%
     unique()
 
 
+
+
 # Antigens that have ENSEMBL ID in hgnc but do not share an alias
-#aj <- semi_join(totalseq, hgnc, by = c("ENSEMBL_ID")) %>%
-#    anti_join(hgnc, by = c("Antigen" = "value"))
-#aj <- aj %>% left_join(hgnc, by = "ENSEMBL_ID") %>%
-#    dplyr::select(Antigen, HGNC_SYMBOL, value, Clone, ENSEMBL_ID) %>%
-#    group_by(Antigen)
+aj <- semi_join(totalseq, hgnc, by = c("ENSEMBL_ID")) %>%
+    anti_join(hgnc, by = c("Antigen" = "value")) %>%
+    left_join(hgnc, by = "ENSEMBL_ID") %>%
+    dplyr::select(Antigen, HGNC_SYMBOL, value, Clone, ENSEMBL_ID) %>%
+    group_by(Antigen)
+
+
+
+
+# To do:
+# CD45RA, CD45RB, CD45R0, CD66a/c/e, HLA-A,B,C, HLA-A2, HLA-DR (?HLA-DRA),
+# HLA-DR, DP, DQ , MICA / MICB, TRAV24, TCR vgamma9 != KLRK1?
+# TRA-1-60-R != POXDL? TRA-1-81 != PODXL
+# (from abcam) TRA-1-60 - a carbohydrate epitope associated with podocalyxin
+# (from stemcell) TRA1-81 is a carbohydrate epitope associated with podocalyxin
+
+
+
 
 
 # Check different antigen mapped to same gene
