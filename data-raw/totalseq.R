@@ -213,7 +213,15 @@ fixes <- tibble::tribble(
     "TCR Vγ9", "B3","ENSG00000211695",
 
     # Totalseq website: H1R2 reacts with common epitope of CD235a and CD235b
-    "CD235ab", "HIR2", "ENSG00000170180, ENSG00000250361")
+    "CD235ab", "HIR2", "ENSG00000170180, ENSG00000250361",
+
+    # Totalseq website: CD98 is a heterodimer
+    "CD98","MEM-108","ENSG00000103257, ENSG00000168003",
+
+    # Totalseq website: 6D4 antibody reacts with common epitope of MICA/MICB
+    "MICA/MICB", "6D4", "ENSG00000204516, ENSG00000204520")
+
+
 
 # CD3, CD45RA, CD45RB, CD45R0, CD66a/c/e, HLA-A,B,C, HLA-A2, HLA-DR (?HLA-DRA),
 # HLA-DR, DP, DQ , MICA / MICB, TRAV24, TCR vgamma9 != KLRK1?
