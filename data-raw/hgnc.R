@@ -41,8 +41,7 @@ hgnc_proteins <- dplyr::rename(hgnc_proteins,
                                PREVIOUS_SYMBOL = prev_symbol,
                                ALIAS_NAME = alias_name,
                                PREVIOUS_NAME = prev_name,
-                               BIOTYPE = locus_type) %>%
-    dplyr::mutate()
+                               BIOTYPE = locus_type)
 
 hgnc_groups <- readr::read_delim(hgnc_groups_f)
 
@@ -65,12 +64,23 @@ hgnc_groups <- hgnc_groups %>%
 
 hgnc <- dplyr::full_join(hgnc_proteins, hgnc_groups)
 
-# Check that one symbol maps to one ID ----
+# Check that one HGNC ID maps to one ID ----
 temp <- hgnc %>%
-    nPerGroup(group = "HGNC_ID", col = c("ENTREZ_ID", "ENSEMBL_ID")) %>%
+    AbNames:::nPerGroup(group = "HGNC_ID",
+                       col = c("ENTREZ_ID", "ENSEMBL_ID")) %>%
     dplyr::filter(nENTREZ_ID > 1 | nENSEMBL_ID > 1)
 
 stopifnot(nrow(temp) == 0)
+
+
+# Check that one HGNC symbol maps to one ID ----
+temp <- hgnc %>%
+    AbNames:::nPerGroup(group = "HGNC_SYMBOL",
+                        col = c("HGNC_ID", "ENTREZ_ID", "ENSEMBL_ID")) %>%
+    dplyr::filter(nENTREZ_ID > 1 | nENSEMBL_ID > 1 | nHGNC_ID > 1)
+
+stopifnot(nrow(temp) == 0)
+
 
 # Create and save long version of the HGNC table for querying ----
 

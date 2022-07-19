@@ -21,6 +21,9 @@
 # Some Ensembl genes map to multiple HGNC_IDs, e.g. ENSG00000276085 to
 # HGNC:10628 / HGNC:30554
 
+# Note that fetching chromosomes only misses haplotypes, which include many
+# immune genes
+
 # ---------------------------------------------------------------------------
 
 # Biomart -----

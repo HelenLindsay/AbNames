@@ -1,5 +1,8 @@
 # Notes -----
 
+# Ensembl can map same gene to multiple HGNC symbols, e.g. ENSG00000276085
+# to CCL3L1 / CCL3L3
+
 # Genes in NCBI not org_db are where ENTREZ_ID is mapped to a novel gene or
 # scaffold.
 
@@ -28,11 +31,11 @@
 
 library(tidyverse)
 library(readxl)
+library(AbNames)
 
-source("ncbi.R")
-source("entrez_ensembl.Rs")
+source("data-raw/ncbi.R")
+source("data-raw/entrez_ensembl.R")
 
-# TO DO: what happened to biotype?
 # --------------------------------------------------------------------
 # Make HGNC/ENSEMBL IDs from HGNC consistent with Ensembl -----
 
@@ -99,8 +102,8 @@ bm_novel <- bm %>%
 org_db_novel <- org_db %>%
     dplyr::mutate(symbol_type = "ALIAS") %>%
     dplyr::anti_join(hgnc, by = c("HGNC_SYMBOL", "value")) %>%
-    # Only want genes for which there is a HGNC / ENSEMBL combination in HGNC
-    dplyr::semi_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID))
+    # Only want genes for which there is a HGNC / ENSEMBL /ENTREZ comb in HGNC
+    dplyr::semi_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID, ENTREZ_ID))
 
 # NCBI and HGNC can differ in how they describe a symbol, e.g. previous
 # vs alias. Assume that HGNC annotations are correct, as HGNC is the
@@ -119,17 +122,13 @@ ncbi_novel <- ncbi_genes %>%
 hgnc <- hgnc %>%
     dplyr::bind_rows(bm_novel, ncbi_novel, org_db_novel) %>%
 
-    # Fill Entrez IDs from new aliases
-    dplyr::group_by(HGNC_ID) %>%
-    tidyr::fill(ENTREZ_ID, HGNC_NAME, UNIPROT_ID, .direction = "updown") %>%
-
     # Fill HGNC IDs (missing from org_db)
-    dplyr::group_by(ENSEMBL_ID) %>%
+    dplyr::group_by(ENSEMBL_ID, HGNC_SYMBOL, ENTREZ_ID) %>%
     tidyr::fill(HGNC_ID, HGNC_NAME, UNIPROT_ID, .direction = "updown") %>%
 
     # New values may come from more than one source, aggregate
     dplyr::group_by(HGNC_ID, ENSEMBL_ID, UNIPROT_ID, HGNC_SYMBOL, ENTREZ_ID,
-                    symbol_type, value) %>%
+                    BIOTYPE, symbol_type, value) %>%
     dplyr::summarise(SOURCE = toString(SOURCE), .groups = "keep") %>%
 
     # Check if values are unambiguous

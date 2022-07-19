@@ -165,7 +165,7 @@
 #'column from another data.frame or a selection of row indices.  If a second
 #'data frame and a selection of rows is provided, values from df matching
 #'any value in df2[rows, ] are returned.  If only rows indices are provided,
-#'rows matching any value in df[rows, ] are returned.
+#'rows matching any value in df[rows, ] are returned.  NAs are not matched.
 #'
 #'@param df A data.frame from which to select matching rows
 #'@param df2 Optional, a second data
@@ -212,8 +212,9 @@ union_join <- function(df, df2 = NULL, rows = NULL, by = NULL){
     }
 
     # Extra brackets needed, see https://github.com/tidyverse/dplyr/issues/6194
-    df %>% dplyr::filter((dplyr::if_any(.cols = by,
-                                .fns = ~.x %in% qdf[[dplyr::cur_column()]])))
+    df %>%
+        dplyr::filter((dplyr::if_any(.cols = by,
+                        .fns = ~.x %in% na.omit(qdf[[dplyr::cur_column()]]))))
 }
 
 
