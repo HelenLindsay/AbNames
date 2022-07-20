@@ -27,7 +27,14 @@ totalseq
 }
 \description{
 This table contains information downloaded from www.biolegend.com and
-preprocessed into a consistent format.  Note that discontinued antibodies
-do not appear in this table.
+preprocessed into a consistent format.  Discontinued antibodies
+do not appear in this table, and non-human gene identifiers have been
+discarded.
+}
+\details{
+Note that we do not consider the mapping between antibodies and gene
+identifiers to be very reliable.  We have removed cases where the same
+antibody clone was mapped to different gene identifiers, but have not
+checked that the mapping agrees with the HGNC information.
 }
 \keyword{datasets}

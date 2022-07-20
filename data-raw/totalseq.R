@@ -231,8 +231,9 @@ fixes <- tibble::tribble(
     "MICA/MICB", "6D4", "ENSG00000204516, ENSG00000204520",
 
     # Totalseq website: CD158 HP-MA4 rx with KIR2DL1, KIR2DS1, KIR2DS3, KIR2DS5
-    # TO DO: KIR2DS3 AND KIR2DS5 missing from hgnc table!!
-    "CD158", "HP-MA4", "ENSG00000125498, ENSG00000276387",
+    # KIR2DS3 AND KIR2DS5 are on haplotype chromosomes
+    "CD158", "HP-MA4",
+        "ENSG00000125498, ENSG00000276387, ENSG00000277163, ENSG00000274739",
 
     # Totalseq website: CD16 3G8 interacts with FcGRIIIa and FGγRIIIb receptors
     "CD16", "3G8", "ENSG00000203747, ENSG00000162747",
