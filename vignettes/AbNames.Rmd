@@ -80,7 +80,7 @@ panels for CITE-seq analyses.  The data set "totalseq" is a
 re-formatted version of the TotalSeq barcodes data sheets available from the
 BioLegend website, including BioLegend antibody names and Ensembl gene IDs. 
 The isotypes of the antibodies are not included in the TotalSeq data sheets,
-and only human antibodies and isotype controls are included.
+and only human antibodies and isotype controls are included.  Missing and incomplete Ensembl IDs have been manually fixed.   
 
 Load using:
 ```{r}
@@ -114,6 +114,8 @@ dplyr::glimpse(citeseq)
 Here the column "Antigen" refers to the name given by the authors of the study
 in the table of resources used.  Some minimal formatting has been done, for
 example fixing Greek characters that were accidentally transformed upon data import.
+
+
 
 # Creating a query table
 
@@ -196,6 +198,9 @@ the CITE-seq data set. We have already done some formatting of these names, e.g.
 for "TCR Va24-Ja18 (iNKT cell)" we have removed the section in brackets. We wish
 to create a query data.frame where each subunit of the TCR complex appears on a
 separate line. 
+
+Note: this function may cause false matches if the numbering of the gene name
+does not match that of the antibody. 
 
 ```{r}
 tcr <- data.frame(Antigen =
@@ -329,7 +334,16 @@ head(citeseq)
 
 ## Filling using the TotalSeq dataset
 
-We can try to annotate antibodies that could not be annotated using the
+Another approach to annotating antibodies is to use the totalseq data.  We are
+not confident about the assignment of antibodies to Ensembl identifiers. 
+However, this may not be a problem if the aim is simply to standardise names
+between datasets or to a common reference.
+
+```{}
+```
+
+
+We can also try to annotate antibodies that could not be annotated using the
 HGNC by using the totalseq table.  This could also be done as a first matching
 step.  Here, we cannot add any more annotations. 
 
@@ -468,6 +482,10 @@ missing <- citeseq %>%
 # union join back gene ID / get info by antigen
 # Include clones when standardising names?
 # Put RRID into CITEseq
+# Export and demonstrate group_by_any? e.g. 
+# citeseq <- citeseq %>% group_by_any(c("Antigen", "Cat_Number") 
+# showGroups(citeseq, 2, interactive = FALSE)
+# ungroup(citeseq)
 
 # How can we match antibodies:
 # By an exact match in a query table
@@ -480,4 +498,3 @@ sessionInfo()
 ```
 
 
-AbNames has two parts - a collection of gene names and aliases, and information about CITE-seq antibodies.  You could use the first part for mapping CYTOF antibodies to gene identifiers.   
