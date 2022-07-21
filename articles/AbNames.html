@@ -8,8 +8,8 @@
 <meta name="description" content="AbNames">
 <title>Introduction to AbNames • AbNames</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.1.0/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.1.0/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<link href="../deps/bootstrap-5.1.3/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.1.3/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Introduction to AbNames">
 <meta property="og:description" content="AbNames">
@@ -40,6 +40,12 @@
 </li>
 <li class="nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
+</li>
+<li class="nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/renameSingleCellExp.html">Standardize a SingleCellExperiment</a>
+  </div>
 </li>
 <li class="nav-item">
   <a class="nav-link" href="../news/index.html">Changelog</a>
@@ -101,51 +107,57 @@
 </h2>
 <p>AbNames contains several curated gene name data sets for matching to antibody names.</p>
 <div class="section level3">
-<h3 id="hgnc-gene-names">HGNC gene names<a class="anchor" aria-label="anchor" href="#hgnc-gene-names"></a>
+<h3 id="gene-aliases">Gene aliases<a class="anchor" aria-label="anchor" href="#gene-aliases"></a>
 </h3>
-<p>The <code>hgnc</code> data set is a reformatted version of the protein-coding gene information downloaded from the Human Gene Names Consortium. This includes previous (obsolete) gene names and aliases, which in our experience have been useful for matching to antibody names. The <code>hgnc_long</code> data set contains the same seq of gene identifiers as the <code>hgnc</code> data set, in long format (one alias per row).</p>
+<p>The <code>gene_aliases</code> data set is primarily based on the protein-coding and gene groups tables from the Human Gene Names Consortium (HGNC). These include previous (obsolete) gene names and aliases, which in our experience have been useful for matching to antibody names. Non-ambiguous gene aliases from Ensembl (fetched via Bioconductor package biomaRt) and NCBI (fetched via the NCBI ftp site and the Bioconductor package org.Hs.eg.db) have been added. Mappings between HGNC, Ensembl and NCBI (Entrez) IDs are mostly based on HGNC, with some corrections of obsolete Ensembl IDs using the Ensembl data. The <code>gene_aliases</code> data set is in long format (one alias per row).</p>
 <p>Load using:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/HelenLindsay/AbNames" class="external-link">AbNames</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span>
-
-<span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"hgnc"</span>, package <span class="op">=</span> <span class="st">"AbNames"</span><span class="op">)</span> <span class="co"># hgnc_long is loaded similarly</span>
-
-<span class="co"># Show the first entries of hgnc, where each row is the start of one column</span>
-<span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="va">hgnc</span><span class="op">)</span> 
-<span class="co">#&gt; Rows: 139,296</span>
-<span class="co">#&gt; Columns: 7</span>
-<span class="co">#&gt; $ HGNC_ID     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "HGNC:5", "HGNC:5", "HGNC:24086", "HGNC:24086", "HGNC:2408…</span>
-<span class="co">#&gt; $ ENSEMBL_ID  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "ENSG00000121410", "ENSG00000121410", "ENSG00000148584", "…</span>
-<span class="co">#&gt; $ UNIPROT_IDS <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "P04217", "P04217", "Q9NQ94", "Q9NQ94", "Q9NQ94", "Q9NQ94"…</span>
-<span class="co">#&gt; $ HGNC_SYMBOL <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "A1BG", "A1BG", "A1CF", "A1CF", "A1CF", "A1CF", "A1CF", "A…</span>
-<span class="co">#&gt; $ symbol_type <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "HGNC_SYMBOL", "HGNC_NAME", "HGNC_SYMBOL", "HGNC_NAME", "A…</span>
-<span class="co">#&gt; $ value       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "A1BG", "alpha-1-B glycoprotein", "A1CF", "APOBEC1 complem…</span>
-<span class="co">#&gt; $ SOURCE      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "HGNC", "HGNC", "HGNC", "HGNC", "HGNC", "HGNC", "HGNC", "H…</span>
-
-<span class="co"># (Note: it isn't necessary to use dplyr:: to call "glimpse" as dplyr is loaded</span>
-<span class="co"># with the library call above. This syntax is used to make it clear which</span>
-<span class="co"># packages functions belong to)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/HelenLindsay/AbNames" class="external-link">AbNames</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"gene_aliases"</span>, package <span class="op">=</span> <span class="st">"AbNames"</span><span class="op">)</span> </span>
+<span></span>
+<span><span class="co"># Show the first entries of gene_aliases,</span></span>
+<span><span class="co"># where each row is the start of one column</span></span>
+<span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="va">gene_aliases</span><span class="op">)</span> </span>
+<span><span class="co">#&gt; Rows: 138,653</span></span>
+<span><span class="co">#&gt; Columns: 9</span></span>
+<span><span class="co">#&gt; $ HGNC_ID     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "HGNC:100", "HGNC:100", "HGNC:100", "HGNC:100", "HGNC:100"…</span></span>
+<span><span class="co">#&gt; $ ENSEMBL_ID  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "ENSG00000110881", "ENSG00000110881", "ENSG00000110881", "…</span></span>
+<span><span class="co">#&gt; $ UNIPROT_ID  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "A8K1U5|P78348", "A8K1U5|P78348", "A8K1U5|P78348", "A8K1U5…</span></span>
+<span><span class="co">#&gt; $ HGNC_SYMBOL <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "ASIC1", "ASIC1", "ASIC1", "ASIC1", "ASIC1", "ASIC1", "ASI…</span></span>
+<span><span class="co">#&gt; $ ENTREZ_ID   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "41", "41", "41", "41", "41", "41", "41", "41", "41", "41"…</span></span>
+<span><span class="co">#&gt; $ BIOTYPE     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "protein-coding", "protein_coding", "protein_coding", "pro…</span></span>
+<span><span class="co">#&gt; $ symbol_type <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "ALIAS", "ALIAS", "ALIAS", "HGNC_NAME", "HGNC_SYMBOL", "PR…</span></span>
+<span><span class="co">#&gt; $ value       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "ASIC", "BNaC2", "hBNaC2", "acid sensing ion channel subun…</span></span>
+<span><span class="co">#&gt; $ SOURCE      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "NCBI, ORGDB", "HGNC", "HGNC", "HGNC", "HGNC", "HGNC", "HG…</span></span>
+<span></span>
+<span><span class="co"># (Note: it isn't necessary to use dplyr:: to call "glimpse" as dplyr is loaded</span></span>
+<span><span class="co"># with the library call above. This syntax is used to make it clear which</span></span>
+<span><span class="co"># packages functions belong to)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="biolegend-antibodies">BioLegend antibodies<a class="anchor" aria-label="anchor" href="#biolegend-antibodies"></a>
 </h3>
-<p>BioLegend is a major supplier of antibodies, and provides several antibody panels for CITE-seq analyses. The data set “totalseq_cocktails” is a re-formatted version of the TotalSeq cocktails data sheets available from the BioLegend website, including BioLegend antibody names and Ensembl gene IDs. The isotypes of the antibodies are not included in the TotalSeq data sheets.</p>
+<p>BioLegend is a major supplier of antibodies, and provides several antibody panels for CITE-seq analyses. The data set “totalseq” is a re-formatted version of the TotalSeq barcodes data sheets available from the BioLegend website, including BioLegend antibody names and Ensembl gene IDs. The isotypes of the antibodies are not included in the TotalSeq data sheets, and only human antibodies and isotype controls are included.</p>
 <p>Load using:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"totalseq_cocktails"</span>, package <span class="op">=</span> <span class="st">"AbNames"</span><span class="op">)</span>
-<span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="va">totalseq_cocktails</span><span class="op">)</span>
-<span class="co">#&gt; Rows: 485</span>
-<span class="co">#&gt; Columns: 9</span>
-<span class="co">#&gt; $ Antigen          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "CD86", "CD274 (B7-H1, PD-L1)", "CD270 (HVEM, TR2)", …</span>
-<span class="co">#&gt; $ Clone            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "IT2.2", "29E.2A3", "122", "SKII.4", "TX31", "CC2C6",…</span>
-<span class="co">#&gt; $ ENSEMBL_ID       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "ENSG00000114013", "ENSG00000120217", "ENSG0000015787…</span>
-<span class="co">#&gt; $ Oligo_ID         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "0006", "0007", "0020", "0023", "0024", "0026", "0029…</span>
-<span class="co">#&gt; $ TotalSeq_Cat     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A"…</span>
-<span class="co">#&gt; $ Barcode_Sequence <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "GTCTTTGTCAGTGCA", "GTTGTCCGACAATAC", "TGATAGAAACAGAC…</span>
-<span class="co">#&gt; $ Reactivity       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "human", "human", "human", "human", "human", "human",…</span>
-<span class="co">#&gt; $ HGNC_ID          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "HGNC:1705", "HGNC:17635", "HGNC:11912", "HGNC:9705",…</span>
-<span class="co">#&gt; $ HGNC_SYMBOL      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "CD86", "CD274", "TNFRSF14", "PVR", "NECTIN2", "CD47"…</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"totalseq"</span>, package <span class="op">=</span> <span class="st">"AbNames"</span><span class="op">)</span></span>
+<span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="va">totalseq</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Rows: 977</span></span>
+<span><span class="co">#&gt; Columns: 12</span></span>
+<span><span class="co">#&gt; $ Cat_Number       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "305239", "305443", "329743", "329619", "309413", "33…</span></span>
+<span><span class="co">#&gt; $ Oligo_ID         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "0005", "0006", "0007", "0008", "0009", "0010", "0014…</span></span>
+<span><span class="co">#&gt; $ Antigen          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "CD80", "CD86", "CD274", "CD273", "CD275", "CD276", "…</span></span>
+<span><span class="co">#&gt; $ Clone            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "2D10", "IT2.2", "29E.2A3", "24F.10C12", "2D3", "DCN.…</span></span>
+<span><span class="co">#&gt; $ TotalSeq_Cat     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "A", "A", "A", "A", "A", "A", "A", "A", "A", "A", "A"…</span></span>
+<span><span class="co">#&gt; $ Reactivity       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "Human", "Human, African Green, Baboon, Capuchin Monk…</span></span>
+<span><span class="co">#&gt; $ Cross_Reactivity <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "Rhesus", NA, NA, NA, NA, NA, "Chimpanzee, Baboon, Cy…</span></span>
+<span><span class="co">#&gt; $ Barcode_Sequence <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "ACGAATCAATCTGTG", "GTCTTTGTCAGTGCA", "GTTGTCCGACAATA…</span></span>
+<span><span class="co">#&gt; $ Date_Released    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "07/13/2018", "06/08/2018", "07/24/2018", "06/08/2018…</span></span>
+<span><span class="co">#&gt; $ ENSEMBL_ID       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "ENSG00000121594", "ENSG00000114013", "ENSG0000012021…</span></span>
+<span><span class="co">#&gt; $ HGNC_ID          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "HGNC:1700", "HGNC:1705", "HGNC:17635", "HGNC:18731",…</span></span>
+<span><span class="co">#&gt; $ HGNC_SYMBOL      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "CD80", "CD86", "CD274", "PDCD1LG2", "ICOSLG", "CD276…</span></span></code></pre></div>
 <p>Note that the “Antigen” column here refers to antibody names with prefixes such as “anti-human” removed.</p>
 </div>
 <div class="section level3">
@@ -154,25 +166,28 @@
 <p>This is a table matching antibody names to gene and protein IDs from &gt;20 data sets with publicly available CITE-seq data. The data sets are data that we have worked with and we would be happy to add other data sets if provided. The AbNames package collects the functions that were used to create this table. This table (NOT IN THERE YET) includes manually curated matches between antibody names and gene IDs for cases where we were unable to find an exact match to the antibody name provided. Isotype controls were manually identified based on either the name, e.g. “IgG1 Isotype Ctrl” or the reactivity, e.g. “Mouse IgG2b”.</p>
 <p>Load using</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># As the citeseq data set contains raw data, it is loaded differently</span>
-<span class="co"># than the other data sets </span>
-
-<span class="va">citeseq_fname</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"citeseq.csv"</span>, package <span class="op">=</span> <span class="st">"AbNames"</span><span class="op">)</span>
-<span class="va">citeseq</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">citeseq_fname</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="op">)</span>
-<span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="va">citeseq</span><span class="op">)</span>
-<span class="co">#&gt; Rows: 2,203</span>
-<span class="co">#&gt; Columns: 8</span>
-<span class="co">#&gt; $ Antigen      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "2B4", "4.1BB", "4.1BBL", "Annexin V", "anti-c-Met", "ant…</span>
-<span class="co">#&gt; $ Study        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "Wu_2021_b", "Wu_2021_b", "Wu_2021_b", "Kotliarov_2020", …</span>
-<span class="co">#&gt; $ Clone        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "C1.7", "4B4-1", "5F4", NA, "12.1", "12.1", "12.1", "PE00…</span>
-<span class="co">#&gt; $ Cat_Number   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "329527", "309835", "311509", "custom made (similar to 94…</span>
-<span class="co">#&gt; $ Oligo_ID     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "0189", "0355", "0022", "0025", "1055", "1055", NA, "0911…</span>
-<span class="co">#&gt; $ TotalSeq_Cat <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "A", "A", "A", "A", "C", "C", NA, "A", "A", "C", "A", "A"…</span>
-<span class="co">#&gt; $ Vendor       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "BioLegend", "BioLegend", "BioLegend", "BioLegend", "BioL…</span>
-<span class="co">#&gt; $ Control      <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, F…</span>
-
-<span class="co"># TO DO: AS THIS IS ONLY A SUBSET OF THE CITESEQ INFO, THERE ARE APPARENT</span>
-<span class="co"># DUPLICATES, DECIDE WHAT TO DO WITH THESE</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># As the citeseq data set contains raw data, it is loaded differently</span></span>
+<span><span class="co"># than the other data sets </span></span>
+<span></span>
+<span><span class="va">citeseq_fname</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"citeseq.csv"</span>, package <span class="op">=</span> <span class="st">"AbNames"</span><span class="op">)</span></span>
+<span><span class="va">citeseq</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">citeseq_fname</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="va">citeseq</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Rows: 2,203</span></span>
+<span><span class="co">#&gt; Columns: 11</span></span>
+<span><span class="co">#&gt; $ Antigen         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "2B4", "4.1BB", "4.1BBL", "Annexin V", "anti-c-Met", "…</span></span>
+<span><span class="co">#&gt; $ Study           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "Wu_2021_b", "Wu_2021_b", "Wu_2021_b", "Kotliarov_2020…</span></span>
+<span><span class="co">#&gt; $ Clone           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "C1.7", "4B4-1", "5F4", NA, "12.1", "12.1", "12.1", "P…</span></span>
+<span><span class="co">#&gt; $ Cat_Number      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "329527", "309835", "311509", "custom made (similar to…</span></span>
+<span><span class="co">#&gt; $ Oligo_ID        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "0189", "0355", "0022", "0025", "1055", "1055", NA, "0…</span></span>
+<span><span class="co">#&gt; $ TotalSeq_Cat    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "A", "A", "A", "A", "C", "C", NA, "A", "A", "C", "A", …</span></span>
+<span><span class="co">#&gt; $ Vendor          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "BioLegend", "BioLegend", "BioLegend", "BioLegend", "B…</span></span>
+<span><span class="co">#&gt; $ Control         <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span></span>
+<span><span class="co">#&gt; $ RRID            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> NA, NA, NA, NA, NA, NA, NA, NA, NA, "AB_2832723", NA, …</span></span>
+<span><span class="co">#&gt; $ Lot             <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> NA, NA, NA, "B270560", NA, NA, NA, NA, NA, NA, NA, NA,…</span></span>
+<span><span class="co">#&gt; $ Custom_Antibody <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> NA, NA, NA, TRUE, NA, NA, NA, NA, NA, NA, NA, NA, NA, …</span></span>
+<span></span>
+<span><span class="co"># TO DO: AS THIS IS ONLY A SUBSET OF THE CITESEQ INFO, THERE ARE APPARENT</span></span>
+<span><span class="co"># DUPLICATES, DECIDE WHAT TO DO WITH THESE</span></span></code></pre></div>
 <p>Here the column “Antigen” refers to the name given by the authors of the study in the table of resources used. Some minimal formatting has been done, for example fixing Greek characters that were accidentally transformed upon data import.</p>
 </div>
 </div>
@@ -181,53 +196,53 @@
 </h2>
 <p>To illustrate the problem with matching antibody names to gene names, let’s look at an example from the citeseq data set.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># The regular expression inside "grepl" searches for PD.L1, PD-L1, PDL1 or CD274</span>
-
-<span class="va">cd274</span> <span class="op">&lt;-</span> <span class="va">citeseq</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"PD[\\.-]?L1|CD274"</span>, <span class="va">Antigen</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">Antigen</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="op">)</span>
-
-<span class="va">cd274</span>
-<span class="co">#&gt; [1] "CD274"                "CD274 (B7-H1, PD-L1)" "CD274 (PD-L1)"       </span>
-<span class="co">#&gt; [4] "PD-L1"                "PD-L1 (CD274)"        "PDL1"                </span>
-<span class="co">#&gt; [7] "PDL1 (CD274)"</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># The regular expression inside "grepl" searches for PD.L1, PD-L1, PDL1 or CD274</span></span>
+<span></span>
+<span><span class="va">cd274</span> <span class="op">&lt;-</span> <span class="va">citeseq</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"PD[\\.-]?L1|CD274"</span>, <span class="va">Antigen</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">Antigen</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">cd274</span></span>
+<span><span class="co">#&gt; [1] "CD274"                "CD274 (B7-H1, PD-L1)" "CD274 (PD-L1)"       </span></span>
+<span><span class="co">#&gt; [4] "PD-L1"                "PD-L1 (CD274)"        "PDL1"                </span></span>
+<span><span class="co">#&gt; [7] "PDL1 (CD274)"</span></span></code></pre></div>
 <p>All of the antigen names above refer to the same cell surface protein.</p>
 <div class="section level3">
 <h3 id="default-query-table">Default query table<a class="anchor" aria-label="anchor" href="#default-query-table"></a>
 </h3>
 <p>We will demonstrate how to create a default query table using the raw CITE-seq data set. This collects information from the reagents tables provided as supplementary material in the studies used.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Add an ID column to the citeseq data set to allow the results table to be merged</span>
-<span class="va">citeseq</span> <span class="op">&lt;-</span> <span class="fu">AbNames</span><span class="fu">::</span><span class="fu"><a href="../reference/addID.html">addID</a></span><span class="op">(</span><span class="va">citeseq</span><span class="op">)</span>
-<span class="co">#&gt; Warning in AbNames::addID(citeseq): ID columns do not uniquely identify rows,</span>
-<span class="co">#&gt; row numbers added.</span>
-
-<span class="co"># Remove control columns, as we are only searching human proteins</span>
-<span class="va">controls</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">citeseq</span>, <span class="va">Control</span><span class="op">)</span>
-<span class="va">citeseq</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">citeseq</span>, <span class="op">!</span> <span class="va">Control</span><span class="op">)</span>
-
-<span class="co"># Select just the columns that are needed for querying:</span>
-<span class="va">citeseq_q</span> <span class="op">&lt;-</span> <span class="va">citeseq</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">ID</span>, <span class="va">Antigen</span><span class="op">)</span>
-
-<span class="co"># Apply the default transformation sequence and make a query table in long format</span>
-<span class="va">query_df</span> <span class="op">&lt;-</span> <span class="fu">AbNames</span><span class="fu">::</span><span class="fu"><a href="../reference/makeQueryTable.html">makeQueryTable</a></span><span class="op">(</span><span class="va">citeseq_q</span>, ab <span class="op">=</span> <span class="st">"Antigen"</span><span class="op">)</span>
-<span class="co">#&gt; Warning in (function (df, ex, f, ...) : Rows were added when merging split</span>
-<span class="co">#&gt; data.frames</span>
-
-<span class="co"># Print one example antigen from the query table:</span>
-<span class="va">query_df</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">ID</span> <span class="op">==</span> <span class="st">"TCR alpha/beta__Hao_2021"</span><span class="op">)</span>
-<span class="co">#&gt; <span style="color: #949494;"># A tibble: 7 × 3</span></span>
-<span class="co">#&gt;   ID                       name          value                      </span>
-<span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                      </span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">1</span> TCR alpha/beta__Hao_2021 Antigen       TCR alpha/beta             </span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">2</span> TCR alpha/beta__Hao_2021 greek_word    TCR alpha/beta             </span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">3</span> TCR alpha/beta__Hao_2021 greek_letter  TCR a/b                    </span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">4</span> TCR alpha/beta__Hao_2021 upper_no_dash TCR A/B                    </span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">5</span> TCR alpha/beta__Hao_2021 lower_no_dash tcr a/b                    </span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">6</span> TCR alpha/beta__Hao_2021 TCR_long      T cell receptor alpha locus</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">7</span> TCR alpha/beta__Hao_2021 TCR_long      T cell receptor beta locus</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># Add an ID column to the citeseq data set to allow the results table to be merged</span></span>
+<span><span class="va">citeseq</span> <span class="op">&lt;-</span> <span class="fu">AbNames</span><span class="fu">::</span><span class="fu"><a href="../reference/addID.html">addID</a></span><span class="op">(</span><span class="va">citeseq</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in AbNames::addID(citeseq): ID columns do not uniquely identify rows,</span></span>
+<span><span class="co">#&gt; row numbers added.</span></span>
+<span></span>
+<span><span class="co"># Remove control columns, as we are only searching human proteins</span></span>
+<span><span class="va">controls</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">citeseq</span>, <span class="va">Control</span><span class="op">)</span></span>
+<span><span class="va">citeseq</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">citeseq</span>, <span class="op">!</span> <span class="va">Control</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Select just the columns that are needed for querying:</span></span>
+<span><span class="va">citeseq_q</span> <span class="op">&lt;-</span> <span class="va">citeseq</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">ID</span>, <span class="va">Antigen</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Apply the default transformation sequence and make a query table in long format</span></span>
+<span><span class="va">query_df</span> <span class="op">&lt;-</span> <span class="fu">AbNames</span><span class="fu">::</span><span class="fu"><a href="../reference/makeQueryTable.html">makeQueryTable</a></span><span class="op">(</span><span class="va">citeseq_q</span>, ab <span class="op">=</span> <span class="st">"Antigen"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in (function (df, ex, f, ...) : Rows were added when merging split</span></span>
+<span><span class="co">#&gt; data.frames</span></span>
+<span></span>
+<span><span class="co"># Print one example antigen from the query table:</span></span>
+<span><span class="va">query_df</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">ID</span> <span class="op">==</span> <span class="st">"TCR alpha/beta__Hao_2021"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 7 × 3</span></span></span>
+<span><span class="co">#&gt;   ID                       name          value                      </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> TCR alpha/beta__Hao_2021 Antigen       TCR alpha/beta             </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> TCR alpha/beta__Hao_2021 greek_word    TCR alpha/beta             </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> TCR alpha/beta__Hao_2021 greek_letter  TCR a/b                    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> TCR alpha/beta__Hao_2021 upper_no_dash TCR A/B                    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> TCR alpha/beta__Hao_2021 lower_no_dash tcr a/b                    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> TCR alpha/beta__Hao_2021 TCR_long      T cell receptor alpha locus</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> TCR alpha/beta__Hao_2021 TCR_long      T cell receptor beta locus</span></span></code></pre></div>
 <p>The example above shows that each antibody name has been reformatted in several ways. When querying a data set, we search for an exact match to any of these strings.</p>
 </div>
 <div class="section level3">
@@ -236,65 +251,65 @@
 <p>AbNames provides a few template functions that can be used to construct a pipeline for creating a query table. The default query table uses the function <code>defaultQuery</code> to create a list of partial functions which are then applied recursively to the data.frame using <code><a href="https://magrittr.tidyverse.org/reference/freduce.html" class="external-link">magrittr::freduce</a></code>. To use this strategy, all functions must accept the data.frame as the only required argument. Other arguments should be filled in when creating the partial functions.</p>
 <p>The default function list can used as a starting point to add extra formatting functions, remove or modify certain steps. The individual formatting functions are introduced below (SO FAR ONLY THE T-CELL RECEPTORS)</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Get the default sequence of formatting functions </span>
-<span class="va">default_funs</span> <span class="op">&lt;-</span> <span class="fu">AbNames</span><span class="fu">::</span><span class="fu"><a href="../reference/defaultQuery.html">defaultQuery</a></span><span class="op">(</span><span class="op">)</span>
-
-<span class="co"># Print the first two formatting functions as an example</span>
-<span class="va">default_funs</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span>
-<span class="co">#&gt; [[1]]</span>
-<span class="co">#&gt; &lt;partialised&gt;</span>
-<span class="co">#&gt; function (...) </span>
-<span class="co">#&gt; gsubAb(ab = "Antigen", ...)</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; [[2]]</span>
-<span class="co">#&gt; &lt;partialised&gt;</span>
-<span class="co">#&gt; function (...) </span>
-<span class="co">#&gt; gsubAb(ab = "Antigen", pattern = "\\s[Rr]ecombinant", ...)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># Get the default sequence of formatting functions </span></span>
+<span><span class="va">default_funs</span> <span class="op">&lt;-</span> <span class="fu">AbNames</span><span class="fu">::</span><span class="fu"><a href="../reference/defaultQuery.html">defaultQuery</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Print the first two formatting functions as an example</span></span>
+<span><span class="va">default_funs</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span></span>
+<span><span class="co">#&gt; [[1]]</span></span>
+<span><span class="co">#&gt; &lt;partialised&gt;</span></span>
+<span><span class="co">#&gt; function (...) </span></span>
+<span><span class="co">#&gt; gsubAb(ab = "Antigen", ...)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]]</span></span>
+<span><span class="co">#&gt; &lt;partialised&gt;</span></span>
+<span><span class="co">#&gt; function (...) </span></span>
+<span><span class="co">#&gt; gsubAb(ab = "Antigen", pattern = "\\s[Rr]ecombinant", ...)</span></span></code></pre></div>
 <div class="section level4">
 <h4 id="t-cell-receptors">T-cell receptors<a class="anchor" aria-label="anchor" href="#t-cell-receptors"></a>
 </h4>
 <p>We found that querying the HGNC gene description was the easiest way to match the names of antibodies against the T-cell receptor to their gene IDs. (An alternative method is to search for the gene symbol.)</p>
-<p>We will start with a data.frame of antibodies against the T-cell receptor from the CITE-seq data set. We have already done some fomatting of these names, e.g.  for “TCR Va24-Ja18 (iNKT cell)” we have removed the section in brackets. We wish to create a query data.frame where each subunit of the TCR complex appears on a separate line.</p>
+<p>We will start with a data.frame of antibodies against the T-cell receptor from the CITE-seq data set. We have already done some formatting of these names, e.g.  for “TCR Va24-Ja18 (iNKT cell)” we have removed the section in brackets. We wish to create a query data.frame where each subunit of the TCR complex appears on a separate line.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">tcr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Antigen <span class="op">=</span>
-                      <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TCR alpha/beta"</span>, <span class="st">"TCRab"</span>, <span class="st">"TCR gamma/delta"</span>, <span class="st">"TCRgd"</span>,
-                        <span class="st">"TCR g/d"</span>, <span class="st">"TCR Vgamma9"</span>, <span class="st">"TCR Vg9"</span>, <span class="st">"TCR Vd2"</span>,
-                        <span class="st">"TCR Vdelta2"</span>, <span class="st">"TCR Vα24-Jα18"</span>, <span class="st">"TCRVa24.Ja18"</span>, 
-                        <span class="st">"TCR Valpha24-Jalpha18"</span>, <span class="st">"TCR Vα7.2"</span>, <span class="st">"TCR Va7.2"</span>,
-                        <span class="st">"TCRa7.2"</span>, <span class="st">"TCRVa7.2"</span>, <span class="st">"TCR Vbeta13.1"</span>, <span class="st">"TCR γ/δ"</span>, 
-                        <span class="st">"TCR Vβ13.1"</span>, <span class="st">"TCR Vγ9"</span>, <span class="st">"TCR Vδ2"</span>, <span class="st">"TCR α/β"</span>,
-                        <span class="st">"TCRb"</span>, <span class="st">"TCRg"</span><span class="op">)</span><span class="op">)</span>
-
-
-<span class="co"># First, we convert the Greek symbols to letters.  </span>
-<span class="co"># Note that as we are using replaceGreekSyms in a dplyr pipeline, we don't </span>
-<span class="co"># put quotes around the column name, i.e. Antigen not "Antigen".</span>
-
-<span class="va">tcr</span> <span class="op">&lt;-</span> <span class="va">tcr</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>query <span class="op">=</span> 
-                    <span class="fu">AbNames</span><span class="fu">::</span><span class="fu"><a href="../reference/replaceGreekSyms.html">replaceGreekSyms</a></span><span class="op">(</span><span class="va">Antigen</span>, replace <span class="op">=</span> <span class="st">"sym2letter"</span><span class="op">)</span><span class="op">)</span>
- 
-<span class="co"># Print out a few rows to see the result</span>
-<span class="va">tcr</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> 
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">Antigen</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TCR Vβ13.1"</span>, <span class="st">"TCR Vδ2"</span>, <span class="st">"TCR α/β"</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt;      Antigen      query</span>
-<span class="co">#&gt; 1 TCR Vβ13.1 TCR Vb13.1</span>
-<span class="co">#&gt; 2    TCR Vδ2    TCR Vd2</span>
-<span class="co">#&gt; 3    TCR α/β    TCR a/b</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">tcr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Antigen <span class="op">=</span></span>
+<span>                      <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TCR alpha/beta"</span>, <span class="st">"TCRab"</span>, <span class="st">"TCR gamma/delta"</span>, <span class="st">"TCRgd"</span>,</span>
+<span>                        <span class="st">"TCR g/d"</span>, <span class="st">"TCR Vgamma9"</span>, <span class="st">"TCR Vg9"</span>, <span class="st">"TCR Vd2"</span>,</span>
+<span>                        <span class="st">"TCR Vdelta2"</span>, <span class="st">"TCR Vα24-Jα18"</span>, <span class="st">"TCRVa24.Ja18"</span>, </span>
+<span>                        <span class="st">"TCR Valpha24-Jalpha18"</span>, <span class="st">"TCR Vα7.2"</span>, <span class="st">"TCR Va7.2"</span>,</span>
+<span>                        <span class="st">"TCRa7.2"</span>, <span class="st">"TCRVa7.2"</span>, <span class="st">"TCR Vbeta13.1"</span>, <span class="st">"TCR γ/δ"</span>, </span>
+<span>                        <span class="st">"TCR Vβ13.1"</span>, <span class="st">"TCR Vγ9"</span>, <span class="st">"TCR Vδ2"</span>, <span class="st">"TCR α/β"</span>,</span>
+<span>                        <span class="st">"TCRb"</span>, <span class="st">"TCRg"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span></span>
+<span><span class="co"># First, we convert the Greek symbols to letters.  </span></span>
+<span><span class="co"># Note that as we are using replaceGreekSyms in a dplyr pipeline, we don't </span></span>
+<span><span class="co"># put quotes around the column name, i.e. Antigen not "Antigen".</span></span>
+<span></span>
+<span><span class="va">tcr</span> <span class="op">&lt;-</span> <span class="va">tcr</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>query <span class="op">=</span> </span>
+<span>                    <span class="fu">AbNames</span><span class="fu">::</span><span class="fu"><a href="../reference/replaceGreekSyms.html">replaceGreekSyms</a></span><span class="op">(</span><span class="va">Antigen</span>, replace <span class="op">=</span> <span class="st">"sym2letter"</span><span class="op">)</span><span class="op">)</span></span>
+<span> </span>
+<span><span class="co"># Print out a few rows to see the result</span></span>
+<span><span class="va">tcr</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">Antigen</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TCR Vβ13.1"</span>, <span class="st">"TCR Vδ2"</span>, <span class="st">"TCR α/β"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      Antigen      query</span></span>
+<span><span class="co">#&gt; 1 TCR Vβ13.1 TCR Vb13.1</span></span>
+<span><span class="co">#&gt; 2    TCR Vδ2    TCR Vd2</span></span>
+<span><span class="co">#&gt; 3    TCR α/β    TCR a/b</span></span></code></pre></div>
 <p>Now we use the function <code>formatTCR</code> to format the antibody names for querying the gene description field of the HGNC data set.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">tcr_f</span> <span class="op">&lt;-</span> <span class="fu">AbNames</span><span class="fu">::</span><span class="fu"><a href="../reference/formatTCR.html">formatTCR</a></span><span class="op">(</span><span class="va">tcr</span>, tcr <span class="op">=</span> <span class="st">"query"</span><span class="op">)</span>
-
-<span class="co"># Print out the first few rows</span>
-<span class="va">tcr_f</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span> 
-<span class="co">#&gt;           Antigen           query                    TCR_long</span>
-<span class="co">#&gt; 1  TCR alpha/beta  TCR alpha/beta T cell receptor alpha locus</span>
-<span class="co">#&gt; 2  TCR alpha/beta  TCR alpha/beta  T cell receptor beta locus</span>
-<span class="co">#&gt; 3           TCRab           TCRab T cell receptor alpha locus</span>
-<span class="co">#&gt; 4           TCRab           TCRab  T cell receptor beta locus</span>
-<span class="co">#&gt; 5 TCR gamma/delta TCR gamma/delta T cell receptor gamma locus</span>
-<span class="co">#&gt; 6 TCR gamma/delta TCR gamma/delta T cell receptor delta locus</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">tcr_f</span> <span class="op">&lt;-</span> <span class="fu">AbNames</span><span class="fu">::</span><span class="fu"><a href="../reference/formatTCR.html">formatTCR</a></span><span class="op">(</span><span class="va">tcr</span>, tcr <span class="op">=</span> <span class="st">"query"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Print out the first few rows</span></span>
+<span><span class="va">tcr_f</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span> </span>
+<span><span class="co">#&gt;           Antigen           query                    TCR_long</span></span>
+<span><span class="co">#&gt; 1  TCR alpha/beta  TCR alpha/beta T cell receptor alpha locus</span></span>
+<span><span class="co">#&gt; 2  TCR alpha/beta  TCR alpha/beta  T cell receptor beta locus</span></span>
+<span><span class="co">#&gt; 3           TCRab           TCRab T cell receptor alpha locus</span></span>
+<span><span class="co">#&gt; 4           TCRab           TCRab  T cell receptor beta locus</span></span>
+<span><span class="co">#&gt; 5 TCR gamma/delta TCR gamma/delta T cell receptor gamma locus</span></span>
+<span><span class="co">#&gt; 6 TCR gamma/delta TCR gamma/delta T cell receptor delta locus</span></span></code></pre></div>
 </div>
 </div>
 </div>
@@ -305,158 +320,135 @@
 <p>By default, we require that matches must be found for all subunits of a multi-subunit protein to avoid incorrect matches.</p>
 <p>Here we will query the HGNC data set for the CITE-seq antibodies, using the query table created above.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">hgnc_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/searchHGNC.html">searchHGNC</a></span><span class="op">(</span><span class="va">query_df</span><span class="op">)</span>
-<span class="co">#&gt; Joining, by = "value"</span>
-<span class="co">#&gt; Joining, by = "HGNC_ID"</span>
-
-<span class="co"># Print 10 random results:</span>
-<span class="va">hgnc_results</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">ID</span>, <span class="va">name</span>, <span class="va">value</span>, <span class="va">symbol_type</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/sample_n.html" class="external-link">sample_n</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span>
-<span class="co">#&gt; <span style="color: #949494;"># A tibble: 10 × 4</span></span>
-<span class="co">#&gt;    ID                                     name                 value symbol_type</span>
-<span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span>
-<span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> IgD__Kotliarov_2020                    Ig                   IGHD  HGNC_SYMBOL</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> CD59__Qian_2020                        greek_word           CD59  HGNC_SYMBOL</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> CD27__Kaufmann_2021                    greek_word           CD27  HGNC_SYMBOL</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> CD4__Hao_2021__2                       greek_word           CD4   HGNC_SYMBOL</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> CD163__Mimitou_2021_cite_and_dogma_seq greek_word           CD163 HGNC_SYMBOL</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> CD137 (4-1BB)__Kotliarov_2020          Antigen|greek_word|… CD13… alias_symb…</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> CD4__Qian_2020                         greek_word           CD4   HGNC_SYMBOL</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> CD8__Pont_2020                         Antigen|greek_word|… CD8   prev_symbol</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> CD184 (CXCR4)__Hao_2021                greek_word           CXCR4 HGNC_SYMBOL</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">10</span> CD274__Qi_2020                         greek_word           CD274 HGNC_SYMBOL</span></code></pre></div>
-<p>The results table above contains (just) the matches between the query table and the HGNC tables. In the example above, we see in the “name” column the formatting function that generated the string in the “value” column that was matched, and in the “symbol_type” column which column of the HGNC data was matched. If there are multiple matches for a given ID, the official symbol (“HGNC_SYMBOL”) is preferred over aliases or previous symbols.</p>
+<code class="sourceCode R"><span><span class="va">hgnc_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/searchHGNC.html">searchHGNC</a></span><span class="op">(</span><span class="va">query_df</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Joining, by = "value"</span></span>
+<span></span>
+<span><span class="co"># Print 10 random results:</span></span>
+<span><span class="va">hgnc_results</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">ID</span>, <span class="va">name</span>, <span class="va">value</span>, <span class="va">symbol_type</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/sample_n.html" class="external-link">sample_n</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 10 × 4</span></span></span>
+<span><span class="co">#&gt;    ID                                    name                      value symbo…¹</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                 <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> CD24__Mimitou_2019                    greek_letter              CD24  HGNC_S…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> CD46__Mimitou_2021_cite_and_dogma_seq greek_letter              CD46  HGNC_S…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> CD209 (DC-SIGN)__Qian_2020            greek_letter              CD209 HGNC_S…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> CD33__Su_2020                         Antigen                   CD33  HGNC_S…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> CD70__Kotliarov_2020                  greek_letter              CD70  HGNC_S…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> CD13__Mimitou_2021_cite_and_dogma_seq Antigen|greek_word|greek… CD13  PREVIO…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> CD52__Hao_2021                        Antigen                   CD52  HGNC_S…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> CD66a/c/e__Su_2020                    subunit                   CD66e ALIAS  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> CD274 (B7-H1, PD-L1)__Hao_2021        Antigen                   CD274 HGNC_S…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> CR1__Wu_2021_b                        greek_letter              CR1   HGNC_S…</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># … with abbreviated variable name ¹​symbol_type</span></span></span></code></pre></div>
+<p>The results table above contains (just) the matches between the query table and the HGNC table. In the example above, we see in the “name” column the formatting function that generated the string in the “value” column that was matched, and in the “symbol_type” column which column of the HGNC data was matched. If there are multiple matches for a given ID, the official symbol (“HGNC_SYMBOL”) is preferred over aliases or previous symbols.</p>
 <p>We may wish to review the matches before merging the results into the original table. For example, we can check for matches to different genes where the name was not guessed to be a multi-subunit protein.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">hgnc_results</span> <span class="op">&lt;-</span> <span class="va">hgnc_results</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">ID</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>n_ids <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/n_distinct.html" class="external-link">n_distinct</a></span><span class="op">(</span><span class="va">HGNC_ID</span><span class="op">)</span><span class="op">)</span> <span class="co"># Count distinct IDs</span>
-    
-<span class="co"># Select antigens where there are matches to multiple genes but not</span>
-<span class="co"># because the antibody is against a multi-gene protein </span>
-<span class="va">multi_gene</span> <span class="op">&lt;-</span> <span class="va">hgnc_results</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">n_ids</span> <span class="op">&gt;</span> <span class="fl">1</span>, <span class="op">!</span> <span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="va">name</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TCR_long"</span>, <span class="st">"subunit"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">ID</span>, <span class="va">name</span>, <span class="va">value</span>, <span class="va">HGNC_ID</span><span class="op">)</span>
-
-<span class="co"># Look at the first group in multi_gene.</span>
-<span class="co"># Set interactive = FALSE for interactive exploration</span>
-<span class="fu"><a href="../reference/showGroups.html">showGroups</a></span><span class="op">(</span><span class="va">multi_gene</span>, <span class="fl">1</span>, interactive <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-<span class="co">#&gt; Group 1 of 101: 14 rows</span>
-<span class="co">#&gt;                       ID                            name value   HGNC_ID</span>
-<span class="co">#&gt; 1  CD11a.CD18__Wu_2021_b                   upper_no_dash CD11A HGNC:6148</span>
-<span class="co">#&gt; 2  CD11a.CD18__Wu_2021_b                   upper_no_dash CD11A HGNC:6148</span>
-<span class="co">#&gt; 3  CD11a.CD18__Wu_2021_b                   upper_no_dash CD11A HGNC:6148</span>
-<span class="co">#&gt; 4  CD11a.CD18__Wu_2021_b                   upper_no_dash CD11A HGNC:6148</span>
-<span class="co">#&gt; 5  CD11a.CD18__Wu_2021_b                   upper_no_dash CD11A HGNC:6148</span>
-<span class="co">#&gt; 6  CD11a.CD18__Wu_2021_b                   upper_no_dash CD11A HGNC:6148</span>
-<span class="co">#&gt; 7  CD11a.CD18__Wu_2021_b                   upper_no_dash CD11A HGNC:6148</span>
-<span class="co">#&gt; 8  CD11a.CD18__Wu_2021_b Antigen|greek_word|greek_letter  CD18 HGNC:6155</span>
-<span class="co">#&gt; 9  CD11a.CD18__Wu_2021_b Antigen|greek_word|greek_letter  CD18 HGNC:6155</span>
-<span class="co">#&gt; 10 CD11a.CD18__Wu_2021_b Antigen|greek_word|greek_letter  CD18 HGNC:6155</span>
-<span class="co">#&gt; 11 CD11a.CD18__Wu_2021_b Antigen|greek_word|greek_letter  CD18 HGNC:6155</span>
-<span class="co">#&gt; 12 CD11a.CD18__Wu_2021_b Antigen|greek_word|greek_letter  CD18 HGNC:6155</span>
-<span class="co">#&gt; 13 CD11a.CD18__Wu_2021_b Antigen|greek_word|greek_letter  CD18 HGNC:6155</span>
-<span class="co">#&gt; 14 CD11a.CD18__Wu_2021_b Antigen|greek_word|greek_letter  CD18 HGNC:6155</span>
-
-<span class="co"># This is an example where the antibody is against a heterodimeric protein.</span>
-<span class="co"># We can confirm this by looking up the vendor catalogue number:</span>
-<span class="va">citeseq</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">ID</span> <span class="op">==</span> <span class="st">"CD11a.CD18-Wu_2021_b"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">Antigen</span>, <span class="va">Cat_Number</span>, <span class="va">Vendor</span><span class="op">)</span>
-<span class="co">#&gt; Adding missing grouping variables: `ID`</span>
-<span class="co">#&gt; <span style="color: #949494;"># A tibble: 0 × 4</span></span>
-<span class="co">#&gt; <span style="color: #949494;"># Groups:   ID [0]</span></span>
-<span class="co">#&gt; <span style="color: #949494;"># … with 4 variables: ID &lt;chr&gt;, Antigen &lt;chr&gt;, Cat_Number &lt;chr&gt;, Vendor &lt;chr&gt;</span></span></code></pre></div>
-<p>However, there are also cases where the results table contains false matches, for example:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">hgnc_results</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">ID</span> <span class="op">==</span> <span class="st">"CD270 (HVEM, TR2)-Hao_2021"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="op">)</span>
-<span class="co">#&gt;  [1] ID          name        value       HGNC_ID     ENSEMBL_ID  alias_name </span>
-<span class="co">#&gt;  [7] prev_name   UNIPROT_IDS symbol_type n_matches   HGNC_SYMBOL n_ids      </span>
-<span class="co">#&gt; &lt;0 rows&gt; (or 0-length row.names)</span></code></pre></div>
-<p>In the above table, we see from the “value” column that the gene “ENSG00000157873” has alias symbols “CD270”, “HVEM” and “TR2”. The next two rows show genes that have alias symbols for only “TR2”. Here we could guess that the gene with the most matches is the correct one.</p>
-<p>NOTE: I haven’t written a convenience function for merging back into the original table yet. TODO:</p>
-<ul>
-<li>Add official HGNC symbols back into to the HGNC data set</li>
-<li>QUERY FOR CD11/CD18 in protein ontology</li>
-<li>Remove redundant results because of Antigen/greek_letter e.g. “KLRG1 (MAFA)-Qian_2020”</li>
-</ul>
-<p>Other examples to discuss?</p>
-<p>*“KIR2DL5” matches two genes HGNC:16345 HGNC:16346</p>
-<p>*“CD279 (PD-1)-Mimitou_2021_cite_and_dogma_seq”</p>
-<p>*“DR3 (TRAMP)-Liu_2021”</p>
+<code class="sourceCode R"><span><span class="va">hgnc_results</span> <span class="op">&lt;-</span> <span class="va">hgnc_results</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">ID</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>n_ids <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/n_distinct.html" class="external-link">n_distinct</a></span><span class="op">(</span><span class="va">HGNC_ID</span><span class="op">)</span><span class="op">)</span> <span class="co"># Count distinct IDs</span></span>
+<span>    </span>
+<span><span class="co"># Select antigens where there are matches to multiple genes but not</span></span>
+<span><span class="co"># because the antibody is against a multi-gene protein </span></span>
+<span><span class="va">multi_gene</span> <span class="op">&lt;-</span> <span class="va">hgnc_results</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">n_ids</span> <span class="op">&gt;</span> <span class="fl">1</span>, <span class="op">!</span> <span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="va">name</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TCR_long"</span>, <span class="st">"subunit"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">ID</span>, <span class="va">name</span>, <span class="va">value</span>, <span class="va">HGNC_ID</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Look at the first group in multi_gene.</span></span>
+<span><span class="co"># Set interactive = FALSE for interactive exploration</span></span>
+<span><span class="fu"><a href="../reference/showGroups.html">showGroups</a></span><span class="op">(</span><span class="va">multi_gene</span>, <span class="fl">1</span>, interactive <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Group 1 of 9: 2 rows</span></span>
+<span><span class="co">#&gt;                      ID                            name value   HGNC_ID</span></span>
+<span><span class="co">#&gt; 1 CD11a.CD18__Wu_2021_b                   upper_no_dash CD11A HGNC:6148</span></span>
+<span><span class="co">#&gt; 2 CD11a.CD18__Wu_2021_b Antigen|greek_word|greek_letter  CD18 HGNC:6155</span></span>
+<span></span>
+<span><span class="co"># This is an example where the antibody is against a heterodimeric protein.</span></span>
+<span><span class="co"># We can confirm this by looking up the vendor catalogue number:</span></span>
+<span><span class="va">citeseq</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">ID</span> <span class="op">==</span> <span class="st">"CD11a.CD18-Wu_2021_b"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">Antigen</span>, <span class="va">Cat_Number</span>, <span class="va">Vendor</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Adding missing grouping variables: `ID`</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 0 × 4</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># Groups:   ID [0]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># … with 4 variables: ID &lt;chr&gt;, Antigen &lt;chr&gt;, Cat_Number &lt;chr&gt;, Vendor &lt;chr&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ Use `colnames()` to see all variable names</span></span></span></code></pre></div>
+<p>NOTE: I haven’t written a convenience function for merging back into the original table yet. TODO: * QUERY FOR CD11/CD18 in protein ontology * Remove redundant results because of Antigen/greek_letter e.g. “KLRG1 (MAFA)-Qian_2020”</p>
+<p>Examples to discuss?</p>
+<p><em>“KIR2DL5” matches two genes HGNC:16345 HGNC:16346 </em>"DR3 (TRAMP)__Liu_2021" - tramp alias is ambiguous</p>
 <p>For now I will remove all genes with multiple matches before merging the results into the citeseq data.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">hgnc_results</span><span class="op">)</span>
-<span class="co">#&gt; [1] 24414</span>
-
-<span class="co"># Remove matches to several genes, select just columns of interest</span>
-<span class="va">hgnc_results</span> <span class="op">&lt;-</span> <span class="va">hgnc_results</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">n_ids</span> <span class="op">==</span> <span class="fl">1</span> <span class="op">|</span> <span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="va">name</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TCR_long"</span>, <span class="st">"subunit"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">ID</span>, <span class="va">HGNC_ID</span>, <span class="va">HGNC_SYMBOL</span>, <span class="va">ENSEMBL_ID</span>, <span class="va">UNIPROT_IDS</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="co"># Collapse results with same ID from different queries</span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">across</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">HGNC_ID</span>, <span class="va">HGNC_SYMBOL</span>,
-                                     <span class="va">ENSEMBL_ID</span>, <span class="va">UNIPROT_IDS</span><span class="op">)</span>,
-                                   <span class="va">toString</span><span class="op">)</span><span class="op">)</span> <span class="co"># Collapse multi-subunit entries</span>
-
-<span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">hgnc_results</span><span class="op">)</span>
-<span class="co">#&gt; [1] 1865</span>
-
-<span class="va">citeseq</span> <span class="op">&lt;-</span> <span class="va">citeseq</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span><span class="va">hgnc_results</span>, by <span class="op">=</span> <span class="st">"ID"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/relocate.html" class="external-link">relocate</a></span><span class="op">(</span><span class="va">ID</span>, <span class="va">Antigen</span>, <span class="va">Cat_Number</span>, <span class="va">HGNC_ID</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="op">)</span>
-
-<span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">citeseq</span><span class="op">)</span>
-<span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 13</span></span>
-<span class="co">#&gt; <span style="color: #949494;"># Groups:   ID [6]</span></span>
-<span class="co">#&gt;   ID         Antigen Cat_Number HGNC_ID Study Clone Oligo_ID TotalSeq_Cat Vendor</span>
-<span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> </span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 2B4__Wu_2… 2B4     329527     HGNC:1… Wu_2… C1.7  0189     A            BioLe…</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 4.1BB__Wu… 4.1BB   309835     HGNC:1… Wu_2… 4B4-1 0355     A            BioLe…</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 4.1BBL__W… 4.1BBL  311509     HGNC:1… Wu_2… 5F4   0022     A            BioLe…</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Annexin V… Annexi… custom ma… <span style="color: #BB0000;">NA</span>      Kotl… <span style="color: #BB0000;">NA</span>    0025     A            BioLe…</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">5</span> anti-c-Me… anti-c… <span style="color: #BB0000;">NA</span>         <span style="color: #BB0000;">NA</span>      Liu_… 12.1  1055     C            BioLe…</span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">6</span> anti-c-Me… anti-c… <span style="color: #BB0000;">NA</span>         <span style="color: #BB0000;">NA</span>      Su_2… 12.1  1055     C            <span style="color: #BB0000;">NA</span>    </span>
-<span class="co">#&gt; <span style="color: #949494;"># … with 4 more variables: Control &lt;lgl&gt;, HGNC_SYMBOL &lt;chr&gt;, ENSEMBL_ID &lt;chr&gt;,</span></span>
-<span class="co">#&gt; <span style="color: #949494;">#   UNIPROT_IDS &lt;chr&gt;</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">hgnc_results</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 3495</span></span>
+<span></span>
+<span><span class="co"># Remove matches to several genes, select just columns of interest</span></span>
+<span><span class="va">hgnc_results</span> <span class="op">&lt;-</span> <span class="va">hgnc_results</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">n_ids</span> <span class="op">==</span> <span class="fl">1</span> <span class="op">|</span> <span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="va">name</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TCR_long"</span>, <span class="st">"subunit"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">matches</a></span><span class="op">(</span><span class="st">"ID|HGNC"</span><span class="op">)</span>, <span class="va">name</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="co"># Select ID and HGNC columns</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="co"># Collapse results with same ID from different queries</span></span>
+<span>    <span class="co"># Collapse multi-subunit entries</span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">across</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">HGNC_ID</span>, <span class="va">HGNC_SYMBOL</span>,</span>
+<span>                                     <span class="va">ENSEMBL_ID</span>, <span class="va">UNIPROT_ID</span><span class="op">)</span>,</span>
+<span>                                   <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/toString.html" class="external-link">toString</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">.x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">hgnc_results</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 1896</span></span>
+<span></span>
+<span><span class="va">citeseq</span> <span class="op">&lt;-</span> <span class="va">citeseq</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span><span class="va">hgnc_results</span>, by <span class="op">=</span> <span class="st">"ID"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/relocate.html" class="external-link">relocate</a></span><span class="op">(</span><span class="va">ID</span>, <span class="va">Antigen</span>, <span class="va">Cat_Number</span>, <span class="va">HGNC_ID</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">citeseq</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 16</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># Groups:   ID [6]</span></span></span>
+<span><span class="co">#&gt;   ID    Antigen Cat_N…¹ HGNC_ID Study Clone Oligo…² Total…³ Vendor Control RRID </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 2B4_… 2B4     329527  HGNC:1… Wu_2… C1.7  0189    A       BioLe… FALSE   <span style="color: #BB0000;">NA</span>   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 4.1B… 4.1BB   309835  HGNC:1… Wu_2… 4B4-1 0355    A       BioLe… FALSE   <span style="color: #BB0000;">NA</span>   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 4.1B… 4.1BBL  311509  HGNC:1… Wu_2… 5F4   0022    A       BioLe… FALSE   <span style="color: #BB0000;">NA</span>   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Anne… Annexi… custom… <span style="color: #BB0000;">NA</span>      Kotl… <span style="color: #BB0000;">NA</span>    0025    A       BioLe… FALSE   <span style="color: #BB0000;">NA</span>   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> anti… anti-c… <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>      Liu_… 12.1  1055    C       BioLe… FALSE   <span style="color: #BB0000;">NA</span>   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> anti… anti-c… <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>      Su_2… 12.1  1055    C       <span style="color: #BB0000;">NA</span>     FALSE   <span style="color: #BB0000;">NA</span>   </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># … with 5 more variables: Lot &lt;chr&gt;, Custom_Antibody &lt;lgl&gt;, HGNC_SYMBOL &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   ENSEMBL_ID &lt;chr&gt;, UNIPROT_ID &lt;chr&gt;, and abbreviated variable names</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   ¹​Cat_Number, ²​Oligo_ID, ³​TotalSeq_Cat</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ Use `colnames()` to see all variable names</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="filling-missing-information">Filling missing information<a class="anchor" aria-label="anchor" href="#filling-missing-information"></a>
 </h2>
 <div class="section level3">
-<h3 id="filling-using-the-totalseq-cocktails">Filling using the TotalSeq cocktails<a class="anchor" aria-label="anchor" href="#filling-using-the-totalseq-cocktails"></a>
+<h3 id="filling-using-the-totalseq-dataset">Filling using the TotalSeq dataset<a class="anchor" aria-label="anchor" href="#filling-using-the-totalseq-dataset"></a>
 </h3>
-<p>We can annotate some of the antibodies that could not be annotated using the HGNC by using the totalseq_cocktails table:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">count_missing</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span><span class="op">)</span><span class="op">{</span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">df</span>, <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">HGNC_ID</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="op">)</span>
-<span class="op">}</span>
-
-<span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">totalseq_cocktails</span><span class="op">)</span>
-<span class="va">ts</span> <span class="op">&lt;-</span> <span class="va">totalseq_cocktails</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/all_of.html" class="external-link">any_of</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">citeseq</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
-
-<span class="va">missing</span> <span class="op">&lt;-</span> <span class="fu">count_missing</span><span class="op">(</span><span class="va">citeseq</span><span class="op">)</span>
-
-<span class="co"># Fill in IDs where Antigen, Oligo, Clone and TotalSeq category match</span>
-<span class="va">citeseq</span> <span class="op">&lt;-</span> <span class="va">citeseq</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/rows.html" class="external-link">rows_patch</a></span><span class="op">(</span><span class="va">ts</span>,
-                      by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Antigen"</span>, <span class="st">"Oligo_ID"</span>, <span class="st">"Clone"</span>, <span class="st">"TotalSeq_Cat"</span><span class="op">)</span>,
-                      unmatched <span class="op">=</span> <span class="st">"ignore"</span><span class="op">)</span>
-
-<span class="va">missing_after_ts</span> <span class="op">&lt;-</span> <span class="fu">count_missing</span><span class="op">(</span><span class="va">citeseq</span><span class="op">)</span>
-
-<span class="co"># Missing before filling:</span>
-<span class="va">missing</span>
-<span class="co">#&gt; [1] 265</span>
-
-<span class="co"># Still missing after filling with TotalSeq:</span>
-<span class="va">missing_after_ts</span>
-<span class="co">#&gt; [1] 162</span></code></pre></div>
+<p>We can try to annotate antibodies that could not be annotated using the HGNC by using the totalseq table. This could also be done as a first matching step. Here, we cannot add any more annotations.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">count_missing</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span><span class="op">)</span><span class="op">{</span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">df</span>, <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">HGNC_ID</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">totalseq</span><span class="op">)</span></span>
+<span><span class="va">ts</span> <span class="op">&lt;-</span> <span class="va">totalseq</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/all_of.html" class="external-link">any_of</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">citeseq</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">missing</span> <span class="op">&lt;-</span> <span class="fu">count_missing</span><span class="op">(</span><span class="va">citeseq</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Fill in IDs where Antigen, Oligo, Clone and TotalSeq category match</span></span>
+<span><span class="va">citeseq</span> <span class="op">&lt;-</span> <span class="va">citeseq</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/rows.html" class="external-link">rows_patch</a></span><span class="op">(</span><span class="va">ts</span>,</span>
+<span>                      by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Antigen"</span>, <span class="st">"Oligo_ID"</span>, <span class="st">"Clone"</span>, <span class="st">"TotalSeq_Cat"</span><span class="op">)</span>,</span>
+<span>                      unmatched <span class="op">=</span> <span class="st">"ignore"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">missing_after_ts</span> <span class="op">&lt;-</span> <span class="fu">count_missing</span><span class="op">(</span><span class="va">citeseq</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Missing before filling:</span></span>
+<span><span class="va">missing</span></span>
+<span><span class="co">#&gt; [1] 234</span></span>
+<span></span>
+<span><span class="co"># Still missing after filling with TotalSeq:</span></span>
+<span><span class="va">missing_after_ts</span></span>
+<span><span class="co">#&gt; [1] 165</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="inspecting-groups-before-filling">Inspecting groups before filling<a class="anchor" aria-label="anchor" href="#inspecting-groups-before-filling"></a>
@@ -468,200 +460,207 @@
 </h3>
 <p>The function <code>fillByGroup</code> is used to fill in NAs in a grouped data.frame. It differs from <code><a href="https://tidyr.tidyverse.org/reference/fill.html" class="external-link">tidyr::fill</a></code> in its treatment of inconsistent values. Whereas <code><a href="https://tidyr.tidyverse.org/reference/fill.html" class="external-link">tidyr::fill</a></code> will fill using the first value, <code>fillByGroup</code> offers the option to fill in the most frequent value. This can be useful when filling antibody IDs given the antibody name and clone or catalogue number.</p>
 <p>To fill using a reference data set, the strategy used is either to add a temporary ID column, join the two data.frames, fill and separate again using the ID column, or use dplyr::rows_patch. We will demonstrate the latter approach below.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Before filling, check how many antibodies were matched.</span>
-<span class="va">original_nmatched</span> <span class="op">&lt;-</span> <span class="fu">count_missing</span><span class="op">(</span><span class="va">citeseq</span><span class="op">)</span>
-
-<span class="co"># Select some data to demonstrate filling:</span>
-<span class="co"># Get entries sharing the same catalogue number,</span>
-<span class="co"># where not every entry has a match</span>
-<span class="va">fill_demo</span> <span class="op">&lt;-</span> <span class="va">citeseq</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">Cat_Number</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">Cat_Number</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">Cat_Number</span><span class="op">)</span>, 
-                  <span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">HGNC_ID</span><span class="op">)</span><span class="op">)</span>,
-                  <span class="op">!</span> <span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">HGNC_ID</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
-
-<span class="fu">AbNames</span><span class="fu">::</span><span class="fu"><a href="../reference/showGroups.html">showGroups</a></span><span class="op">(</span><span class="va">fill_demo</span>, interactive <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-<span class="co">#&gt; Group 1 of 14: 9 rows</span>
-<span class="co">#&gt;                        ID    Antigen Cat_Number   HGNC_ID            Study</span>
-<span class="co">#&gt; 1   CD3__Arunachalam_2020        CD3     300475 HGNC:1673 Arunachalam_2020</span>
-<span class="co">#&gt; 2         CD3__Cadot_2020        CD3     300475 HGNC:1673       Cadot_2020</span>
-<span class="co">#&gt; 3        CD3__Hao_2021__1        CD3     300475 HGNC:1673         Hao_2021</span>
-<span class="co">#&gt; 4          CD3__Pont_2020        CD3     300475 HGNC:1673        Pont_2020</span>
-<span class="co">#&gt; 5     CD3__Witkowski_2020        CD3     300475 HGNC:1673   Witkowski_2020</span>
-<span class="co">#&gt; 6          CD3__Wu_2021_b        CD3     300475 HGNC:1673        Wu_2021_b</span>
-<span class="co">#&gt; 7          CD3__Qian_2020        CD3     300475 HGNC:1673        Qian_2020</span>
-<span class="co">#&gt; 8        CD3__Stuart_2019        CD3     300475      &lt;NA&gt;      Stuart_2019</span>
-<span class="co">#&gt; 9 CD3 (CD3E)__Nathan_2021 CD3 (CD3E)     300475 HGNC:1674      Nathan_2021</span>
-<span class="co">#&gt;   Clone Oligo_ID TotalSeq_Cat    Vendor Control HGNC_SYMBOL      ENSEMBL_ID</span>
-<span class="co">#&gt; 1 UCHT1     0034            A BioLegend   FALSE        CD3D ENSG00000167286</span>
-<span class="co">#&gt; 2 UCHT1     0034            A BioLegend   FALSE        CD3D ENSG00000167286</span>
-<span class="co">#&gt; 3 UCHT1     0034            A BioLegend   FALSE        CD3D ENSG00000167286</span>
-<span class="co">#&gt; 4 UCHT1     0034            A BioLegend   FALSE        CD3D ENSG00000167286</span>
-<span class="co">#&gt; 5 UCHT1     0034            A BioLegend   FALSE        CD3D ENSG00000167286</span>
-<span class="co">#&gt; 6 UCHT1     0034            A BioLegend   FALSE        CD3D ENSG00000167286</span>
-<span class="co">#&gt; 7 UCHT1     0034            A BioLegend   FALSE        CD3D ENSG00000167286</span>
-<span class="co">#&gt; 8 UCHT1     0034         &lt;NA&gt;      &lt;NA&gt;   FALSE        &lt;NA&gt;            &lt;NA&gt;</span>
-<span class="co">#&gt; 9 UCHT1     0034         &lt;NA&gt;      &lt;NA&gt;   FALSE        CD3E ENSG00000198851</span>
-<span class="co">#&gt;   UNIPROT_IDS</span>
-<span class="co">#&gt; 1        &lt;NA&gt;</span>
-<span class="co">#&gt; 2        &lt;NA&gt;</span>
-<span class="co">#&gt; 3        &lt;NA&gt;</span>
-<span class="co">#&gt; 4        &lt;NA&gt;</span>
-<span class="co">#&gt; 5        &lt;NA&gt;</span>
-<span class="co">#&gt; 6        &lt;NA&gt;</span>
-<span class="co">#&gt; 7        &lt;NA&gt;</span>
-<span class="co">#&gt; 8        &lt;NA&gt;</span>
-<span class="co">#&gt; 9      P07766</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Before filling, check how many antibodies were matched.</span></span>
+<span><span class="va">original_nmatched</span> <span class="op">&lt;-</span> <span class="fu">count_missing</span><span class="op">(</span><span class="va">citeseq</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Select some data to demonstrate filling:</span></span>
+<span><span class="co"># Get entries sharing the same catalogue number,</span></span>
+<span><span class="co"># where not every entry has a match</span></span>
+<span><span class="va">fill_demo</span> <span class="op">&lt;-</span> <span class="va">citeseq</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">Cat_Number</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">Cat_Number</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">Cat_Number</span><span class="op">)</span>, </span>
+<span>                  <span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">HGNC_ID</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                  <span class="op">!</span> <span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">HGNC_ID</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">AbNames</span><span class="fu">::</span><span class="fu"><a href="../reference/showGroups.html">showGroups</a></span><span class="op">(</span><span class="va">fill_demo</span>, interactive <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Group 1 of 14: 9 rows</span></span>
+<span><span class="co">#&gt;                        ID    Antigen Cat_Number   HGNC_ID            Study</span></span>
+<span><span class="co">#&gt; 1   CD3__Arunachalam_2020        CD3     300475      &lt;NA&gt; Arunachalam_2020</span></span>
+<span><span class="co">#&gt; 2         CD3__Cadot_2020        CD3     300475      &lt;NA&gt;       Cadot_2020</span></span>
+<span><span class="co">#&gt; 3        CD3__Hao_2021__1        CD3     300475      &lt;NA&gt;         Hao_2021</span></span>
+<span><span class="co">#&gt; 4          CD3__Pont_2020        CD3     300475      &lt;NA&gt;        Pont_2020</span></span>
+<span><span class="co">#&gt; 5     CD3__Witkowski_2020        CD3     300475      &lt;NA&gt;   Witkowski_2020</span></span>
+<span><span class="co">#&gt; 6          CD3__Wu_2021_b        CD3     300475      &lt;NA&gt;        Wu_2021_b</span></span>
+<span><span class="co">#&gt; 7          CD3__Qian_2020        CD3     300475      &lt;NA&gt;        Qian_2020</span></span>
+<span><span class="co">#&gt; 8        CD3__Stuart_2019        CD3     300475      &lt;NA&gt;      Stuart_2019</span></span>
+<span><span class="co">#&gt; 9 CD3 (CD3E)__Nathan_2021 CD3 (CD3E)     300475 HGNC:1674      Nathan_2021</span></span>
+<span><span class="co">#&gt;   Clone Oligo_ID TotalSeq_Cat    Vendor Control RRID     Lot Custom_Antibody</span></span>
+<span><span class="co">#&gt; 1 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
+<span><span class="co">#&gt; 2 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
+<span><span class="co">#&gt; 3 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
+<span><span class="co">#&gt; 4 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
+<span><span class="co">#&gt; 5 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt; B268760              NA</span></span>
+<span><span class="co">#&gt; 6 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
+<span><span class="co">#&gt; 7 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
+<span><span class="co">#&gt; 8 UCHT1     0034         &lt;NA&gt;      &lt;NA&gt;   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
+<span><span class="co">#&gt; 9 UCHT1     0034         &lt;NA&gt;      &lt;NA&gt;   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
+<span><span class="co">#&gt;   HGNC_SYMBOL      ENSEMBL_ID UNIPROT_ID</span></span>
+<span><span class="co">#&gt; 1        &lt;NA&gt;            &lt;NA&gt;       &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 2        &lt;NA&gt;            &lt;NA&gt;       &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 3        &lt;NA&gt;            &lt;NA&gt;       &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 4        &lt;NA&gt;            &lt;NA&gt;       &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 5        &lt;NA&gt;            &lt;NA&gt;       &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 6        &lt;NA&gt;            &lt;NA&gt;       &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 7        &lt;NA&gt;            &lt;NA&gt;       &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 8        &lt;NA&gt;            &lt;NA&gt;       &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 9        CD3E ENSG00000198851     P07766</span></span></code></pre></div>
 <p>In the above example, we can see that for antibodies with catalogue number “300475”, a match was found if the antibody was named “CD3E” but not if it was named “CD3”. We can fill in the missing information using <code>fillByGroup</code>:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">fill_demo</span> <span class="op">&lt;-</span> <span class="fu">AbNames</span><span class="fu">::</span><span class="fu"><a href="../reference/fillByGroup.html">fillByGroup</a></span><span class="op">(</span><span class="va">fill_demo</span>, <span class="st">"Cat_Number"</span>,
-                                  fill <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"HGNC_ID"</span>, <span class="st">"TotalSeq_Cat"</span>, <span class="st">"Vendor"</span>,
-                                           <span class="st">"ENSEMBL_ID"</span>, <span class="st">"UNIPROT_IDS"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">Cat_Number</span><span class="op">)</span> <span class="co"># Re-group as fillByGroup ungroups</span>
-
-<span class="co"># Print out the first group again</span>
-<span class="fu">AbNames</span><span class="fu">::</span><span class="fu"><a href="../reference/showGroups.html">showGroups</a></span><span class="op">(</span><span class="va">fill_demo</span>, interactive <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-<span class="co">#&gt; Group 1 of 14: 9 rows</span>
-<span class="co">#&gt;                        ID    Antigen Cat_Number   HGNC_ID            Study</span>
-<span class="co">#&gt; 1   CD3__Arunachalam_2020        CD3     300475 HGNC:1673 Arunachalam_2020</span>
-<span class="co">#&gt; 2         CD3__Cadot_2020        CD3     300475 HGNC:1673       Cadot_2020</span>
-<span class="co">#&gt; 3        CD3__Hao_2021__1        CD3     300475 HGNC:1673         Hao_2021</span>
-<span class="co">#&gt; 4          CD3__Pont_2020        CD3     300475 HGNC:1673        Pont_2020</span>
-<span class="co">#&gt; 5     CD3__Witkowski_2020        CD3     300475 HGNC:1673   Witkowski_2020</span>
-<span class="co">#&gt; 6          CD3__Wu_2021_b        CD3     300475 HGNC:1673        Wu_2021_b</span>
-<span class="co">#&gt; 7          CD3__Qian_2020        CD3     300475 HGNC:1673        Qian_2020</span>
-<span class="co">#&gt; 8        CD3__Stuart_2019        CD3     300475 HGNC:1674      Stuart_2019</span>
-<span class="co">#&gt; 9 CD3 (CD3E)__Nathan_2021 CD3 (CD3E)     300475 HGNC:1674      Nathan_2021</span>
-<span class="co">#&gt;   Clone Oligo_ID TotalSeq_Cat    Vendor Control HGNC_SYMBOL      ENSEMBL_ID</span>
-<span class="co">#&gt; 1 UCHT1     0034            A BioLegend   FALSE        CD3D ENSG00000167286</span>
-<span class="co">#&gt; 2 UCHT1     0034            A BioLegend   FALSE        CD3D ENSG00000167286</span>
-<span class="co">#&gt; 3 UCHT1     0034            A BioLegend   FALSE        CD3D ENSG00000167286</span>
-<span class="co">#&gt; 4 UCHT1     0034            A BioLegend   FALSE        CD3D ENSG00000167286</span>
-<span class="co">#&gt; 5 UCHT1     0034            A BioLegend   FALSE        CD3D ENSG00000167286</span>
-<span class="co">#&gt; 6 UCHT1     0034            A BioLegend   FALSE        CD3D ENSG00000167286</span>
-<span class="co">#&gt; 7 UCHT1     0034            A BioLegend   FALSE        CD3D ENSG00000167286</span>
-<span class="co">#&gt; 8 UCHT1     0034            A BioLegend   FALSE        &lt;NA&gt; ENSG00000198851</span>
-<span class="co">#&gt; 9 UCHT1     0034            A BioLegend   FALSE        CD3E ENSG00000198851</span>
-<span class="co">#&gt;   UNIPROT_IDS</span>
-<span class="co">#&gt; 1      P07766</span>
-<span class="co">#&gt; 2      P07766</span>
-<span class="co">#&gt; 3      P07766</span>
-<span class="co">#&gt; 4      P07766</span>
-<span class="co">#&gt; 5      P07766</span>
-<span class="co">#&gt; 6      P07766</span>
-<span class="co">#&gt; 7      P07766</span>
-<span class="co">#&gt; 8      P07766</span>
-<span class="co">#&gt; 9      P07766</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fill_demo</span> <span class="op">&lt;-</span> <span class="fu">AbNames</span><span class="fu">::</span><span class="fu"><a href="../reference/fillByGroup.html">fillByGroup</a></span><span class="op">(</span><span class="va">fill_demo</span>, <span class="st">"Cat_Number"</span>,</span>
+<span>                                  fill <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"HGNC_ID"</span>, <span class="st">"TotalSeq_Cat"</span>, <span class="st">"Vendor"</span>,</span>
+<span>                                           <span class="st">"ENSEMBL_ID"</span>, <span class="st">"UNIPROT_ID"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">Cat_Number</span><span class="op">)</span> <span class="co"># Re-group as fillByGroup ungroups</span></span>
+<span></span>
+<span><span class="co"># Print out the first group again</span></span>
+<span><span class="fu">AbNames</span><span class="fu">::</span><span class="fu"><a href="../reference/showGroups.html">showGroups</a></span><span class="op">(</span><span class="va">fill_demo</span>, interactive <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Group 1 of 14: 9 rows</span></span>
+<span><span class="co">#&gt;                        ID    Antigen Cat_Number   HGNC_ID            Study</span></span>
+<span><span class="co">#&gt; 1   CD3__Arunachalam_2020        CD3     300475 HGNC:1674 Arunachalam_2020</span></span>
+<span><span class="co">#&gt; 2         CD3__Cadot_2020        CD3     300475 HGNC:1674       Cadot_2020</span></span>
+<span><span class="co">#&gt; 3        CD3__Hao_2021__1        CD3     300475 HGNC:1674         Hao_2021</span></span>
+<span><span class="co">#&gt; 4          CD3__Pont_2020        CD3     300475 HGNC:1674        Pont_2020</span></span>
+<span><span class="co">#&gt; 5     CD3__Witkowski_2020        CD3     300475 HGNC:1674   Witkowski_2020</span></span>
+<span><span class="co">#&gt; 6          CD3__Wu_2021_b        CD3     300475 HGNC:1674        Wu_2021_b</span></span>
+<span><span class="co">#&gt; 7          CD3__Qian_2020        CD3     300475 HGNC:1674        Qian_2020</span></span>
+<span><span class="co">#&gt; 8        CD3__Stuart_2019        CD3     300475 HGNC:1674      Stuart_2019</span></span>
+<span><span class="co">#&gt; 9 CD3 (CD3E)__Nathan_2021 CD3 (CD3E)     300475 HGNC:1674      Nathan_2021</span></span>
+<span><span class="co">#&gt;   Clone Oligo_ID TotalSeq_Cat    Vendor Control RRID     Lot Custom_Antibody</span></span>
+<span><span class="co">#&gt; 1 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
+<span><span class="co">#&gt; 2 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
+<span><span class="co">#&gt; 3 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
+<span><span class="co">#&gt; 4 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
+<span><span class="co">#&gt; 5 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt; B268760              NA</span></span>
+<span><span class="co">#&gt; 6 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
+<span><span class="co">#&gt; 7 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
+<span><span class="co">#&gt; 8 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
+<span><span class="co">#&gt; 9 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
+<span><span class="co">#&gt;   HGNC_SYMBOL      ENSEMBL_ID UNIPROT_ID</span></span>
+<span><span class="co">#&gt; 1        &lt;NA&gt; ENSG00000198851     P07766</span></span>
+<span><span class="co">#&gt; 2        &lt;NA&gt; ENSG00000198851     P07766</span></span>
+<span><span class="co">#&gt; 3        &lt;NA&gt; ENSG00000198851     P07766</span></span>
+<span><span class="co">#&gt; 4        &lt;NA&gt; ENSG00000198851     P07766</span></span>
+<span><span class="co">#&gt; 5        &lt;NA&gt; ENSG00000198851     P07766</span></span>
+<span><span class="co">#&gt; 6        &lt;NA&gt; ENSG00000198851     P07766</span></span>
+<span><span class="co">#&gt; 7        &lt;NA&gt; ENSG00000198851     P07766</span></span>
+<span><span class="co">#&gt; 8        &lt;NA&gt; ENSG00000198851     P07766</span></span>
+<span><span class="co">#&gt; 9        CD3E ENSG00000198851     P07766</span></span></code></pre></div>
 <p>Now we will fill the gene information in the citeseq data similarly, and check how many antibodies have not been matched.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># We fill by grouping the Catalogue number:</span>
-<span class="va">citeseq</span> <span class="op">&lt;-</span> <span class="va">citeseq</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-     <span class="fu">AbNames</span><span class="fu">::</span><span class="fu"><a href="../reference/fillByGroup.html">fillByGroup</a></span><span class="op">(</span><span class="st">"Cat_Number"</span>, multiple <span class="op">=</span> <span class="st">"mode"</span>,
-                          fill <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"HGNC_ID"</span>, <span class="st">"TotalSeq_Cat"</span>, <span class="st">"Vendor"</span>,
-                                           <span class="st">"ENSEMBL_ID"</span>, <span class="st">"UNIPROT_IDS"</span><span class="op">)</span><span class="op">)</span>
-
-<span class="va">nmatched_after_fill</span> <span class="op">&lt;-</span> <span class="fu">count_missing</span><span class="op">(</span><span class="va">citeseq</span><span class="op">)</span>
-
-<span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Before filling:"</span><span class="op">)</span>
-<span class="co">#&gt; [1] "Before filling:"</span>
-<span class="va">original_nmatched</span>
-<span class="co">#&gt; [1] 162</span>
-<span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"After filling:"</span><span class="op">)</span>
-<span class="co">#&gt; [1] "After filling:"</span>
-<span class="va">nmatched_after_fill</span>
-<span class="co">#&gt; [1] 140</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># We fill by grouping the Catalogue number:</span></span>
+<span><span class="va">citeseq</span> <span class="op">&lt;-</span> <span class="va">citeseq</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>     <span class="fu">AbNames</span><span class="fu">::</span><span class="fu"><a href="../reference/fillByGroup.html">fillByGroup</a></span><span class="op">(</span><span class="st">"Cat_Number"</span>, multiple <span class="op">=</span> <span class="st">"mode"</span>,</span>
+<span>                          fill <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"HGNC_ID"</span>, <span class="st">"TotalSeq_Cat"</span>, <span class="st">"Vendor"</span>,</span>
+<span>                                   <span class="st">"ENSEMBL_ID"</span>, <span class="st">"UNIPROT_ID"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">nmatched_after_fill</span> <span class="op">&lt;-</span> <span class="fu">count_missing</span><span class="op">(</span><span class="va">citeseq</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Before filling:"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Before filling:"</span></span>
+<span><span class="va">original_nmatched</span></span>
+<span><span class="co">#&gt; [1] 165</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"After filling:"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "After filling:"</span></span>
+<span><span class="va">nmatched_after_fill</span></span>
+<span><span class="co">#&gt; [1] 137</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
 <h2 id="querying-the-protein-ontology">Querying the protein ontology<a class="anchor" aria-label="anchor" href="#querying-the-protein-ontology"></a>
 </h2>
 <p>Let’s see which antibodies were not matched in the HGNC.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">citeseq</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">HGNC_ID</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">Antigen</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="op">)</span>
-<span class="co">#&gt;  [1] "Annexin V"                 "anti-c-Met"               </span>
-<span class="co">#&gt;  [3] "Anti-PE"                   "anti-Tau Phospho (Thr181)"</span>
-<span class="co">#&gt;  [5] "B220 (CD45R)"              "CD11a.CD18"               </span>
-<span class="co">#&gt;  [7] "CD11a/CD18 (LFA-1)"        "CD158f (KIR2DL5)"         </span>
-<span class="co">#&gt;  [9] "CD16"                      "CD235"                    </span>
-<span class="co">#&gt; [11] "CD25"                      "CD279 (PD-1)"             </span>
-<span class="co">#&gt; [13] "CD279_PD1"                 "CD3"                      </span>
-<span class="co">#&gt; [15] "CD3.2"                     "CD32"                     </span>
-<span class="co">#&gt; [17] "CD45R/B220"                "CD45RA"                   </span>
-<span class="co">#&gt; [19] "CD45RB"                    "CD45RO"                   </span>
-<span class="co">#&gt; [21] "CD66"                      "CD77"                     </span>
-<span class="co">#&gt; [23] "CD98"                      "CLA"                      </span>
-<span class="co">#&gt; [25] "DR3 (TRAMP)"               "Folate Receptor β (FR-β)" </span>
-<span class="co">#&gt; [27] "GP130"                     "HLA-A2"                   </span>
-<span class="co">#&gt; [29] "HLA-DR"                    "HLADR"                    </span>
-<span class="co">#&gt; [31] "Ig light chain lambda"     "Ig light chain λ"         </span>
-<span class="co">#&gt; [33] "IgG"                       "IgG (Fc)"                 </span>
-<span class="co">#&gt; [35] "IgG Fc"                    "IgG.Fc"                   </span>
-<span class="co">#&gt; [37] "integrin β7"               "KLRG1 (MAFA)"             </span>
-<span class="co">#&gt; [39] "MHCII (HLA-DR)"            "PD-1"                     </span>
-<span class="co">#&gt; [41] "PD-1 (CD279)"              "PD1 (CD279)"              </span>
-<span class="co">#&gt; [43] "Phospho (Thr181)"          "Podocalyxin"              </span>
-<span class="co">#&gt; [45] "TCR Va7.2"                 "TCR Vbeta13.1"            </span>
-<span class="co">#&gt; [47] "TCR Vα7.2"                 "TCR Vβ13.1"               </span>
-<span class="co">#&gt; [49] "TCRa7.2"                   "TCRVa7.2"                 </span>
-<span class="co">#&gt; [51] "β2-microglobulin"</span>
-
-<span class="va">missing</span> <span class="op">&lt;-</span> <span class="va">citeseq</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">HGNC_ID</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">ID</span>, <span class="va">Antigen</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">citeseq</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">HGNC_ID</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">Antigen</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  [1] "Annexin V"                 "anti-c-Met"               </span></span>
+<span><span class="co">#&gt;  [3] "Anti-PE"                   "anti-Tau Phospho (Thr181)"</span></span>
+<span><span class="co">#&gt;  [5] "B220 (CD45R)"              "CD11a.CD18"               </span></span>
+<span><span class="co">#&gt;  [7] "CD11a/CD18 (LFA-1)"        "CD158"                    </span></span>
+<span><span class="co">#&gt;  [9] "CD158 (KIR2DL1/S1/S3/S5)"  "CD16"                     </span></span>
+<span><span class="co">#&gt; [11] "CD235"                     "CD25"                     </span></span>
+<span><span class="co">#&gt; [13] "CD3"                       "CD3.2"                    </span></span>
+<span><span class="co">#&gt; [15] "CD32"                      "CD45RA"                   </span></span>
+<span><span class="co">#&gt; [17] "CD45RO"                    "CD66"                     </span></span>
+<span><span class="co">#&gt; [19] "CD77"                      "CD98"                     </span></span>
+<span><span class="co">#&gt; [21] "CLA"                       "Folate Receptor β (FR-β)" </span></span>
+<span><span class="co">#&gt; [23] "GP130"                     "HLA-A2"                   </span></span>
+<span><span class="co">#&gt; [25] "HLA-DR"                    "HLADR"                    </span></span>
+<span><span class="co">#&gt; [27] "Ig light chain lambda"     "Ig light chain λ"         </span></span>
+<span><span class="co">#&gt; [29] "IgG"                       "IgG (Fc)"                 </span></span>
+<span><span class="co">#&gt; [31] "IgG Fc"                    "IgG.Fc"                   </span></span>
+<span><span class="co">#&gt; [33] "integrin β7"               "KLRG1 (MAFA)"             </span></span>
+<span><span class="co">#&gt; [35] "MHCII (HLA-DR)"            "Phospho (Thr181)"         </span></span>
+<span><span class="co">#&gt; [37] "Podocalyxin"               "TCR Vbeta13.1"            </span></span>
+<span><span class="co">#&gt; [39] "TCR Vα7.2"                 "TCR Vβ13.1"</span></span>
+<span></span>
+<span><span class="va">missing</span> <span class="op">&lt;-</span> <span class="va">citeseq</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">HGNC_ID</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">ID</span>, <span class="va">Antigen</span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="to-do">TO DO<a class="anchor" aria-label="anchor" href="#to-do"></a>
 </h3>
-<p><em>An example of (interactively) deciding what to do if groups are inconsistent. </em>Standardise names in a singlecellexperiment <em>Check new annotations against previous </em>Isotype controls <em>Add checks on filling if the values are not unique </em>Add control column to isotype controls to prevent false match to mouse IgG2a <em>Add ignore option to split merge? </em> CD25 (good example, multiple genes), CD270, CD279 matched in HGNC? # CD279 PD-1 - example where only some are matched # Fix Hao Clone CD25 # Search for similar genes in master table # Generate camel case regexp? # Split HGNC alias_name, prev_name - keep only if contains “antigen” or “CD”? # Unintuitive to use quoted for splitUnnest # Uniprot ids - possible to split to create complex uniprot and modification # uniprot? # Redocument data sets # HAO CD45 should have catalogue numbers! # union join back gene ID / get info by antigen</p>
+<p><em>An example of (interactively) deciding what to do if groups are inconsistent. </em>Standardise names in a singlecellexperiment <em>Check new annotations against previous </em>Isotype controls <em>Add checks on filling if the values are not unique </em>Add control column to isotype controls to prevent false match to mouse IgG2a <em>Add ignore option to split merge? </em> CD25 (good example, multiple genes), CD270, CD279 matched in HGNC? # CD279 PD-1 - example where only some are matched # Fix Hao Clone CD25 # Search for similar genes in master table # Generate camel case regexp? # Split HGNC alias_name, prev_name - keep only if contains “antigen” or “CD”? # Unintuitive to use quoted for splitUnnest # Uniprot ids - possible to split to create complex uniprot and modification # uniprot? # Redocument data sets # HAO CD45 should have catalogue numbers! # union join back gene ID / get info by antigen # Include clones when standardising names? # Put RRID into CITEseq</p>
 </div>
+</div>
+<div class="section level2">
+<h2 id="how-can-we-match-antibodies">How can we match antibodies:<a class="anchor" aria-label="anchor" href="#how-can-we-match-antibodies"></a>
+</h2>
+</div>
+<div class="section level2">
+<h2 id="by-an-exact-match-in-a-query-table">By an exact match in a query table<a class="anchor" aria-label="anchor" href="#by-an-exact-match-in-a-query-table"></a>
+</h2>
+</div>
+<div class="section level2">
+<h2 id="by-an-approximate-match-to-the-citeseq-data">By an approximate match to the citeseq data<a class="anchor" aria-label="anchor" href="#by-an-approximate-match-to-the-citeseq-data"></a>
+</h2>
 </div>
 <div class="section level2">
 <h2 id="session-info">Session Info<a class="anchor" aria-label="anchor" href="#session-info"></a>
 </h2>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span>
-<span class="co">#&gt; R version 4.2.0 (2022-04-22)</span>
-<span class="co">#&gt; Platform: x86_64-pc-linux-gnu (64-bit)</span>
-<span class="co">#&gt; Running under: Ubuntu 20.04.4 LTS</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; Matrix products: default</span>
-<span class="co">#&gt; BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.9.0</span>
-<span class="co">#&gt; LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.9.0</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; locale:</span>
-<span class="co">#&gt;  [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       </span>
-<span class="co">#&gt;  [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8   </span>
-<span class="co">#&gt;  [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          </span>
-<span class="co">#&gt; [10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   </span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; attached base packages:</span>
-<span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; other attached packages:</span>
-<span class="co">#&gt; [1] dplyr_1.0.9      AbNames_0.1.0    BiocStyle_2.24.0</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; loaded via a namespace (and not attached):</span>
-<span class="co">#&gt;  [1] bslib_0.3.1         compiler_4.2.0      pillar_1.7.0       </span>
-<span class="co">#&gt;  [4] BiocManager_1.30.18 jquerylib_0.1.4     tools_4.2.0        </span>
-<span class="co">#&gt;  [7] digest_0.6.29       tibble_3.1.7        jsonlite_1.8.0     </span>
-<span class="co">#&gt; [10] evaluate_0.15       memoise_2.0.1       lifecycle_1.0.1    </span>
-<span class="co">#&gt; [13] pkgconfig_2.0.3     rlang_1.0.2         DBI_1.1.3          </span>
-<span class="co">#&gt; [16] cli_3.3.0           yaml_2.3.5          pkgdown_2.0.4      </span>
-<span class="co">#&gt; [19] xfun_0.31           fastmap_1.1.0       stringr_1.4.0      </span>
-<span class="co">#&gt; [22] knitr_1.39          desc_1.4.1          generics_0.1.2     </span>
-<span class="co">#&gt; [25] fs_1.5.2            sass_0.4.1          vctrs_0.4.1        </span>
-<span class="co">#&gt; [28] systemfonts_1.0.4   tidyselect_1.1.2    rprojroot_2.0.3    </span>
-<span class="co">#&gt; [31] glue_1.6.2          R6_2.5.1            textshaping_0.3.6  </span>
-<span class="co">#&gt; [34] fansi_1.0.3         rmarkdown_2.14      bookdown_0.27      </span>
-<span class="co">#&gt; [37] tidyr_1.2.0         purrr_0.3.4         magrittr_2.0.3     </span>
-<span class="co">#&gt; [40] htmltools_0.5.2     ellipsis_0.3.2      assertthat_0.2.1   </span>
-<span class="co">#&gt; [43] ragg_1.2.2          utf8_1.2.2          stringi_1.7.6      </span>
-<span class="co">#&gt; [46] cachem_1.0.6        crayon_1.5.1</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; R version 4.2.1 (2022-06-23)</span></span>
+<span><span class="co">#&gt; Platform: x86_64-pc-linux-gnu (64-bit)</span></span>
+<span><span class="co">#&gt; Running under: Ubuntu 20.04.4 LTS</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Matrix products: default</span></span>
+<span><span class="co">#&gt; BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.9.0</span></span>
+<span><span class="co">#&gt; LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.9.0</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; locale:</span></span>
+<span><span class="co">#&gt;  [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       </span></span>
+<span><span class="co">#&gt;  [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8   </span></span>
+<span><span class="co">#&gt;  [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          </span></span>
+<span><span class="co">#&gt; [10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; attached base packages:</span></span>
+<span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; other attached packages:</span></span>
+<span><span class="co">#&gt; [1] dplyr_1.0.9      AbNames_0.1.0    BiocStyle_2.24.0</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
+<span><span class="co">#&gt;  [1] bslib_0.4.0         compiler_4.2.1      pillar_1.8.0       </span></span>
+<span><span class="co">#&gt;  [4] BiocManager_1.30.18 jquerylib_0.1.4     tools_4.2.1        </span></span>
+<span><span class="co">#&gt;  [7] digest_0.6.29       jsonlite_1.8.0      evaluate_0.15      </span></span>
+<span><span class="co">#&gt; [10] memoise_2.0.1       lifecycle_1.0.1     tibble_3.1.7       </span></span>
+<span><span class="co">#&gt; [13] pkgconfig_2.0.3     rlang_1.0.4         DBI_1.1.3          </span></span>
+<span><span class="co">#&gt; [16] cli_3.3.0           yaml_2.3.5          pkgdown_2.0.6      </span></span>
+<span><span class="co">#&gt; [19] xfun_0.31           fastmap_1.1.0       stringr_1.4.0      </span></span>
+<span><span class="co">#&gt; [22] knitr_1.39          desc_1.4.1          generics_0.1.3     </span></span>
+<span><span class="co">#&gt; [25] fs_1.5.2            sass_0.4.2          vctrs_0.4.1        </span></span>
+<span><span class="co">#&gt; [28] systemfonts_1.0.4   tidyselect_1.1.2    rprojroot_2.0.3    </span></span>
+<span><span class="co">#&gt; [31] glue_1.6.2          R6_2.5.1            textshaping_0.3.6  </span></span>
+<span><span class="co">#&gt; [34] fansi_1.0.3         rmarkdown_2.14      bookdown_0.27      </span></span>
+<span><span class="co">#&gt; [37] tidyr_1.2.0         purrr_0.3.4         magrittr_2.0.3     </span></span>
+<span><span class="co">#&gt; [40] htmltools_0.5.3     ellipsis_0.3.2      assertthat_0.2.1   </span></span>
+<span><span class="co">#&gt; [43] ragg_1.2.2          utf8_1.2.2          stringi_1.7.8      </span></span>
+<span><span class="co">#&gt; [46] cachem_1.0.6        crayon_1.5.1</span></span></code></pre></div>
+<p>AbNames has two parts - a collection of gene names and aliases, and information about CITE-seq antibodies. You could use the first part for mapping CYTOF antibodies to gene identifiers.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
@@ -676,7 +675,7 @@
 
 <div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
     </footer>

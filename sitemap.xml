@@ -13,6 +13,9 @@
     <loc>https://helenlindsay.github.io/AbNames/articles/index.html</loc>
   </url>
   <url>
+    <loc>https://helenlindsay.github.io/AbNames/articles/renameSingleCellExp.html</loc>
+  </url>
+  <url>
     <loc>https://helenlindsay.github.io/AbNames/authors.html</loc>
   </url>
   <url>
@@ -52,10 +55,13 @@
     <loc>https://helenlindsay.github.io/AbNames/reference/dot-sharedSubstr.html</loc>
   </url>
   <url>
+    <loc>https://helenlindsay.github.io/AbNames/reference/dot-stopIfColExists.html</loc>
+  </url>
+  <url>
     <loc>https://helenlindsay.github.io/AbNames/reference/dot-tempColName.html</loc>
   </url>
   <url>
-    <loc>https://helenlindsay.github.io/AbNames/reference/dot-warnIfColExists.html</loc>
+    <loc>https://helenlindsay.github.io/AbNames/reference/dot-toString.html</loc>
   </url>
   <url>
     <loc>https://helenlindsay.github.io/AbNames/reference/fillByGroup.html</loc>
@@ -77,9 +83,6 @@
   </url>
   <url>
     <loc>https://helenlindsay.github.io/AbNames/reference/hgnc.html</loc>
-  </url>
-  <url>
-    <loc>https://helenlindsay.github.io/AbNames/reference/hgnc_long.html</loc>
   </url>
   <url>
     <loc>https://helenlindsay.github.io/AbNames/reference/index.html</loc>
@@ -115,7 +118,10 @@
     <loc>https://helenlindsay.github.io/AbNames/reference/splitUnnest.html</loc>
   </url>
   <url>
-    <loc>https://helenlindsay.github.io/AbNames/reference/totalseq_cocktails.html</loc>
+    <loc>https://helenlindsay.github.io/AbNames/reference/totalseq.html</loc>
+  </url>
+  <url>
+    <loc>https://helenlindsay.github.io/AbNames/reference/union_join.html</loc>
   </url>
   <url>
     <loc>https://helenlindsay.github.io/AbNames/reference/upperSquish.html</loc>
