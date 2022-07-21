@@ -44,10 +44,17 @@ very similar names, searching for partial matches to names in free-text gene des
 AbNames contains several curated gene name data sets for matching to antibody
 names.
 
-## HGNC gene names
+## Gene aliases
 
-The `hgnc` data set is a consistently formatted version of the protein-coding
-and gene groups tables from the Human Gene Names Consortium. This includes previous (obsolete) gene names and aliases, which in our experience have been useful for matching to antibody names.  The `hgnc` data set is in long format (one alias per row).
+The `gene_aliases` data set is primarily based on the protein-coding
+and gene groups tables from the Human Gene Names Consortium (HGNC). These
+include previous (obsolete) gene names and aliases, which in our experience
+have been useful for matching to antibody names.  Non-ambiguous gene aliases
+from Ensembl (fetched via Bioconductor package biomaRt) and NCBI 
+(fetched via the NCBI ftp site and the Bioconductor package org.Hs.eg.db) have
+been added.  Mappings between HGNC, Ensembl and NCBI (Entrez) IDs are mostly
+based on HGNC, with some corrections of obsolete Ensembl IDs using the Ensembl
+data.  The `gene_aliases` data set is in long format (one alias per row).
 
 Load using:
 
@@ -55,10 +62,11 @@ Load using:
 library(AbNames)
 library(dplyr)
 
-data("hgnc", package = "AbNames") 
+data("gene_aliases", package = "AbNames") 
 
-# Show the first entries of hgnc, where each row is the start of one column
-dplyr::glimpse(hgnc) 
+# Show the first entries of gene_aliases,
+# where each row is the start of one column
+dplyr::glimpse(gene_aliases) 
 
 # (Note: it isn't necessary to use dplyr:: to call "glimpse" as dplyr is loaded
 # with the library call above. This syntax is used to make it clear which
@@ -70,7 +78,9 @@ dplyr::glimpse(hgnc)
 BioLegend is a major supplier of antibodies, and provides several antibody
 panels for CITE-seq analyses.  The data set "totalseq" is a
 re-formatted version of the TotalSeq barcodes data sheets available from the
-BioLegend website, including BioLegend antibody names and Ensembl gene IDs.  The isotypes of the antibodies are not included in the TotalSeq data sheets.
+BioLegend website, including BioLegend antibody names and Ensembl gene IDs. 
+The isotypes of the antibodies are not included in the TotalSeq data sheets,
+and only human antibodies and isotype controls are included.
 
 Load using:
 ```{r}

@@ -231,23 +231,22 @@ fixes <- tibble::tribble(
     "MICA/MICB", "6D4", "ENSG00000204516, ENSG00000204520",
 
     # Totalseq website: CD158 HP-MA4 rx with KIR2DL1, KIR2DS1, KIR2DS3, KIR2DS5
-    # TO DO: KIR2DS3 AND KIR2DS5 missing from hgnc table!!
-    "CD158", "HP-MA4", "ENSG00000125498, ENSG00000276387",
+    # KIR2DS3 AND KIR2DS5 are on haplotype chromosomes
+    "CD158", "HP-MA4",
+        "ENSG00000125498, ENSG00000276387, ENSG00000277163, ENSG00000274739",
 
-    # Totalseq website: CD16 3G8 interacts with FcGRIIa and FGγRIIIb receptors
-    "CD16", "3G8", "ENSG00000203747"
+    # Totalseq website: CD16 3G8 interacts with FcGRIIIa and FGγRIIIb receptors
+    "CD16", "3G8", "ENSG00000203747, ENSG00000162747",
 
     # Totalseq website: CD66a/c/e binds epitope shared by CD66a, c and e
-    "CD66a/c/e", "ASL-32", "ENSG00000079385"
+    "CD66a/c/e", "ASL-32", "ENSG00000079385, ENSG00000086548, ENSG00000105388",
 
     # Totalseq website: M1310G05 has higher affinity for
     # IgG1 and IgG3 than IgG2 and IgG4
-    "IgG FC", "M1310G05", "ENSG00000211896, "
+    "IgG FC", "M1310G05", "ENSG00000211896, ENSG00000211897",
 
-    "TCR Vα24-Jα18", "6B11", "ENSG00000211805",
+    "TCR Vα24-Jα18", "6B11", "ENSG00000211805, ENSG00000211871")
 
-
-    )
 
 totalseq <- totalseq %>%
     dplyr::rows_update(fixes, by = "Clone", unmatched = "ignore")

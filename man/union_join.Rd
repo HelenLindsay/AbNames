@@ -20,6 +20,6 @@ Select values from a data.frame df matching any
 column from another data.frame or a selection of row indices.  If a second
 data frame and a selection of rows is provided, values from df matching
 any value in df2[rows, ] are returned.  If only rows indices are provided,
-rows matching any value in df[rows, ] are returned.
+rows matching any value in df[rows, ] are returned.  NAs are not matched.
 }
 \keyword{internal}
