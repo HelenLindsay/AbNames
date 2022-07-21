@@ -1,7 +1,8 @@
 # Notes -----
 
 # Ensembl can map same gene to multiple HGNC symbols, e.g. ENSG00000276085
-# to CCL3L1 / CCL3L3
+# to CCL3L1 / CCL3L3.  HGNC maps to different ENSEMBL IDs,
+
 
 # Genes in NCBI not org_db are where ENTREZ_ID is mapped to a novel gene or
 # scaffold.
