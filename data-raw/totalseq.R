@@ -204,6 +204,14 @@ fixes <- tibble::tribble(
     "EGFR", "AY13", "ENSG00000146648",
     "GARP (LRRC32)", "7B11", "ENSG00000137507",
     "VEGFR-3 (FLT-4)", "9D9F9", "ENSG00000037280",
+    "CD11a/CD18 (LFA-1)", "m24", "ENSG00000005844, ENSG00000160255",
+    "CD207", "4C7", "ENSG00000116031",
+    "TCR Vδ2", "B6", "ENSG00000211821",
+
+    # www.beckman.ch, TCR Vα7.2 = TCRAV7S2, gene cards TCRAV7S2 = TRAV1-2
+    # Gapin (2014) TRAV1-2 = TCR Vα7.2
+    # From Biolegend: Vα7.2 joined with Jα33 is characteristic of MAIT cells
+    "TCR Vα7.2", "3C10", "ENSG00000256553",
 
     # From totalseq website - clone SK1 recognises the alpha chain
     "CD8a", "SK1", "ENSG00000153563",
@@ -234,6 +242,10 @@ fixes <- tibble::tribble(
     # KIR2DS3 AND KIR2DS5 are on haplotype chromosomes
     "CD158", "HP-MA4",
         "ENSG00000125498, ENSG00000276387, ENSG00000277163, ENSG00000274739",
+
+    # Totalseq website: CD158b DX27 reacts with common epitope of
+    # KIR2DL2, KIR2DL3 and KIR2DS2
+    "CD158b", "DX27", "ENSG00000274412, ENSG00000243772, ENSG00000278300",
 
     # Totalseq website: CD16 3G8 interacts with FcGRIIIa and FGγRIIIb receptors
     "CD16", "3G8", "ENSG00000203747, ENSG00000162747",
@@ -270,115 +282,40 @@ totalseq <- totalseq %>%
 # Add HGNC_SYMBOL from hgnc data set ----
 data(hgnc)
 hgnc <- hgnc %>%
-    dplyr::select(HGNC_ID, HGNC_SYMBOL, ENSEMBL_ID, value) %>%
+    dplyr::select(HGNC_ID, HGNC_SYMBOL, ENSEMBL_ID) %>%
     dplyr::filter(! is.na(ENSEMBL_ID)) %>%
     unique()
 
-
-
-
-# Antigens that have ENSEMBL ID in hgnc but do not share an alias
-aj <- semi_join(totalseq, hgnc, by = c("ENSEMBL_ID")) %>%
-    anti_join(hgnc, by = c("Antigen" = "value")) %>%
-    left_join(hgnc, by = "ENSEMBL_ID") %>%
-    dplyr::select(Antigen, HGNC_SYMBOL, value, Clone, ENSEMBL_ID) %>%
-    group_by(Antigen)
-
-
-
-
-# To do:
-# CD45RA, CD45RB, CD45R0, CD66a/c/e, HLA-A,B,C, HLA-A2, HLA-DR (?HLA-DRA),
-# HLA-DR, DP, DQ , MICA / MICB, TRAV24, TCR vgamma9 != KLRK1?
-# TRA-1-60-R != POXDL? TRA-1-81 != PODXL
-# (from abcam) TRA-1-60 - a carbohydrate epitope associated with podocalyxin
-# (from stemcell) TRA1-81 is a carbohydrate epitope associated with podocalyxin
-
-
-
-
-
-# Check different antigen mapped to same gene
-sg <- totalseq %>%
-    group_by(ENSEMBL_ID) %>%
-    dplyr::filter(n_distinct(Antigen) > 1)
-
-
-
-hgnc_to_ts <- hgnc$HGNC_SYMBOL[match(totalseq$ENSEMBL_ID, hgnc$ENSEMBL_ID)]
-df <- tibble(hgnc = hgnc_to_ts, ts = totalseq$HGNC_SYMBOL)
-
-# Values do not match when
-# - totalseq is missing
-# - totalseq gives extra information (TNFRSF8 (CD30), MME (CD10))
-# - CD34 / CD334 - this is clearly a mistake in totalseq as Antigen = CD34
-
-df %>% dplyr::filter(! hgnc == ts | is.na(ts))
-
-# Replace symbols with HGNC values, add HGNC ids
-totalseq <- totalseq %>%
-    dplyr::select(-HGNC_SYMBOL) %>%
-    dplyr::left_join(hgnc, by = "ENSEMBL_ID")
-
-any(is.na(totalseq$HGNC_SYMBOL))
-
-# Check the cases where multiple antigens are mapped to the same gene ----
-
-x <- totalseq %>%
-    dplyr::group_by(ENSEMBL_ID) %>%
-    dplyr::mutate(n_antigen = n_distinct(Antigen)) %>%
-    dplyr::filter(n_antigen > 1) %>%
-    dplyr::select(ENSEMBL_ID, Antigen) %>%
-    dplyr::arrange(ENSEMBL_ID) %>%
-    unique()
-
-
-# CD45 / CD45RA / CD45RO
-# HLA-DR / HLA-DR, DP, DQ
-
-
-# CD3 is CD3E on website but CD3D in totalseq, remove
-
-totalseq <- totalseq %>%
-    dplyr::filter(! Antigen == "CD3")
-
-
-
-
-
-
-
-
-
-
-# Remove ENSEMBL ID if there is more than one per Antigen-Clone combination ----
-
-# ts_barcodes....
-totalseq <- totalseq %>%
-    AbNames:::nPerGroup(group = c("Antigen", "Clone"), "ENSEMBL_ID")
-
-if (max(totalseq$nENSEMBL_ID) > 1){
-    warning("More than one value of Ensembl_ID per Antigen/Clone combo")
-}
-
-totalseq <- totalseq %>% dplyr::select(-nENSEMBL_ID)
-
-
-
-
-
+totalseq <- left_join(totalseq, hgnc, by = c("ENSEMBL_ID"))
 
 # Create totalseq data set ----
-totalseq <- as.data.frame(ts_barcodes)
+totalseq <- as.data.frame(totalseq)
 usethis::use_data(totalseq, overwrite = TRUE, compress = "bzip2")
 
 
-# Genes to check annotation: -----
-# CD158 (KIR2DL1/S1/S3/S5)
-# CD158b (KIR2DL2/L3, NKAT2)
-# CD158e1 (KIR3DL1, NKB1)
-# CD169
-# CD3
+# Code for manually checking for inconsistencies ----
+
+# # Antigens that have ENSEMBL ID in hgnc but do not share an alias
+# aj <- semi_join(totalseq, hgnc, by = c("ENSEMBL_ID")) %>%
+#     anti_join(hgnc, by = c("Antigen" = "value")) %>%
+#     left_join(hgnc, by = "ENSEMBL_ID") %>%
+#     dplyr::select(Antigen, HGNC_SYMBOL, value, Clone, ENSEMBL_ID) %>%
+#     group_by(Antigen)
+#
+# # Check different antigen mapped to same gene
+# sg <- totalseq %>%
+#     group_by(ENSEMBL_ID) %>%
+#     dplyr::filter(n_distinct(Antigen) > 1)
+#
+#
+# # Select genes with null reactivity or Ensembl ID
+# nrx <- totalseq %>%
+#     dplyr::filter(is.na(Reactivity) | is.na(ENSEMBL_ID)) %>%
+#     dplyr::select(-Barcode_Sequence, -Date_Released,
+#                   -Oligo_ID, -TotalSeq_Cat) %>%
+#     dplyr::arrange(Antigen, Clone) %>%
+#     dplyr::group_by(Antigen, Clone)
+
 
 # Exploration with inexact join (not necessary for this data set) -----
 
@@ -405,5 +342,23 @@ usethis::use_data(totalseq, overwrite = TRUE, compress = "bzip2")
 #p <- data.frame( p[,c("x", "y")])
 
 
+# Notes ----
 
+# Haven't overwritten but not sure
+# TCR Va24 = TRAV10 Gapin "Check MAIT", https://www.beckman.ch
+# (IGRa02 is only described sequence)
+# https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:12103
+# https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:12121
+
+# from beckman TCR Vβ13.1 is also called TCRBV13S1
+# TCRBV13S1 is HGNC alias for TRBV6-5 HGNC:12230 and TRBV13 HGNC:12188
+
+# To do:
+# CD45RA, CD45RB, CD45R0, ,TRAV24
+#  HLA-A,B,C, HLA-A2
+# HLA-DR L234 - does not cross react with DP and DQ - binds HLA-DRa
+# HLA-DR, DP, DQ Tu39
+# TRA-1-60-R != POXDL? TRA-1-81 != PODXL
+# (from abcam) TRA-1-60 - a carbohydrate epitope associated with podocalyxin
+# (from stemcell) TRA1-81 is a carbohydrate epitope associated with podocalyxin
 
