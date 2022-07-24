@@ -1,8 +1,8 @@
-# searchHGNC ----
+# searchAliases ----
 
-#'@title Search for matches to antibody names in HGNC protein coding genes
+#'@title Search for matches to antibody names in gene aliases data set
 #'
-#'@description Search HGNC gene symbols, aliases and names for an exact match
+#'@description Search gene symbols, aliases and names for an exact match
 #'to an value, assumed to be an antigen name or part of an antigen name.
 #'query_df must have columns named "ID", "name" and "value".
 #'
@@ -18,7 +18,7 @@
 #'@importFrom utils data
 #'@importFrom dplyr left_join
 #'@export
-searchHGNC <- function(query_df, multisubunit = c("TCR_long", "subunit")){
+searchAliases <- function(query_df, multisubunit = c("TCR_long", "subunit")){
 
     if (! all(c("ID", "name", "value") %in% colnames(query_df))){
         stop("Query data frame must contain columns named ID and value")
@@ -26,7 +26,7 @@ searchHGNC <- function(query_df, multisubunit = c("TCR_long", "subunit")){
 
     official_nms <- c("HGNC_SYMBOL", "HGNC_NAME")
 
-    utils::data("hgnc", envir = environment())
+    utils::data("gene_aliases", envir = environment())
 
     res <- dplyr::left_join(query_df, hgnc) %>%
         dplyr::filter(! is.na(HGNC_ID)) %>%
@@ -65,6 +65,3 @@ searchHGNC <- function(query_df, multisubunit = c("TCR_long", "subunit")){
     return(res)
 }
 
-
-# Tau Phospho and Thr181 have same cat number
-#  b2-microglobin without dash

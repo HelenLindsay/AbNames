@@ -257,6 +257,14 @@ group_by_any <- function(df, groups, new_col = "group"){
 }
 
 
+# Join by matches in any set of columns
+# Allow cols in groups, e.g. "Cat_Number", c("Antigen", "Clone"), ...
+left_join_any <- function(x, y, cols){
+
+}
+
+
+
 # rm_ambiguous ----
 # For adding new data into gene alias table.  Note doesn't check temp col name
 # gp - name of column to group by

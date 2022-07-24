@@ -256,7 +256,7 @@ set.seed(549867)
 ```
 
 ```{r}
-hgnc_results <- searchHGNC(query_df)
+hgnc_results <- searchAliases(query_df)
 
 # Print 10 random results:
 hgnc_results %>%
@@ -334,18 +334,21 @@ head(citeseq)
 
 ## Filling using the TotalSeq dataset
 
-Another approach to annotating antibodies is to use the totalseq data.  We are
-not confident about the assignment of antibodies to Ensembl identifiers. 
-However, this may not be a problem if the aim is simply to standardise names
+Another approach to annotating antibodies is to use the totalseq data.  We are not confident about the assignment of antibodies to Ensembl identifiers. However, this may not be a problem if the aim is simply to standardise names
 between datasets or to a common reference.
 
-```{}
+```{r}
+cs <- citeseq %>%
+    # Add ids by matching catalogue numbers
+    dplyr::left_join(totalseq, by = "Cat_Number") %>%
+    # Add ids by matching 
+    
+
 ```
 
 
 We can also try to annotate antibodies that could not be annotated using the
-HGNC by using the totalseq table.  This could also be done as a first matching
-step.  Here, we cannot add any more annotations. 
+HGNC by using the totalseq table.  This could also be done as a first matching step as above.  Here, we cannot add any more annotations. 
 
 ```{r}
 count_missing <- function(df){
@@ -486,6 +489,8 @@ missing <- citeseq %>%
 # citeseq <- citeseq %>% group_by_any(c("Antigen", "Cat_Number") 
 # showGroups(citeseq, 2, interactive = FALSE)
 # ungroup(citeseq)
+# Tau Phospho and Thr181 have same cat number
+#  b2-microglobin without dash
 
 # How can we match antibodies:
 # By an exact match in a query table
