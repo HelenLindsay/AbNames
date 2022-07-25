@@ -334,16 +334,15 @@ head(citeseq)
 
 ## Filling using the TotalSeq dataset
 
-Another approach to annotating antibodies is to use the totalseq data.  We are not confident about the assignment of antibodies to Ensembl identifiers. However, this may not be a problem if the aim is simply to standardise names
-between datasets or to a common reference.
+Another approach to annotating antibodies is to use the totalseq data.  We are not confident about the assignment of antibodies to Ensembl identifiers. However, this may not be a problem if the aim is simply to standardise names between datasets or to a common reference.
+
+The function `searchTotalseq` by default matches sequentially to columns catalogue number (Cat_Number), Antigen, then Clone.  Matching columns may be configured,
+but column names in the query data set should match those in the totalseq data
+set.
 
 ```{r}
 cs <- citeseq %>%
-    # Add ids by matching catalogue numbers
-    dplyr::left_join(totalseq, by = "Cat_Number") %>%
-    # Add ids by matching 
-    
-
+    searchTotalseq()
 ```
 
 
@@ -491,6 +490,7 @@ missing <- citeseq %>%
 # ungroup(citeseq)
 # Tau Phospho and Thr181 have same cat number
 #  b2-microglobin without dash
+# Add tag for non-human tagging antibodies
 
 # How can we match antibodies:
 # By an exact match in a query table

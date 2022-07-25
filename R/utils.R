@@ -257,9 +257,39 @@ group_by_any <- function(df, groups, new_col = "group"){
 }
 
 
+# left_join_any ----
 # Join by matches in any set of columns
+# Perform successive inner joins, at each round only using unmatched
 # Allow cols in groups, e.g. "Cat_Number", c("Antigen", "Clone"), ...
+# Cols must be a list.  Assume that rows can be uniquely identified
 left_join_any <- function(x, y, cols){
+
+    # For each join, we only want to include the join column of interest in y
+    cn_y <- colnames(y)
+    cn_x <- colnames(x)
+    join_cns <- unique(unlist(cols))
+    add_cn <- setdiff(cn_y, join_cns)
+
+    res <- head(x, 0)
+
+    # Successive inner joins, adding new results at each stage
+    for (col_set in cols){
+        x_aj <- dplyr::anti_join(x, res, by = cn_x)
+        y_subs <- y %>%
+            dplyr::select(all_of(c(add_cn, col_set))) %>%
+            unique()
+
+        new_res <- x_aj %>%
+            dplyr::inner_join(y_subs, by = col_set, na_matches = "never")
+
+        res <- bind_rows(res, new_res)
+    }
+
+    # Add the unmatched rows back in
+    x_aj <- dplyr::anti_join(x, res, by = cn_x)
+    res <- bind_rows(x_aj, res)
+
+    return(res)
 
 }
 

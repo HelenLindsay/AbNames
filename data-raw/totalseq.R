@@ -257,7 +257,15 @@ fixes <- tibble::tribble(
     # IgG1 and IgG3 than IgG2 and IgG4
     "IgG FC", "M1310G05", "ENSG00000211896, ENSG00000211897",
 
-    "TCR Vα24-Jα18", "6B11", "ENSG00000211805, ENSG00000211871")
+    "TCR Vα24-Jα18", "6B11", "ENSG00000211805, ENSG00000211871",
+
+    # Totalseq website: Clone W6/32 reacts with beta2-microglobulin
+    # (relabelling to beta2-microglobulin to avoid ambiguity with HLA gene ID)
+    "HLA-A,B,C", "W6/32", "ENSG00000166710",
+
+    # Assign CD3 to CD3E to match website
+    "CD3", "UCHT1", "ENSG00000198851",
+    "CD3", "SK7", "ENSG00000198851")
 
 
 totalseq <- totalseq %>%
@@ -269,7 +277,7 @@ totalseq <- totalseq %>%
     # Check for multiple ENSEMBL_IDs with the same Antigen
     AbNames:::nPerGroup(group = c("Antigen"), "ENSEMBL_ID") %>%
     # If there is more than one value of ENSEMBL_ID per Antigen set to zero
-    # (18/7/22) - this is just CD3 mapped to CD3E and CD3D
+    # (18/7/22) - this is just CD3 mapped to CD3E and CD3D, fixed above
     dplyr::mutate(ENSEMBL_ID = ifelse(nENSEMBL_ID <= 1, ENSEMBL_ID, NA)) %>%
     dplyr::select(-nENSEMBL_ID)
 
