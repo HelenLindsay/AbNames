@@ -121,3 +121,15 @@ setMethod("renameADT", as(structure(.Data = c("MultiAssayExperiment",
     }
     return(SummarizedExperiment::assays(obj)[[assay]])
 }
+
+
+# getCommonName ----
+
+# default matching columns are Antigen, Cat_Number, Clone, HGNC_SYMBOL)
+getCommonName <- function(x, cols = NULL){
+    if (is.null(cols)) {
+        cols <- c("Antigen", "Cat_Number", "Clone", "HGNC_SYMBOL", "ENSEMBL_ID")
+    }
+
+    x <- group_by_any(x, cols)
+}

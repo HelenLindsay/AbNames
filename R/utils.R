@@ -225,6 +225,7 @@ union_join <- function(df, df2 = NULL, rows = NULL, by = NULL){
 #
 # df - data.frame
 # groups - character vector of grouping columns
+# CHECK NA BEHAVIOUR
 group_by_any <- function(df, groups, new_col = "group"){
     if (length(groups) < 2){
         stop("This function only makes sense for at least 2 groups")

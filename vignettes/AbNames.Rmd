@@ -256,10 +256,10 @@ set.seed(549867)
 ```
 
 ```{r}
-hgnc_results <- searchAliases(query_df)
+alias_results <- searchAliases(query_df)
 
 # Print 10 random results:
-hgnc_results %>%
+alias_results %>%
     dplyr::select(ID, name, value, symbol_type) %>%
     dplyr::ungroup() %>%
     dplyr::sample_n(10)
@@ -271,13 +271,13 @@ We may wish to review the matches before merging the results into the original t
 For example, we can check for matches to different genes where the name was not guessed to be a multi-subunit protein.
 
 ```{r}
-hgnc_results <- hgnc_results %>%
+alias_results <- alias_results %>%
     dplyr::group_by(ID) %>%
     dplyr::mutate(n_ids = dplyr::n_distinct(HGNC_ID)) # Count distinct IDs
     
 # Select antigens where there are matches to multiple genes but not
 # because the antibody is against a multi-gene protein 
-multi_gene <- hgnc_results %>%
+multi_gene <- alias_results %>%
     dplyr::filter(n_ids > 1, ! all(name %in% c("TCR_long", "subunit"))) %>%
     dplyr::select(ID, name, value, HGNC_ID)
 
@@ -307,10 +307,10 @@ Examples to discuss?
 For now I will remove all genes with multiple matches before merging the results into the citeseq data.
 
 ```{r}
-nrow(hgnc_results)
+nrow(alias_results)
 
 # Remove matches to several genes, select just columns of interest
-hgnc_results <- hgnc_results %>%
+alias_results <- alias_results %>%
     dplyr::filter(n_ids == 1 | all(name %in% c("TCR_long", "subunit"))) %>%
     dplyr::select(matches("ID|HGNC"), name) %>% # Select ID and HGNC columns
     unique() %>% # Collapse results with same ID from different queries
@@ -320,10 +320,10 @@ hgnc_results <- hgnc_results %>%
                                    ~ toString(unique(.x))))
 
 
-nrow(hgnc_results)
+nrow(alias_results)
 
 citeseq <- citeseq %>%
-    dplyr::left_join(hgnc_results, by = "ID") %>%
+    dplyr::left_join(alias_results, by = "ID") %>%
     dplyr::relocate(ID, Antigen, Cat_Number, HGNC_ID) %>%
     unique()
 
