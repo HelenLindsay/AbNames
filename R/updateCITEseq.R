@@ -194,7 +194,10 @@ fillCITEseq <- function(citeseq){
 
 
 
-
+#citeseq %>%
+# group_by(RRID) %>%
+# dplyr::filter(n_distinct(HGNC_ID) > 1 |
+# n_distinct(Clone) > 1 | n_distinct(Cat_Number) > 1)
 
 
 # Bind to CITE-seq

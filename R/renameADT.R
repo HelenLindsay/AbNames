@@ -123,13 +123,102 @@ setMethod("renameADT", as(structure(.Data = c("MultiAssayExperiment",
 }
 
 
+# Probably want to standardise name via aliases table.....
+# At the moment relies on column names matching
+# Rename programmatically?
+# Match to the curated citeseq data.set
+# nm could be either data.frame or single vector of names
+# Eventually, matching just by names may be enough
+# To do: check types of matching columns?
+# To do: add a column indicating group size?
+matchToCiteseq <- function(x, cols = NULL){
+
+    # Do do: make citeseq a data set!
+    citeseq_fname <- system.file("extdata", "citeseq.csv", package = "AbNames")
+    citeseq <- read.csv(citeseq_fname) %>% unique()
+
+    if (! is.null(cols)){
+        keep_cols <- intersect(cols, colnames(citeseq))
+        if (! identical(keep_cols, cols)){
+            warning("cols should match columns in cite seq data set")
+        }
+        if (! "data.frame" %in% class(x)){
+            stop("If 'cols' argument is provided, x must be a data.frame")
+        }
+        if (! "Antigen" %in% colnames(x)){
+            stop("If 'cols' argument is provided, ",
+                 "x must contain a column 'Antigen'")
+        }
+        cols <- unique(c(keep_cols, "Antigen"))
+    }
+
+    if (! "data.frame" %in% class(x)){
+        x <- data.frame(Antigen = x)
+    }
+    if (is.null(cols)) cols <- "Antigen"
+
+    x <- dplyr::bind_rows(x %>% dplyr::mutate(ID = "KEEPME"), citeseq)
+
+    x <- getCommonName(x, cols = cols, ab = "Antigen",
+                       new_col = "Antigen_std", keep = TRUE)
+
+    x <- x %>% dplyr::filter(ID == "KEEPME") %>%
+        dplyr::select(all_of(c("Antigen", "Antigen_std")))
+
+    # TRIANA HAS DUPLICATES?
+
+}
+
+
 # getCommonName ----
 
 # default matching columns are Antigen, Cat_Number, Clone, HGNC_SYMBOL)
-getCommonName <- function(x, cols = NULL){
+# cols = columns for grouping
+# ab = column for standardising
+# new_col = column to add
+# ... pass keep = TRUE for keeping grouping columns for debugging
+getCommonName <- function(x, cols = NULL, ab = "Antigen",
+                          new_col = "Antigen_std", ...){
+
+    dots <- list(...)
+
+    keep_cols <- c(colnames(x), new_col)
+
+    if (new_col %in% colnames(x)){
+        stop(sprintf("Column %s already exists in data.frame", new_col))
+    }
+
     if (is.null(cols)) {
         cols <- c("Antigen", "Cat_Number", "Clone", "HGNC_SYMBOL", "ENSEMBL_ID")
     }
 
-    x <- group_by_any(x, cols)
+    # Remove sections in brackets, replace Greek symbols
+    x <- dplyr::mutate(x, !! new_col := gsub("^[Aa]nti-| \\(.*", "", !!sym(ab)),
+                       !! new_col := replaceGreekSyms(!!sym(new_col)))
+
+    # Group by any e.g. catalogue number or exact match to antigen
+    tmp_grp <- .tempColName(x, nm = "group")
+    x <- group_by_any(x, cols, new_col = tmp_grp)
+
+    # Fill with most common value
+    x <- fillByGroup(x, group = tmp_grp, method = "all",
+                     multiple = "mode", fill = new_col)
+
+    # Problems: Tau (Phospho Thr181) Su and Stephenson?
+    # HGNC_SYMBOL WRONG FOR CD158b (KIR2DL2/L3, NKAT2)?  (NKAT2 = only one gene)
+    # RRID AB_2810478 matches CD226 and CD98
+    # Triana RRID same for CD235a and CD235a - match via combination of RRID
+    # and Antigen
+    # Triana group 5... - matching because of NA?
+    # CD3.1 should not have HGNC symbol PECAM1
+    # CD45 MATCHING THROUGH GENE SYMBOL
+    # If symbols are provided, check that symbols are valid
+    # Fill citeseq RRID by Cat_Number
+
+    if (isTRUE(dots$keep)){
+        return(x)
+    }
+
+    # Remove temporary columns
+    return(dplyr::select(x, all_of(keep_cols)))
 }

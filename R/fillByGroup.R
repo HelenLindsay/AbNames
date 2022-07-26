@@ -42,7 +42,7 @@ fillByGroup <- function(df, group, fill, method = c("only_na", "all"),
 # .fillByGroup ----
 #
 #'@keywords internal
-#'@importFrom dplyr across all_of if_any
+#'@importFrom dplyr all_of if_any
 .fillByGroup <- function(df, group, fill, multiple, overwrite){
     # Group data frame, check if there are multiple values per group
     cn <- colnames(df)
@@ -101,6 +101,7 @@ fillByGroup <- function(df, group, fill, method = c("only_na", "all"),
 #'@importFrom rlang .data
 groupMode <- function(df, cl, gp, new_cl = NA, min_n = NA, n = NA,
                       keep_first = TRUE, overwrite = FALSE){
+
     n <- .tempColName(df, 1, "n")
     tmp <- .tempColName(df, 1)
 

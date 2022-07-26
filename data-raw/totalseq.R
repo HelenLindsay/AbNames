@@ -325,31 +325,6 @@ usethis::use_data(totalseq, overwrite = TRUE, compress = "bzip2")
 #     dplyr::group_by(Antigen, Clone)
 
 
-# Exploration with inexact join (not necessary for this data set) -----
-
-# Reactivity is more thoroughly described in ts_barcodes
-# totalseq_cocktails often use longer antigen names
-
-# Jaro Winkler distance is an edit distance with matches at the start given
-# higher scores
-
-# https://github.com/djvanderlaan/reclin
-
-#library(reclin)
-#
-#p <- pair_blocking(totalseq_cocktails, ts_barcodes,
-#                   blocking_var = c("Oligo_ID", "TotalSeq_Cat")) %>%
-#    compare_pairs(by = c("Antigen", "Clone", "Oligo_ID", "Barcode_Sequence"),
-#                  default_comparator = jaro_winkler(0.9), overwrite = TRUE) %>%
-#    score_simsum(var = "simsum") %>%
-#    select_greedy("simsum", var = "greedy", threshold = 0)
-#
-## Problem in problink_em - mprobs become 1 leading to div by zero
-#
-## For this data.set, it doesn't make a difference if greedy or n_to_m is used
-#p <- data.frame( p[,c("x", "y")])
-
-
 # Notes ----
 
 # Haven't overwritten but not sure
