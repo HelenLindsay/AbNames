@@ -76,6 +76,9 @@
     <loc>https://helenlindsay.github.io/AbNames/reference/formatTCRv.html</loc>
   </url>
   <url>
+    <loc>https://helenlindsay.github.io/AbNames/reference/gene_aliases.html</loc>
+  </url>
+  <url>
     <loc>https://helenlindsay.github.io/AbNames/reference/groupMode.html</loc>
   </url>
   <url>
@@ -103,7 +106,10 @@
     <loc>https://helenlindsay.github.io/AbNames/reference/replaceGreekSyms.html</loc>
   </url>
   <url>
-    <loc>https://helenlindsay.github.io/AbNames/reference/searchHGNC.html</loc>
+    <loc>https://helenlindsay.github.io/AbNames/reference/searchAliases.html</loc>
+  </url>
+  <url>
+    <loc>https://helenlindsay.github.io/AbNames/reference/searchTotalseq.html</loc>
   </url>
   <url>
     <loc>https://helenlindsay.github.io/AbNames/reference/separateSubunits.html</loc>
