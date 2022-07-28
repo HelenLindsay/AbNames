@@ -199,6 +199,9 @@ fillCITEseq <- function(citeseq){
 # dplyr::filter(n_distinct(HGNC_ID) > 1 |
 # n_distinct(Clone) > 1 | n_distinct(Cat_Number) > 1)
 
+# If symbols are provided, check that symbols are valid
+# Fill citeseq RRID by Cat_Number
+
 
 # Bind to CITE-seq
 

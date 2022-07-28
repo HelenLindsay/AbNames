@@ -212,8 +212,7 @@ getCommonName <- function(x, cols = NULL, ab = "Antigen",
     # Triana group 5... - matching because of NA?
     # CD3.1 should not have HGNC symbol PECAM1
     # CD45 MATCHING THROUGH GENE SYMBOL
-    # If symbols are provided, check that symbols are valid
-    # Fill citeseq RRID by Cat_Number
+
 
     if (isTRUE(dots$keep)){
         return(x)
