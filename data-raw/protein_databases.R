@@ -1,4 +1,4 @@
-data(hgnc)
+data(gene_aliases)
 
 # Cell marker database ---------------------------------------------
 
@@ -11,6 +11,12 @@ data(hgnc)
 # is there an extra , Adhesion molecules, LFA1, Adhesion molecules LFA2?
 
 # http://bio-bigdata.hrbmu.edu.cn/CellMarker/index.jsp
+
+# For patching ENTREZ_SYMBOL using Antigen
+ga_patch <- gene_aliases %>%
+    dplyr::select(value, UNIPROT_ID, ENTREZ_ID) %>%
+    dplyr::rename(Antigen = value) %>%
+    unique()
 
 gsubCellmarker <- function(x){
     p1_matches <- stringr::str_extract_all(x, "\\[([^\\[]+)\\]")
@@ -54,6 +60,7 @@ cellmarker <- readr::read_delim(cellmarker_fname) %>%
                       lengths(cellMarker) == lengths(proteinID) &
                       lengths(geneSymbol) == lengths(geneID) &
                       lengths(proteinID) == lengths(proteinName)) %>%
+    # One row per gene
     tidyr::unnest(cols = c(cellMarker, geneSymbol, geneID,
                            proteinName, proteinID)) %>%
     dplyr::rename(Antigen = cellMarker,
@@ -63,8 +70,17 @@ cellmarker <- readr::read_delim(cellmarker_fname) %>%
     dplyr::mutate(SOURCE = "CELLMARKER") %>%
     dplyr::mutate(across(c(ENTREZ_SYMBOL, ENTREZ_ID,
                            proteinName, UNIPROT_ID), ~na_if(., "NA"))) %>%
+    # Patch missing ENTREZ or UNIPROT ids
+    dplyr::coalesce(ga_patch)
+
+
+
+
     # Filter again, some cellNames include an NA in a list of markers
+    # (some aren't protein-coding, some would have an ENTREZ ID)
     dplyr::filter(if_all(c(ENTREZ_ID, UNIPROT_ID), ~! is.na(.x))) %>%
+
+
     dplyr::mutate(across(everything(), ~stringr::str_squish(.x))) %>%
     # Split the protein complexes
     dplyr::mutate(across(c(ENTREZ_SYMBOL, ENTREZ_ID, proteinName, UNIPROT_ID),
@@ -75,13 +91,13 @@ cellmarker <- readr::read_delim(cellmarker_fname) %>%
                                                       UNIPROT_ID)) %>%
     # Not useful if antigen already exists
     dplyr::filter(! Antigen == ENTREZ_SYMBOL,
-                  ! Antigen %in% hgnc$value)
+                  ! Antigen %in% gene_aliases$value)
 
 # There are 13 markers that don't match HGNC_SYMBOL / ENTREZ_ID combo
 # Removing, but probably safe to keep them
 cellmarker <- cellmarker %>%
-    dplyr::semi_join(hgnc, by = c("ENTREZ_SYMBOL" = "HGNC_SYMBOL",
-                                  "ENTREZ_ID")) %>%
+    dplyr::semi_join(gene_aliases,
+                     by = c("ENTREZ_SYMBOL" = "HGNC_SYMBOL", "ENTREZ_ID")) %>%
     # Patch the uniprot IDs
     dplyr::rename(HGNC_SYMBOL = ENTREZ_SYMBOL) %>%
     dplyr::rows_update(hgnc %>%
@@ -101,10 +117,10 @@ cellmarker <- cellmarker %>%
     # Protein names will be added as an alias if they don't already exist
     dplyr::mutate(proteinName = ifelse(proteinName == HGNC_SYMBOL,
                                        NA, proteinName),
-                  proteinName = ifelse(proteinName %in% hgnc$value,
+                  proteinName = ifelse(proteinName %in% gene_aliases$value,
                                        NA, proteinName)) %>%
 
-    # Pivot longer for merging with hgnc
+    # Pivot longer for merging with aliases
     dplyr::rename(CELLMARKER_ANTIGEN = Antigen,
                   CELLMARKER_PROTEIN = proteinName) %>%
     tidyr::pivot_longer(cols = c("CELLMARKER_ANTIGEN", "CELLMARKER_PROTEIN"),
@@ -132,7 +148,7 @@ cellmarker <- cellmarker %>%
 
 # Demonstration of row shift error in UNIPROT_IDs
 #missing <- anti_join(cellmarker %>% dplyr::mutate(row_n = row_number()),
-#                     hgnc, by = c("ENTREZ_ID", "UNIPROT_ID"))
+#                     gene_aliases, by = c("ENTREZ_ID", "UNIPROT_ID"))
 #x <- missing$row_n - seq_along(missing$row_n)
 #rle(x)$lengths
 
@@ -174,15 +190,16 @@ cspa <- #readxl::read_xlsx(cspa_fname) %>%
                   across(c(ENTREZ_SYMBOL, ENTREZ_ID), ~na_if(.x, "0")),
                   ENTREZ_ID = as.character(ENTREZ_ID)) %>%
     dplyr::filter(! is.na(ENTREZ_SYMBOL)) %>%
-    # Join by exact match to "value" in HGNC
+    # Join by exact match to "value" in gene_aliases table
     # (either official symbol or alias)
-    dplyr::inner_join(hgnc %>%
+    dplyr::inner_join(gene_aliases %>%
                           dplyr::select(HGNC_SYMBOL, HGNC_ID,
                                         ENTREZ_ID, value) %>%
                           unique(),
                       by = c("ENTREZ_SYMBOL" = "value", "ENTREZ_ID")) %>%
     # Know from join that ENTREZ_SYMBOL must match an existing symbol or alias
-    dplyr::mutate(Antigen = ifelse(Antigen %in% hgnc$value, NA, Antigen)) %>%
+    dplyr::mutate(Antigen = ifelse(Antigen %in%
+                                       gene_aliases$value, NA, Antigen)) %>%
     dplyr::filter(! is.na(Antigen)) %>%
     dplyr::select(HGNC_ID, HGNC_SYMBOL, ENTREZ_ID,
                   UNIPROT_ID, Antigen, SOURCE) %>%
@@ -192,18 +209,15 @@ cspa <- #readxl::read_xlsx(cspa_fname) %>%
 # Check for inconsistencies -----
 # Two entries from CSPA have Uniprot ID, NA in HGNC
 
-
-cspa %>% dplyr::anti_join(hgnc,
+cspa %>% dplyr::anti_join(gene_aliases,
                           by = c("HGNC_ID", "ENTREZ_ID", "UNIPROT_ID"))
 
 
 
-
-
 # Add a column to hgnc indicating if gene is in CSPA
-hgnc <- hgnc %>%
+gene_aliases <- gene_aliases %>%
     dplyr::left_join(cspa %>% dplyr::select(HGNC_ID, CSPA))
 
 cspa_novel <- cspa %>%
-    dplyr::anti_join(hgnc, by = c("HGNC_ID", "HGNC_SYMBOL",
-                                  "UNIPROT_ID", "value"))
+    dplyr::anti_join(gene_aliases,
+                     by = c("HGNC_ID", "HGNC_SYMBOL", "UNIPROT_ID", "value"))

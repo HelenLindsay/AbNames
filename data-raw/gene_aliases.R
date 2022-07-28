@@ -1,5 +1,11 @@
 # Notes -----
 
+# PROBLEMS:
+# THERE ARE DUPLICATED VALUES WITH SOURCE NCBI, ORGDB / ORGDB, e.g. KRAS
+# TWO DIFFERENT HGNC SYMBOLS MAPPING TO SAME HGNC_ID (ONE IS A PREVIOUS SYMBOL)
+# HGNC:17134 - HGNC has a UNIPROT ID, why is there no source == HGNC?
+
+
 # Ensembl can map same gene to multiple HGNC symbols, e.g. ENSG00000276085
 # to CCL3L1 / CCL3L3.  HGNC maps to different ENSEMBL IDs,
 
@@ -143,7 +149,8 @@ hgnc <- hgnc %>%
     # Aggregate the protein IDs
     dplyr::group_by(HGNC_ID, HGNC_SYMBOL, ENSEMBL_ID, ENTREZ_ID) %>%
     dplyr::mutate(UNIPROT_ID = paste0(sort(unique(UNIPROT_ID)),
-                                         collapse = "|")) %>%
+                                         collapse = "|"),
+                  UNIPROT_ID = dplyr::na_if(UNIPROT_ID, "")) %>%
     ungroup() %>%
     unique()
 

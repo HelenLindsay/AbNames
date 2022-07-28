@@ -67,6 +67,44 @@ showGroups <- function(df, i = 1, n = 1, max_rows = 50, interactive = TRUE){
 }
 
 
+# print_n ----
+#
+# print a data.frame n rows at a time
+print_n <- function(df, n = 20){
+    gp_info <- "Rows %s - %s (%s rows total)\n"
+    msg <- "Enter\nn to print the next group, or\nq to quit"
+
+    brks <- seq_len(nrow(df))[seq_len(nrow(df)) %% n == 0]
+
+    # If last break equals number of rows, remove
+    if (tail(brks, 1) == nrow(df)){
+        brks <- head(brks, -1)
+    }
+    starts <- c(1, brks + 1)
+    ends <- c(brks, nrow(df))
+
+    # If last start equals number of rows, remove
+    if (tail(starts, 1) == nrow(df)){
+        starts <- head(starts, -1)
+        ends <- head(ends, -1)
+    }
+
+    for (i in seq_along(starts)){
+        print(i)
+        cat(sprintf(gp_info, starts[i], ends[i], nrow(df)))
+        print(df[starts[i]:ends[i],])
+        choice <- readline(msg)
+        if (! choice %in% c("n", "q")) readline(msg)
+        if (choice == "q" ) break()
+        if (i == length(starts)){
+            message("no more groups to show")
+        }
+    }
+
+}
+
+
+
 # getGroups ----
 #' Return the first n groups of a grouped data.frame
 #'
