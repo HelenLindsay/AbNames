@@ -89,7 +89,8 @@ union_join <- function(df, df2 = NULL, rows = NULL, by = NULL){
 # df - data.frame
 # groups - character vector of grouping columns
 # CHECK NA BEHAVIOUR
-group_by_any <- function(df, groups, new_col = "group"){
+# ignore e.g. Cat_Number == "custom_made".  Regex?
+group_by_any <- function(df, groups, new_col = "group", ignore = NULL){
     if (length(groups) < 2){
         stop("This function only makes sense for at least 2 groups")
     }
@@ -98,9 +99,16 @@ group_by_any <- function(df, groups, new_col = "group"){
                       ~dplyr::group_by(df, !!sym(.x)) %>%
                           dplyr::group_indices())
 
-    idx <- do.call(dplyr::bind_cols, idx)
-    colnames(idx) <- groups
-    idx[is.na(df[,groups])] <- NA
+    idx <- do.call(dplyr::bind_cols, structure(idx, names = groups))
+    idx[is.na(df[, groups])] <- NA
+
+    if (! is.null(ignore)){
+        for (nm in names(ignore)){
+            vals <- ignore[[nm]]
+            vals <- do.call(paste, list(vals, collapse = "|"))
+            idx[grepl(vals, df[[nm]]), nm] <- NA
+        }
+    }
 
     new_idxs <- idx[[ groups[1] ]]
     curr_idxs <- idx[[ groups[1] ]]

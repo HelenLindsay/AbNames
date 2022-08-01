@@ -89,7 +89,6 @@ fillByGroup <- function(df, group, fill, method = c("only_na", "all"),
 #'@param min_n (integer(1), default NA) Minimum number of occurrences of
 #'majority value.  If provided, the majority value will be set to NA when it
 #'occurs less than min_n times.
-#'@param n Name of column containing counts.
 #'@param keep_first (logical(1), default TRUE) If there are multiple modes,
 #'should the first (in order of the data.frame) be selected?  If FALSE,
 #'entries are set to NA
@@ -99,7 +98,7 @@ fillByGroup <- function(df, group, fill, method = c("only_na", "all"),
 #'with NA.
 #'@importFrom dplyr n
 #'@importFrom rlang .data
-groupMode <- function(df, cl, gp, new_cl = NA, min_n = NA, n = NA,
+groupMode <- function(df, cl, gp, new_cl = NA, min_n = NA,
                       keep_first = TRUE, overwrite = FALSE){
 
     n <- .tempColName(df, 1, "n")

@@ -177,8 +177,10 @@ matchToCiteseq <- function(x, cols = NULL){
 # ab = column for standardising
 # new_col = column to add
 # ... pass keep = TRUE for keeping grouping columns for debugging
+# Be careful of exceptions, e.g. Cat_Number == "custom made"
 getCommonName <- function(x, cols = NULL, ab = "Antigen",
-                          new_col = "Antigen_std", ...){
+                          new_col = "Antigen_std",
+                          ignore = list(Cat_Number = "[Cc]ustom"), ...){
 
     dots <- list(...)
 
@@ -190,6 +192,7 @@ getCommonName <- function(x, cols = NULL, ab = "Antigen",
 
     if (is.null(cols)) {
         cols <- c("Antigen", "Cat_Number", "Clone", "HGNC_SYMBOL", "ENSEMBL_ID")
+
     }
 
     # Remove sections in brackets, replace Greek symbols
@@ -198,11 +201,12 @@ getCommonName <- function(x, cols = NULL, ab = "Antigen",
 
     # Group by any e.g. catalogue number or exact match to antigen
     tmp_grp <- .tempColName(x, nm = "group")
-    x <- group_by_any(x, cols, new_col = tmp_grp)
+    x <- group_by_any(x, cols, new_col = tmp_grp, ignore = ignore)
 
     # Fill with most common value
     x <- fillByGroup(x, group = tmp_grp, method = "all",
                      multiple = "mode", fill = new_col)
+    #xx <- groupMode(x, "Antigen", "group", new_cl = new_col,overwrite = TRUE)
 
     # Problems: Tau (Phospho Thr181) Su and Stephenson?
     # HGNC_SYMBOL WRONG FOR CD158b (KIR2DL2/L3, NKAT2)?  (NKAT2 = only one gene)

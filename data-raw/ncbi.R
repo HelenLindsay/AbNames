@@ -29,6 +29,7 @@ ncbi_genes <- readr::read_delim(f, na = c("", "NA", "-"))
 # Keywords for filtering "Other" column
 alias_grep <- "^CD|[Aa]ntigen|MHC|HLA|(T[- ]cell)|(B[- ]cell)|surface|immunoglo"
 
+
 # Make long format NCBI table
 
 ncbi_genes <- ncbi_genes %>%
@@ -53,18 +54,27 @@ ncbi_genes <- ncbi_genes %>%
                   ENSEMBL_ID = stringr::str_extract_all(dbXrefs,
                                                     "(?<=Ensembl:)ENSG[0-9]+"),
                   HGNC_ID = map_chr(HGNC_ID, toString),
-                  HGNC_ID = ifelse(HGNC_ID %in% c("NA", ""), NA, HGNC_ID)) %>%
+                  HGNC_ID = ifelse(HGNC_ID %in% c("NA", ""), NA, HGNC_ID),
+                  ENTREZ_ID = as.character(ENTREZ_ID)) %>%
 
     # Assume that antibodies of interest are against proteins with HGNC IDs
     dplyr::filter(! is.na(HGNC_ID)) %>%
 
     tidyr::unnest(ENSEMBL_ID) %>%
 
+    # Only keep genes for which there is a HGNC / ENSEMBL / ENTREZ comb in HGNC
+    # (Note that not all HGNC IDs are in hgnc data set, e.g. non-protein-coding)
+
+    # There are some differences in which ENSEMBL_ID is mapped to which HGNC_ID,
+    # e.g. in HGNC HGNC:4883 -> ENSG00000000971 (official gene)
+    #      in NCBI HGNC:4883 -> ENSG00000289697 (novel gene)
+    dplyr::semi_join(hgnc %>% dplyr::select(HGNC_ID, HGNC_SYMBOL,
+                                            ENSEMBL_ID, ENTREZ_ID)) %>%
+
     dplyr::mutate(# Only keep NCBI_SYMBOL if different from HGNC_SYMBOL
                   NCBI_SYMBOL = AbNames:::.noDups(NCBI_SYMBOL, HGNC_SYMBOL),
                   # Only keep NCBI_NAME if different from HGNC_NAME
-                  NCBI_NAME = AbNames:::.noDups(NCBI_NAME, HGNC_NAME),
-                  ENTREZ_ID = as.character(ENTREZ_ID)) %>%
+                  NCBI_NAME = AbNames:::.noDups(NCBI_NAME, HGNC_NAME)) %>%
 
     # Only keep columns of interest
     dplyr::select(-`#tax_id`, -`map_location`, -`Modification_date`,
@@ -89,15 +99,7 @@ ncbi_genes <- ncbi_genes %>%
     dplyr::group_by(value) %>%
     dplyr::mutate(n_genes = n_distinct(HGNC_SYMBOL)) %>%
     dplyr::filter(n_genes == 1) %>%
-    dplyr::select(-n_genes) %>%
-
-    # Only keep genes for which there is a HGNC / ENSEMBL / ENTREZ comb in HGNC
-    # (Note that not all HGNC IDs are in hgnc data set, e.g. non-protein-coding)
-
-    # There are some differences in which ENSEMBL_ID is mapped to which HGNC_ID,
-    # e.g. in HGNC HGNC:4883 -> ENSG00000000971 (official gene)
-    #      in NCBI HGNC:4883 -> ENSG00000289697 (novel gene)
-    dplyr::semi_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID, ENTREZ_ID))
+    dplyr::select(-n_genes)
 
 
 ncbi_genes <- as.data.frame(ncbi_genes)

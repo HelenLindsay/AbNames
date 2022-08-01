@@ -2,8 +2,10 @@
 
 # PROBLEMS:
 # THERE ARE DUPLICATED VALUES WITH SOURCE NCBI, ORGDB / ORGDB, e.g. KRAS
-# TWO DIFFERENT HGNC SYMBOLS MAPPING TO SAME HGNC_ID (ONE IS A PREVIOUS SYMBOL)
 # HGNC:17134 - HGNC has a UNIPROT ID, why is there no source == HGNC?
+# ARMC9 / ENSG00000135931 for isotype control
+# Antigen with e.g. CD3.1 - not safe to remove dot if both sides are number
+
 
 
 # Ensembl can map same gene to multiple HGNC symbols, e.g. ENSG00000276085
@@ -119,6 +121,27 @@ org_db_novel <- org_db %>%
 # (Regardless of what type of symbol it is considered to be)
 ncbi_novel <- ncbi_genes %>%
     dplyr::anti_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID, value))
+
+
+# UNIPROT IDs can differ.
+# Set to HGNC value, as the goal here is not to be comprehensive
+hgnc_patch <- hgnc %>%
+    dplyr::select(HGNC_SYMBOL, ENSEMBL_ID,ENTREZ_ID, UNIPROT_ID) %>%
+    unique()
+
+org_db_novel <- dplyr::rows_update(org_db_novel, hgnc_patch,
+                                 by = c("ENSEMBL_ID",
+                                        "ENTREZ_ID",
+                                        "HGNC_SYMBOL"),
+                                 unmatched = "ignore") %>%
+    unique()
+
+bm_novel <- dplyr::rows_update(bm_novel, hgnc_patch,
+                                   by = c("ENSEMBL_ID",
+                                          "ENTREZ_ID",
+                                          "HGNC_SYMBOL"),
+                                   unmatched = "ignore") %>%
+    unique()
 
 # --------------------------------------------------------------------------
 

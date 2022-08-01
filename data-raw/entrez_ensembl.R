@@ -151,7 +151,7 @@ org_db <- AnnotationDbi::select(hs,
     dplyr::mutate(SOURCE = "ORGDB") %>%
 
     # Only keep Ensembl ids that appear in the Biomart table (or missing),
-    # Remove pseudogenes
+    # remove pseudogenes by biotype
     dplyr::filter(ENSEMBL_ID %in% bm$ENSEMBL_ID | is.na(ENSEMBL_ID),
                   ! grepl("pseudo|unknown|ncRNA", BIOTYPE)) %>%
 
