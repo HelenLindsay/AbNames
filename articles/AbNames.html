@@ -120,17 +120,17 @@
 <span><span class="co"># Show the first entries of gene_aliases,</span></span>
 <span><span class="co"># where each row is the start of one column</span></span>
 <span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="va">gene_aliases</span><span class="op">)</span> </span>
-<span><span class="co">#&gt; Rows: 138,653</span></span>
+<span><span class="co">#&gt; Rows: 129,598</span></span>
 <span><span class="co">#&gt; Columns: 9</span></span>
 <span><span class="co">#&gt; $ HGNC_ID     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "HGNC:100", "HGNC:100", "HGNC:100", "HGNC:100", "HGNC:100"…</span></span>
 <span><span class="co">#&gt; $ ENSEMBL_ID  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "ENSG00000110881", "ENSG00000110881", "ENSG00000110881", "…</span></span>
-<span><span class="co">#&gt; $ UNIPROT_ID  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "A8K1U5|P78348", "A8K1U5|P78348", "A8K1U5|P78348", "A8K1U5…</span></span>
+<span><span class="co">#&gt; $ UNIPROT_ID  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "P78348", "P78348", "P78348", "P78348", "P78348", "P78348"…</span></span>
 <span><span class="co">#&gt; $ HGNC_SYMBOL <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "ASIC1", "ASIC1", "ASIC1", "ASIC1", "ASIC1", "ASIC1", "ASI…</span></span>
-<span><span class="co">#&gt; $ ENTREZ_ID   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "41", "41", "41", "41", "41", "41", "41", "41", "41", "41"…</span></span>
-<span><span class="co">#&gt; $ BIOTYPE     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "protein-coding", "protein_coding", "protein_coding", "pro…</span></span>
-<span><span class="co">#&gt; $ symbol_type <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "ALIAS", "ALIAS", "ALIAS", "HGNC_NAME", "HGNC_SYMBOL", "PR…</span></span>
-<span><span class="co">#&gt; $ value       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "ASIC", "BNaC2", "hBNaC2", "acid sensing ion channel subun…</span></span>
-<span><span class="co">#&gt; $ SOURCE      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "NCBI, ORGDB", "HGNC", "HGNC", "HGNC", "HGNC", "HGNC", "HG…</span></span>
+<span><span class="co">#&gt; $ ENTREZ_ID   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "41", "41", "41", "41", "41", "41", "41", "41", "41", "599…</span></span>
+<span><span class="co">#&gt; $ BIOTYPE     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "protein_coding", "protein_coding", "protein_coding", "pro…</span></span>
+<span><span class="co">#&gt; $ symbol_type <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "ALIAS", "ALIAS", "HGNC_NAME", "HGNC_SYMBOL", "PREVIOUS_NA…</span></span>
+<span><span class="co">#&gt; $ value       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "BNaC2", "hBNaC2", "acid sensing ion channel subunit 1", "…</span></span>
+<span><span class="co">#&gt; $ SOURCE      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "HGNC", "HGNC", "HGNC", "HGNC", "HGNC", "HGNC", "HGNC", "H…</span></span>
 <span></span>
 <span><span class="co"># (Note: it isn't necessary to use dplyr:: to call "glimpse" as dplyr is loaded</span></span>
 <span><span class="co"># with the library call above. This syntax is used to make it clear which</span></span>
