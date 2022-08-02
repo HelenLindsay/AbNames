@@ -195,12 +195,16 @@ gsubAb <- function(df, ab = "Antigen", pattern = "[Aa]nti-", replacement = "",
 #' Values are NA if the new value is identical to the original value and are
 #' only converted if there the original value has 2 segments separated by,
 #' punctuation, e.g. "IFN-g" would become "IFNG" but "IFN-g R alpha-chain" would
-#' have new value NA
+#' have new value NA.  Punctuation is not removed if it separates groups of
+#' numbers, e.g. "CD3.1"
 #'
 #'@param ab (character(n)) A vector of strings to transform
 #'@export
 upperSquish <- function(ab){
-    x <- toupper(gsub("(^[A-z0-9]+)[-\\. ]?([A-z0-9]+)$", "\\1\\2", ab))
+    p1 <- "(^[A-z]+[0-9]?)[-\\. ]?([A-z]+)$" # e.g. CD3-A
+    p2 <- "(^[A-z]+)[-\\. ]?([A-z0-9]+)$" # e.g. IL-2Rb
+    x <- gsub(p1, "\\1\\2", ab)
+    x <- toupper(gsub(p2, "\\1\\2", x))
     return(.noDups(x, ab))
 }
 

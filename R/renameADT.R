@@ -206,7 +206,6 @@ getCommonName <- function(x, cols = NULL, ab = "Antigen",
     # Fill with most common value
     x <- fillByGroup(x, group = tmp_grp, method = "all",
                      multiple = "mode", fill = new_col)
-    #xx <- groupMode(x, "Antigen", "group", new_cl = new_col,overwrite = TRUE)
 
     # Problems: Tau (Phospho Thr181) Su and Stephenson?
     # HGNC_SYMBOL WRONG FOR CD158b (KIR2DL2/L3, NKAT2)?  (NKAT2 = only one gene)
