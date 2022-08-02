@@ -53,7 +53,7 @@ ncbi_genes <- ncbi_genes %>%
                                                     "(?<=HGNC:)HGNC:[0-9]+"),
                   ENSEMBL_ID = stringr::str_extract_all(dbXrefs,
                                                     "(?<=Ensembl:)ENSG[0-9]+"),
-                  HGNC_ID = map_chr(HGNC_ID, toString),
+                  HGNC_ID = map_chr(HGNC_ID, AbNames:::.toString),
                   HGNC_ID = ifelse(HGNC_ID %in% c("NA", ""), NA, HGNC_ID),
                   ENTREZ_ID = as.character(ENTREZ_ID)) %>%
 

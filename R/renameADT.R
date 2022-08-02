@@ -192,7 +192,6 @@ getCommonName <- function(x, cols = NULL, ab = "Antigen",
 
     if (is.null(cols)) {
         cols <- c("Antigen", "Cat_Number", "Clone", "HGNC_SYMBOL", "ENSEMBL_ID")
-
     }
 
     # Remove sections in brackets, replace Greek symbols
