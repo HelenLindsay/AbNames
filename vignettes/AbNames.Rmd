@@ -494,6 +494,7 @@ missing <- citeseq %>%
 # Tau Phospho and Thr181 have same cat number
 #  b2-microglobin without dash
 # Add tag for non-human tagging antibodies
+# regenerate citeseq, fix phospho Tau Su / Stephenson
 
 # How can we match antibodies:
 # By an exact match in a query table

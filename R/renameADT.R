@@ -155,10 +155,12 @@ matchToCiteseq <- function(x, cols = NULL){
     if (! "data.frame" %in% class(x)){
         x <- data.frame(Antigen = x)
     }
+    # IS THIS NECESSARY?  getCommonName has default cols
     if (is.null(cols)) cols <- "Antigen"
 
     x <- dplyr::bind_rows(x %>% dplyr::mutate(ID = "KEEPME"), citeseq)
 
+    # cols should be list of columns to use to match
     x <- getCommonName(x, cols = cols, ab = "Antigen",
                        new_col = "Antigen_std", keep = TRUE)
 
@@ -200,19 +202,17 @@ getCommonName <- function(x, cols = NULL, ab = "Antigen",
 
     # Group by any e.g. catalogue number or exact match to antigen
     tmp_grp <- .tempColName(x, nm = "group")
-    x <- group_by_any(x, cols, new_col = tmp_grp, ignore = ignore)
+    x <- group_by_any(x, groups = cols, new_col = tmp_grp, ignore = ignore)
 
     # Fill with most common value
     x <- fillByGroup(x, group = tmp_grp, method = "all",
                      multiple = "mode", fill = new_col)
 
-    # Problems: Tau (Phospho Thr181) Su and Stephenson?
     # HGNC_SYMBOL WRONG FOR CD158b (KIR2DL2/L3, NKAT2)?  (NKAT2 = only one gene)
     # RRID AB_2810478 matches CD226 and CD98
     # Triana RRID same for CD235a and CD235a - match via combination of RRID
     # and Antigen
     # Triana group 5... - matching because of NA?
-    # CD3.1 should not have HGNC symbol PECAM1
     # CD45 MATCHING THROUGH GENE SYMBOL
 
 

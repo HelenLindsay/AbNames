@@ -88,11 +88,13 @@ union_join <- function(df, df2 = NULL, rows = NULL, by = NULL){
 #
 # df - data.frame
 # groups - character vector of grouping columns
-# CHECK NA BEHAVIOUR
 # ignore e.g. Cat_Number == "custom_made".  Regex?
 group_by_any <- function(df, groups, new_col = "group", ignore = NULL){
     if (length(groups) < 2){
-        stop("This function only makes sense for at least 2 groups")
+        warning("With only one group, group_by_any is equivalent to group_by")
+        result <- df %>%
+            dplyr::group_by(!!rlang::sym(groups)) %>%
+            dplyr::mutate(!!new_col := dplyr::group_indices())
     }
 
     idx <- purrr::map(groups,
