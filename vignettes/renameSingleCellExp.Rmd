@@ -32,7 +32,16 @@ To demonstrate, we will use the "cord_blood" dataset available in the package
 # May not need much renaming....
 library("scRNAseq")
 kotliarov <- KotliarovPBMCData(mode = "adt")
-rownames(kotliarov)
+head(rownames(kotliarov))
+
+# Step by step method
+
+# 1. Put into a data frame to allow matching to the CITEseq data set
+df <- data.frame(Original = rownames(kotliarov),
+                 Antigen = gsub("_PROT", "", rownames(kotliarov)))
+
+df <- matchToCiteseq(df)
+
 
 #library(CiteFuse)
 #data("CITEseq_example", package = "CiteFuse")

@@ -25,7 +25,6 @@ Imports:
     utils
 Suggests:
     BiocStyle,
-    fuzzyjoin,
     knitr,
     MultiAssayExperiment,
     readr,

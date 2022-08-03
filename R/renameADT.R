@@ -132,41 +132,37 @@ setMethod("renameADT", as(structure(.Data = c("MultiAssayExperiment",
 # To do: check types of matching columns?
 # To do: add a column indicating group size?
 matchToCiteseq <- function(x, cols = NULL){
+    if (! "data.frame" %in% class(x)) {
+        stop("x should be a data.frame or tibble")
+    }
 
     # Do do: make citeseq a data set!
     citeseq_fname <- system.file("extdata", "citeseq.csv", package = "AbNames")
     citeseq <- read.csv(citeseq_fname) %>% unique()
 
-    if (! is.null(cols)){
-        keep_cols <- intersect(cols, colnames(citeseq))
-        if (! identical(keep_cols, cols)){
-            warning("cols should match columns in cite seq data set")
-        }
-        if (! "data.frame" %in% class(x)){
-            stop("If 'cols' argument is provided, x must be a data.frame")
-        }
-        if (! "Antigen" %in% colnames(x)){
-            stop("If 'cols' argument is provided, ",
-                 "x must contain a column 'Antigen'")
-        }
-        cols <- unique(c(keep_cols, "Antigen"))
+    # Setup names of columns for matching
+    keep_cols <- intersect(cols, colnames(citeseq))
+
+    if (! identical(keep_cols, cols)){
+        warning("cols should match columns in cite seq data set")
     }
 
-    if (! "data.frame" %in% class(x)){
-        x <- data.frame(Antigen = x)
+    if (! "Antigen" %in% colnames(x)){
+        stop("If 'cols' argument is provided, ",
+             "x must contain a column 'Antigen'")
     }
-    if (is.null(cols)) cols <- "Antigen"
 
+    if (! is.null(keep_cols)) { keep_cols <- unique(c(keep_cols, "Antigen")) }
+
+    # Match using specified columns
     x <- dplyr::bind_rows(x %>% dplyr::mutate(ID = "KEEPME"), citeseq)
-
-    x <- getCommonName(x, cols = cols, ab = "Antigen",
+    x <- getCommonName(x, cols = keep_cols, ab = "Antigen",
                        new_col = "Antigen_std", keep = TRUE)
-
+    # Select new names
     x <- x %>% dplyr::filter(ID == "KEEPME") %>%
         dplyr::select(all_of(c("Antigen", "Antigen_std")))
 
-    # TRIANA HAS DUPLICATES?
-
+    return(x)
 }
 
 
@@ -205,15 +201,6 @@ getCommonName <- function(x, cols = NULL, ab = "Antigen",
     # Fill with most common value
     x <- fillByGroup(x, group = tmp_grp, method = "all",
                      multiple = "mode", fill = new_col)
-
-    # Problems: Tau (Phospho Thr181) Su and Stephenson?
-    # HGNC_SYMBOL WRONG FOR CD158b (KIR2DL2/L3, NKAT2)?  (NKAT2 = only one gene)
-    # RRID AB_2810478 matches CD226 and CD98
-    # Triana RRID same for CD235a and CD235a - match via combination of RRID
-    # and Antigen
-    # Triana group 5... - matching because of NA?
-    # CD3.1 should not have HGNC symbol PECAM1
-    # CD45 MATCHING THROUGH GENE SYMBOL
 
 
     if (isTRUE(dots$keep)){
