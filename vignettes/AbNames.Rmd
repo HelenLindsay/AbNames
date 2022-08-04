@@ -305,8 +305,6 @@ Examples to discuss?
 For now I will remove all genes with multiple matches before merging the results into the citeseq data.
 
 ```{r}
-# TO DO: DON'T USE PRIVATE FUNCTION HERE!
-
 nrow(alias_results)
 
 id_cols <- c("HGNC_ID", "HGNC_SYMBOL", "ENSEMBL_ID", "UNIPROT_ID")
@@ -504,6 +502,11 @@ missing <- citeseq %>%
 # Change name of data gene_aliases to just aliases
 # Rename "value" to "alias" in aliases table
 # Problem - adding protein IDs has added ambiguous antigens, e.g. CD98
+# match to lower on both tables?
+# Fix Cat_Number anti-Tau Phospho (Thr181)__Liu_2021 != 366513
+# CD66__Qi_2020 fix should be CD66b - note - different from CD66 
+# HGNC: TRAV10 = TCRAV24S1, NCBI:TRAV24 = TCRAV24S1
+# Be careful of case when removing ambiguous aliases - Met SLTM / MET
 
 # How can we match antibodies:
 # By an exact match in a query table

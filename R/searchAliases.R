@@ -28,7 +28,7 @@ searchAliases <- function(query_df, multisubunit = c("TCR_long", "subunit")){
 
     utils::data("gene_aliases", envir = environment())
 
-    res <- dplyr::left_join(query_df, hgnc) %>%
+    res <- dplyr::left_join(query_df, gene_aliases) %>%
         dplyr::filter(! is.na(HGNC_ID)) %>%
 
         # If it is a multi-subunit protein, we expect all subunits to match
