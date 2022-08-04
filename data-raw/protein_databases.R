@@ -12,11 +12,6 @@ data(gene_aliases)
 
 # http://bio-bigdata.hrbmu.edu.cn/CellMarker/index.jsp
 
-# For patching ENTREZ_SYMBOL using Antigen
-ga_patch <- gene_aliases %>%
-    dplyr::select(value, UNIPROT_ID, ENTREZ_ID) %>%
-    dplyr::rename(Antigen = value) %>%
-    unique()
 
 gsubCellmarker <- function(x){
     p1_matches <- stringr::str_extract_all(x, "\\[([^\\[]+)\\]")
@@ -69,26 +64,31 @@ cellmarker <- readr::read_delim(cellmarker_fname) %>%
                   UNIPROT_ID = proteinID) %>%
     dplyr::mutate(SOURCE = "CELLMARKER") %>%
     dplyr::mutate(across(c(ENTREZ_SYMBOL, ENTREZ_ID,
-                           proteinName, UNIPROT_ID), ~na_if(., "NA"))) %>%
-    # Patch missing ENTREZ or UNIPROT ids
-    dplyr::coalesce(ga_patch)
+                           proteinName, UNIPROT_ID), ~na_if(., "NA")))
 
+# Patch missing ENTREZ or UNIPROT ids
+ga_patch <- gene_aliases %>%
+    dplyr::select(value, UNIPROT_ID, ENTREZ_ID) %>%
+    dplyr::rename(Antigen = value) %>%
+    unique()
 
+ga_patch <- ga_patch[match(cellmarker$Antigen, ga_patch$Antigen), ]
 
+cellmarker <- cellmarker %>%
+    dplyr::coalesce(ga_patch) %>%
 
     # Filter again, some cellNames include an NA in a list of markers
     # (some aren't protein-coding, some would have an ENTREZ ID)
     dplyr::filter(if_all(c(ENTREZ_ID, UNIPROT_ID), ~! is.na(.x))) %>%
 
-
     dplyr::mutate(across(everything(), ~stringr::str_squish(.x))) %>%
     # Split the protein complexes
     dplyr::mutate(across(c(ENTREZ_SYMBOL, ENTREZ_ID, proteinName, UNIPROT_ID),
                          ~strsplit(.x, "\\|"))) %>%
-                               tidyr::unnest(cols = c(ENTREZ_SYMBOL,
-                                                      ENTREZ_ID,
-                                                      proteinName,
-                                                      UNIPROT_ID)) %>%
+    tidyr::unnest(cols = c(ENTREZ_SYMBOL,
+                           ENTREZ_ID,
+                           proteinName,
+                           UNIPROT_ID)) %>%
     # Not useful if antigen already exists
     dplyr::filter(! Antigen == ENTREZ_SYMBOL,
                   ! Antigen %in% gene_aliases$value)
@@ -98,6 +98,9 @@ cellmarker <- readr::read_delim(cellmarker_fname) %>%
 cellmarker <- cellmarker %>%
     dplyr::semi_join(gene_aliases,
                      by = c("ENTREZ_SYMBOL" = "HGNC_SYMBOL", "ENTREZ_ID")) %>%
+
+    # IS THIS REDUNDANT AFTER COALESCE ABOVE?
+
     # Patch the uniprot IDs
     dplyr::rename(HGNC_SYMBOL = ENTREZ_SYMBOL) %>%
     dplyr::rows_update(hgnc %>%
@@ -128,7 +131,7 @@ cellmarker <- cellmarker %>%
     # Aggregated protein names probably aren't useful
     dplyr::filter(! is.na(value), ! grepl("\\|", value))
 
-# To do: check for same antigen to multiple genes (e.g. CD45RO)
+# note still contains multiple antigen to same gene e.g. CD45 isoforms
 
 
 

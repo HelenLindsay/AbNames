@@ -446,7 +446,6 @@ nmatched_after_fill
 ```
 
 
-
 # Querying the protein ontology
 
 Let's see which antibodies were not matched in the HGNC.
@@ -494,7 +493,14 @@ missing <- citeseq %>%
 # Tau Phospho and Thr181 have same cat number
 #  b2-microglobin without dash
 # Add tag for non-human tagging antibodies
-# regenerate citeseq, fix phospho Tau Su / Stephenson
+# Problems: Tau (Phospho Thr181) Su and Stephenson?
+# HGNC_SYMBOL WRONG FOR CD158b (KIR2DL2/L3, NKAT2)?  (NKAT2 = only one gene)
+# RRID AB_2810478 matches CD226 and CD98
+# Triana RRID same for CD235a and CD235a - match via combination of RRID
+# and Antigen
+# Triana group 5... - matching because of NA?
+# CD3.1 should not have HGNC symbol PECAM1
+# CD45 MATCHING THROUGH GENE SYMBOL
 
 # How can we match antibodies:
 # By an exact match in a query table

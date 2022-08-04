@@ -44,6 +44,10 @@ fillByGroup <- function(df, group, fill, method = c("only_na", "all"),
 #'@keywords internal
 #'@importFrom dplyr all_of if_any
 .fillByGroup <- function(df, group, fill, multiple, overwrite){
+    # To do?  Fill with best option matching a condition e.g. no punctuation?
+    # Could be done by creating a duplicate column with no punctuation, filling
+    # by antigen
+
     # Group data frame, check if there are multiple values per group
     cn <- colnames(df)
     df <- .addNPerGroup(df, group, fill)
