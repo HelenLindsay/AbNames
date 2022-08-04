@@ -80,8 +80,8 @@ cellmarker <- cellmarker %>%
     # Filter again, some cellNames include an NA in a list of markers
     # (some aren't protein-coding, some would have an ENTREZ ID)
     dplyr::filter(if_all(c(ENTREZ_ID, UNIPROT_ID), ~! is.na(.x))) %>%
-
     dplyr::mutate(across(everything(), ~stringr::str_squish(.x))) %>%
+
     # Split the protein complexes
     dplyr::mutate(across(c(ENTREZ_SYMBOL, ENTREZ_ID, proteinName, UNIPROT_ID),
                          ~strsplit(.x, "\\|"))) %>%
@@ -98,20 +98,20 @@ cellmarker <- cellmarker %>%
 cellmarker <- cellmarker %>%
     dplyr::semi_join(gene_aliases,
                      by = c("ENTREZ_SYMBOL" = "HGNC_SYMBOL", "ENTREZ_ID")) %>%
-
-    # IS THIS REDUNDANT AFTER COALESCE ABOVE?
-
-    # Patch the uniprot IDs
     dplyr::rename(HGNC_SYMBOL = ENTREZ_SYMBOL) %>%
-    dplyr::rows_update(hgnc %>%
-                           dplyr::select(HGNC_SYMBOL, ENTREZ_ID, UNIPROT_ID) %>%
-                           unique(),
-                       unmatched = "ignore") %>%
+
+    # Add HGNC_IDs and ENSEMBL_IDs
+    dplyr::left_join(gene_aliases %>%
+                         dplyr::select("HGNC_SYMBOL",
+                                       "HGNC_ID",
+                                       "ENSEMBL_ID") %>%
+                         unique()) %>%
 
     # Re-aggregate the protein complexes
     unique() %>%
     dplyr::group_by(Antigen, cellName) %>%
-    dplyr::mutate(across(c(HGNC_SYMBOL, ENTREZ_ID, proteinName, UNIPROT_ID),
+    dplyr::mutate(across(c(HGNC_ID, HGNC_SYMBOL, ENSEMBL_ID, ENTREZ_ID,
+                           proteinName, UNIPROT_ID),
                          ~ paste(.x, collapse = "|"))) %>%
     dplyr::ungroup() %>%
     dplyr::select(-cellName) %>%
@@ -131,9 +131,12 @@ cellmarker <- cellmarker %>%
     # Aggregated protein names probably aren't useful
     dplyr::filter(! is.na(value), ! grepl("\\|", value))
 
+# Add to aliases table, save
+gene_aliases <- gene_aliases %>%
+    dplyr::bind_rows(cellmarker)
+
+
 # note still contains multiple antigen to same gene e.g. CD45 isoforms
-
-
 
 # Exploration ----
 # cellmarker %>% dplyr::select(-cellName) %>% unique()
@@ -192,35 +195,32 @@ cspa <- #readxl::read_xlsx(cspa_fname) %>%
                   Antigen = na_if(Antigen, "no"),
                   across(c(ENTREZ_SYMBOL, ENTREZ_ID), ~na_if(.x, "0")),
                   ENTREZ_ID = as.character(ENTREZ_ID)) %>%
+    # No gene symbol
     dplyr::filter(! is.na(ENTREZ_SYMBOL)) %>%
     # Join by exact match to "value" in gene_aliases table
     # (either official symbol or alias)
     dplyr::inner_join(gene_aliases %>%
-                          dplyr::select(HGNC_SYMBOL, HGNC_ID,
+                          dplyr::select(HGNC_SYMBOL, HGNC_ID, ENSEMBL_ID,
                                         ENTREZ_ID, value) %>%
                           unique(),
                       by = c("ENTREZ_SYMBOL" = "value", "ENTREZ_ID")) %>%
     # Know from join that ENTREZ_SYMBOL must match an existing symbol or alias
-    dplyr::mutate(Antigen = ifelse(Antigen %in%
-                                       gene_aliases$value, NA, Antigen)) %>%
-    dplyr::filter(! is.na(Antigen)) %>%
-    dplyr::select(HGNC_ID, HGNC_SYMBOL, ENTREZ_ID,
-                  UNIPROT_ID, Antigen, SOURCE) %>%
-    dplyr::rename(value = Antigen)
+    tidyr::pivot_longer(c(Antigen, UNIPROT_NAME), names_to = "symbol_type") %>%
+    dplyr::filter(! (value %in% gene_aliases$value | is.na(value))) %>%
+    dplyr::select(dplyr::any_of(colnames(gene_aliases)))
 
 
 # Check for inconsistencies -----
-# Two entries from CSPA have Uniprot ID, NA in HGNC
 
-cspa %>% dplyr::anti_join(gene_aliases,
-                          by = c("HGNC_ID", "ENTREZ_ID", "UNIPROT_ID"))
+# Some HGNC_ID / UNIPROT_ID combinations differ.
+# Can be because gene_aliases UNIPROT_ID is NA, or because ID is out of date
+aj <- cspa %>%
+    dplyr::anti_join(gene_aliases, by = c("HGNC_ID", "ENTREZ_ID", "UNIPROT_ID"))
 
 
-
-# Add a column to hgnc indicating if gene is in CSPA
+# Add to aliases table, save
 gene_aliases <- gene_aliases %>%
-    dplyr::left_join(cspa %>% dplyr::select(HGNC_ID, CSPA))
+    dplyr::bind_rows(cspa)
 
-cspa_novel <- cspa %>%
-    dplyr::anti_join(gene_aliases,
-                     by = c("HGNC_ID", "HGNC_SYMBOL", "UNIPROT_ID", "value"))
+gene_aliases <- as.data.frame(gene_aliases)
+usethis::use_data(gene_aliases, overwrite = TRUE, compress = "bzip2")

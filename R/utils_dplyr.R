@@ -148,7 +148,9 @@ left_join_any <- function(x, y, cols){
 
     # Successive inner joins, adding new results at each stage
     for (col_set in cols){
+        # Select results that aren't already present in results table
         x_aj <- dplyr::anti_join(x, res, by = cn_x)
+
         y_subs <- y %>%
             dplyr::select(all_of(c(add_cn, col_set))) %>%
             unique()
@@ -156,12 +158,18 @@ left_join_any <- function(x, y, cols){
         new_res <- x_aj %>%
             dplyr::inner_join(y_subs, by = col_set, na_matches = "never")
 
-        res <- bind_rows(res, new_res)
+        res <- dplyr::bind_rows(res, new_res)
     }
+
+    # Patch any values present in y but missing from x
+    res <- dplyr::rows_patch(res, y %>%
+                                 dplyr::select(all_of(join_cns)) %>%
+                                 unique(),
+                             unmatched = "ignore")
 
     # Add the unmatched rows back in
     x_aj <- dplyr::anti_join(x, res, by = cn_x)
-    res <- bind_rows(x_aj, res)
+    res <- dplyr::bind_rows(x_aj, res)
 
     return(res)
 

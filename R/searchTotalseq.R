@@ -13,13 +13,14 @@
 #'@export
 searchTotalseq <- function(x, cols = NULL){
     if (is.null(cols)) {
-        cols <- list("Cat_Number", "Antigen", "Clone")
+        cols <- intersect(c("Cat_Number", "Antigen", "Clone"), colnames(x))
+        cols <- as.list(cols)
     }
 
     # Select the gene information from totalseq
     ts <- totalseq %>%
         dplyr::select(Antigen, ENSEMBL_ID, HGNC_SYMBOL, HGNC_ID,
-                      any_of(unlist(cols)))
+                      all_of(unlist(cols)))
 
     utils::data("totalseq", envir = environment())
     return(left_join_any(x, ts, cols))

@@ -20,11 +20,13 @@ knitr::opts_chunk$set(
 
 # Overview
 
-AbNames performs two tasks:
+AbNames performs three tasks:
 
-* Extracting potential gene names from antibody names, and
+* Extracting potential gene names from antibody names, 
 
-* Matching human antibody names to gene names, IDs and protein complex IDs.
+* Matching human antibody names to gene names, IDs and protein complex IDs, and
+
+* Standardising antibody names to match a reference data set
 
 Antibody names are not reported in a consistent format in published data.  Antibodies are often named according to the antigen they target, which may not
 be the same as the name of the protein (complex) the antigen is part of. Antibodies may target multi-subunit protein complexes, and this can be reflected
@@ -32,12 +34,6 @@ in the name, e.g. an antibody against the T-cell receptor alpha and beta subunit
 is conjugated with.  For these reasons, it can be difficult to exactly match
 antibody names with gene or protein names.  As cell surface antigens often have
 very similar names, searching for partial matches to names in free-text gene descriptions is challenging and error-prone.
-
-# Goals
-
- Standardise names of data sets for combined analysis
-
-## Identify all members of a protein complex bound by an antibody
 
 # Data
 
@@ -51,10 +47,12 @@ and gene groups tables from the Human Gene Names Consortium (HGNC). These
 include previous (obsolete) gene names and aliases, which in our experience
 have been useful for matching to antibody names.  Non-ambiguous gene aliases
 from Ensembl (fetched via Bioconductor package biomaRt) and NCBI 
-(fetched via the NCBI ftp site and the Bioconductor package org.Hs.eg.db) have
-been added.  Mappings between HGNC, Ensembl and NCBI (Entrez) IDs are mostly
+(fetched via the NCBI ftp site and the Bioconductor package org.Hs.eg.db), and
+non-ambiguous proteins from the Cell-Surface Protein Atlas (CSPA, Cell-Surface Protein Atlas) and Cellmarker protein database (http://xteam.xbio.top/CellMarker/) have been added.  Mappings between HGNC, Ensembl and NCBI (Entrez) IDs are mostly
 based on HGNC, with some corrections of obsolete Ensembl IDs using the Ensembl
-data.  The `gene_aliases` data set is in long format (one alias per row).
+data.  
+
+The `gene_aliases` data set is in long format (one alias per row).
 
 Load using:
 
@@ -80,7 +78,7 @@ panels for CITE-seq analyses.  The data set "totalseq" is a
 re-formatted version of the TotalSeq barcodes data sheets available from the
 BioLegend website, including BioLegend antibody names and Ensembl gene IDs. 
 The isotypes of the antibodies are not included in the TotalSeq data sheets,
-and only human antibodies and isotype controls are included.  Missing and incomplete Ensembl IDs have been manually fixed.   
+and only human antibodies and isotype controls are included.  Missing and incomplete Ensembl IDs have been manually corrected.   
 
 Load using:
 ```{r}
@@ -501,6 +499,11 @@ missing <- citeseq %>%
 # Triana group 5... - matching because of NA?
 # CD3.1 should not have HGNC symbol PECAM1
 # CD45 MATCHING THROUGH GENE SYMBOL
+# Update BIOMART entrez ids to match entrez / HGNC??
+# Check that UNIPROT IDs are valid (not all from CSPA are up to date)
+# Change name of data gene_aliases to just aliases
+# Rename "value" to "alias" in aliases table
+# Problem - adding protein IDs has added ambiguous antigens, e.g. CD98
 
 # How can we match antibodies:
 # By an exact match in a query table

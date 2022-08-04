@@ -40,7 +40,11 @@ head(rownames(kotliarov))
 df <- data.frame(Original = rownames(kotliarov),
                  Antigen = gsub("_PROT", "", rownames(kotliarov)))
 
+# 2. Review suggested consensus names
 df <- matchToCiteseq(df)
+
+# 3. Rename 
+
 
 
 #library(CiteFuse)
