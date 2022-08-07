@@ -95,6 +95,7 @@ group_by_any <- function(df, groups, new_col = "group", ignore = NULL){
         result <- df %>%
             dplyr::group_by(!!rlang::sym(groups)) %>%
             dplyr::mutate(!!new_col := dplyr::group_indices())
+        return(result)
     }
 
     idx <- purrr::map(groups,
@@ -120,8 +121,9 @@ group_by_any <- function(df, groups, new_col = "group", ignore = NULL){
             merge_vals <- na.omit(unique(merge_idxs[curr_idxs == val]))
             v_to_replace <- new_idxs[merge_idxs %in% merge_vals]
             if (any(v_to_replace)) {
-                new_idxs[merge_idxs %in% merge_vals |
-                             new_idxs %in% v_to_replace] <- min(v_to_replace)
+                rp_id <- merge_idxs %in% merge_vals |
+                    new_idxs %in% na.omit(v_to_replace)
+                new_idxs[rp_id] <- min(v_to_replace, na.rm = TRUE)
             }
         }
     }

@@ -31,50 +31,62 @@ CLA <- paste0("From BioLegend website: ",
               "and fucose-modified P-selectin glycoprotein ligand-1 (PSGL-1) ",
               "Ligand for E-selectin, P-selectin, and L-selectin.")
 
-manual_matches <- tibble::tribble(
-    ~Antigen, ~Clone, ~HGNC_Symbol, ~HGNC_ID, ~PRO_ID, ~Comments,
-    "Mac-2", "", "LGALS3", "HGNC:6563", "", "",
 
-    "FAS.L", "NOK-1", "FASLG", "HGNC:11936", "", "",
+# Use ALT_ID when it is a modification, a complex, or not a protein
+manual_matches <- tibble::tribble(~Antigen, ~Clone, ~HGNC_Symbol, ~HGNC_ID,
+                                  ~PRO_ID, ~ALT_ID, ~Comments,
+
+    "Tau Phospho (Thr181)", "M7004D06", "MAPT", "HGNC:6893", "PR:000027448,
+        PR:000027447", "PR:000027448", "",
+        "PRO-short-label: hMAPT/iso:Tau-F/Phos:1",
+
+    "Mac-2", "M3/38", "LGALS3", "HGNC:6563", "", "", "", "",
+
+    # This can be matched via the clone
+    "FAS.L", "NOK-1", "FASLG", "HGNC:11936", "", "", "", "",
+
+
 
     "IFN-g R a chain", "GIR-208", "IFNGR1", "HGNC:5439",
-        "PR:000001361", IFN_gamma,
+        "PR:000001361", "", IFN_gamma,
 
     "TCR Va7.2", "3C10","TRAV7", "HGNC:12145", "", TRAV7,
-    "TCR Vb13.1 ", "H131", "", "", "", "",
+    "TCR Vb13.1 ", "H131", "", "", "", "", "",
 
-    "cKIT", "104D2","KIT", "HGNC:6342", "", "",
+    "cKIT", "104D2","KIT", "HGNC:6342", "", "", "",
 
-    "CD77", "","A4GALT", "HGNC:18149", "",
+    "CD77", "","A4GALT", "HGNC:18149", "", "",
         "https://www.sinobiological.com/research/cd-antigens/cd77",
-    "[Ff]olate [Rr]eceptor b", "FOLR2", "HGNC:3793", "", "", "",
 
-    "PE", "PE001", NA, NA, NA,
+    "[Ff]olate [Rr]eceptor b", "FOLR2", "HGNC:3793", "", "", "", "",
+
+    "PE", "PE001", NA, NA, NA, "",
         "anti-phycoerythrin, for binding PE-antibody labeled cells",
 
-    "integrin b7", "FIB504","ITGB7", "HGNC:6162", "", "",
+    "integrin b7", "FIB504","ITGB7", "HGNC:6162", "", "", "",
 
-    "HLA-DR", "L243", NA, NA, "PR:P01903, PR:000050459", HLA_DR,
-    "HLA.A.B.C", "W6/32", "B2M", "HGNC:914", "", HLA_ABC,
+    "HLA-DR", "L243", NA, NA, "PR:P01903, PR:000050459", "", HLA_DR,
+    "HLA.A.B.C", "W6/32", "B2M", "HGNC:914", "", "", HLA_ABC,
 
-    "CD11a/CD18", "", "ITGB2, ITGAL", "", "", "",
+    "CD11a/CD18", "", "ITGB2, ITGAL", "", "", "", "",
 
-    "CD66","B1.1", "CEACAM1, CEACAM6, CEACAM3, CEACAM5", "", "", CD66,
+    "CD66","B1.1", "CEACAM1, CEACAM6, CEACAM3, CEACAM5", "", "", "", CD66,
 
-    "Tau", "M7004D06", "MAPT", "HGNC:6893", "PR:000027448, PR:000027447",
-        "phospho-tau (thr181)",
+
+
 
     "CD158", "HP-MA4", "KIR2DL1, KIR2DS1, KIR2DS3, KIR2DS5",
-        "HGNC:6329, HGNC:6333, HGNC:6335, HGNC:6337", "", CD158,
+        "HGNC:6329, HGNC:6333, HGNC:6335, HGNC:6337", "", "", CD158,
 
-    "CD45RA", "HI100", "", "PTPRC", "PR_000001015", "Isoform of CD45",
-    "CD45RO", "UCHL1", "", "PTPRC", "PR_000001017", "Isoform of CD45",
+    "CD45RA", "HI100", "", "PTPRC", "PR_000001015", "", "Isoform of CD45",
+    "CD45RO", "UCHL1", "", "PTPRC", "PR_000001017", "", "Isoform of CD45",
 
     "Ig light chain lambda", "MHL-38", "IGL", "HGNC:5853", "PR:000050185", "",
+        "",
 
-    "IgG Fc", "M1310G05", "IGHG1,IGHG3", "HGNC:5525, HGNC:5527", "", IgG,
+    "IgG Fc", "M1310G05", "IGHG1,IGHG3", "HGNC:5525, HGNC:5527", "", "", IgG,
 
-    "c-Met", "12.1", "MET", "HGNC:7029", "", "",
+    "c-Met", "12.1", "MET", "HGNC:7029", "", "", "",
 
-    "CLA", "HECA-452", "SELPLG", "HGNC:10722", "", ""
+    "CLA", "HECA-452", "SELPLG", "HGNC:10722", "", "", ""
 )
