@@ -38,10 +38,11 @@ head(rownames(kotliarov))
 
 # 1. Put into a data frame to allow matching to the CITEseq data set
 df <- data.frame(Original = rownames(kotliarov),
-                 Antigen = gsub("_PROT", "", rownames(kotliarov)))
+                 Antigen = gsub("_PROT", "", rownames(kotliarov))) %>%
+    dplyr::mutate(Antigen = stringr::str_squish(Antigen))
 
 # 2. Review suggested consensus names
-df <- matchToCiteseq(df)
+df
 
 # 3. Rename 
 

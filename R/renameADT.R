@@ -154,7 +154,7 @@ matchToCiteseq <- function(x, cols = NULL){
     # Match using specified columns
     x <- dplyr::bind_rows(x %>% dplyr::mutate(ID = "KEEPME"), citeseq)
     x <- getCommonName(x, cols = keep_cols, ab = "Antigen",
-                       new_col = "Antigen_std", keep = TRUE)
+                       fill_col = "Antigen_std", keep = TRUE)
     # Select new names
     x <- x %>% dplyr::filter(ID == "KEEPME") %>%
         dplyr::select(all_of(c("Antigen", "Antigen_std")))

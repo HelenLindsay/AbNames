@@ -3,28 +3,32 @@
 # default matching columns are Antigen, Cat_Number, Clone, HGNC_SYMBOL)
 # cols = columns for grouping
 # ab = column for standardising
-# new_col = column to add
+# fill_col = column to add
 # ... pass keep = TRUE for keeping grouping columns for debugging
 # Be careful of exceptions, e.g. Cat_Number == "custom made"
 getCommonName <- function(x, cols = NULL, ab = "Antigen",
-                          new_col = "Antigen_std",
+                          fill_col = "Antigen_std",
                           ignore = list(Cat_Number = "[Cc]ustom"), ...){
 
-    keep_cols <- c(colnames(x), new_col)
+    keep_cols <- c(colnames(x), fill_col)
 
-    if (new_col %in% colnames(x)){
-        stop(sprintf("Column %s already exists in data.frame", new_col))
+    if (fill_col %in% colnames(x)){
+        stop(sprintf("Column %s already exists in data.frame", fill_col))
     }
 
     if (is.null(cols)) {
         cols <- c("Antigen", "Cat_Number", "Clone", "HGNC_SYMBOL", "ENSEMBL_ID")
     }
 
+    if (! fill_col %in% colnames(x)){
+        x <- dplyr::mutate(x, !! fill_col := !!sym(ab))
+    }
+
     # Antibody formatting makes this function less generalisable
-    #x <- dplyr::mutate(x, !! new_col := !!sym(ab))
+    #x <- dplyr::mutate(x, !! fill_col := !!sym(ab))
     ## Remove sections in brackets, replace Greek symbols
-    #x <- dplyr::mutate(x, !! new_col := gsub("^[Aa]nti-| \\(.*", "", !!sym(ab)),
-    #                   !! new_col := replaceGreekSyms(!!sym(new_col)))
+    #x <- dplyr::mutate(x, !! fill_col := gsub("^[Aa]nti-| \\(.*", "", !!sym(ab)),
+    #                   !! fill_col := replaceGreekSyms(!!sym(fill_col)))
 
     # Group by any e.g. catalogue number or exact match to antigen
     tmp_grp <- .tempColName(x, nm = "group")
@@ -32,7 +36,10 @@ getCommonName <- function(x, cols = NULL, ab = "Antigen",
 
     # Fill with most common value
     x <- fillByGroup(x, group = tmp_grp, method = "all",
-                     multiple = "mode", fill = new_col)
+                     multiple = "mode", fill = fill_col)
+
+
+    # To do: report n matched?
 
     return(x)
 }
