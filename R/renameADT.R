@@ -136,9 +136,7 @@ matchToCiteseq <- function(x, cols = NULL){
         stop("x should be a data.frame or tibble")
     }
 
-    # Do do: make citeseq a data set!
-    citeseq_fname <- system.file("extdata", "citeseq.csv", package = "AbNames")
-    citeseq <- read.csv(citeseq_fname) %>% unique()
+    utils::data("citeseq", envir = environment())
 
     # Setup names of columns for matching
     keep_cols <- intersect(cols, colnames(citeseq))
@@ -148,8 +146,7 @@ matchToCiteseq <- function(x, cols = NULL){
     }
 
     if (! "Antigen" %in% colnames(x)){
-        stop("If 'cols' argument is provided, ",
-             "x must contain a column 'Antigen'")
+        stop("x must contain a column 'Antigen'")
     }
 
     if (! is.null(keep_cols)) { keep_cols <- unique(c(keep_cols, "Antigen")) }
