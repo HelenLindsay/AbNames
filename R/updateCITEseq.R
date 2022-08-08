@@ -194,6 +194,8 @@ fillCITEseq <- function(citeseq){
 
 
 
+# Check RRID and Cat_Number correct if info available
+
 #citeseq %>%
 # group_by(RRID) %>%
 # dplyr::filter(n_distinct(HGNC_ID) > 1 |

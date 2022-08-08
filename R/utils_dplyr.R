@@ -146,6 +146,9 @@ left_join_any <- function(x, y, cols){
     join_cns <- unique(unlist(cols))
     add_cn <- setdiff(cn_y, join_cns)
 
+    # Columns to add are columns not already in in x and not used for joining
+    #add_cn <- setdiff(cn_y, c(join_cns, cn_x))
+
     res <- head(x, 0)
 
     # Successive inner joins, adding new results at each stage

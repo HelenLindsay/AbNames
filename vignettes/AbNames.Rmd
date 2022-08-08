@@ -340,8 +340,11 @@ but column names in the query data set should match those in the totalseq data
 set.
 
 ```{r}
+
+table(is.na(cs$HGNC_ID))
 cs <- citeseq %>%
     searchTotalseq()
+table(is.na(cs$HGNC_ID))
 ```
 
 
@@ -465,17 +468,14 @@ missing <- citeseq %>%
 *Standardise names in a singlecellexperiment
 *Check new annotations against previous
 *Isotype controls
-*Add checks on filling if the values are not unique
 *Add control column to isotype controls to prevent false match to mouse IgG2a
 *Add ignore option to split merge?
 * CD25 (good example, multiple genes), CD270, CD279 matched in HGNC?
 # CD279 PD-1 - example where only some are matched
-# Fix Hao Clone CD25
+# Fix Hao Clone CD25 - Is it custom?  No Oligo or Cat_Number for this one 
 # Search for similar genes in master table
 # Generate camel case regexp?
-# Split HGNC alias_name, prev_name - keep only if contains "antigen" or "CD"?
 # Unintuitive to use quoted for splitUnnest
-# Uniprot ids - possible to split to create complex uniprot and modification
 # uniprot?
 # Redocument data sets
 # HAO CD45 should have catalogue numbers!
@@ -486,12 +486,10 @@ missing <- citeseq %>%
 # citeseq <- citeseq %>% group_by_any(c("Antigen", "Cat_Number") 
 # showGroups(citeseq, 2, interactive = FALSE)
 # ungroup(citeseq)
-# Tau Phospho and Thr181 have same cat number
 #  b2-microglobin without dash
 # Add tag for non-human tagging antibodies
 # Problems: Tau (Phospho Thr181) Su and Stephenson?
 # HGNC_SYMBOL WRONG FOR CD158b (KIR2DL2/L3, NKAT2)?  (NKAT2 = only one gene)
-# RRID AB_2810478 matches CD226 and CD98
 # Triana RRID same for CD235a and CD235a - match via combination of RRID
 # and Antigen
 # Triana group 5... - matching because of NA?
@@ -503,14 +501,12 @@ missing <- citeseq %>%
 # Rename "value" to "alias" in aliases table
 # Problem - adding protein IDs has added ambiguous antigens, e.g. CD98
 # match to lower on both tables?
-# Fix Cat_Number anti-Tau Phospho (Thr181)__Liu_2021 != 366513
-# CD66__Qi_2020 fix should be CD66b - note - different from CD66 
 # HGNC: TRAV10 = TCRAV24S1, NCBI:TRAV24 = TCRAV24S1
 # Be careful of case when removing ambiguous aliases - Met SLTM / MET
-
 # How can we match antibodies:
 # By an exact match in a query table
 # By an approximate match to the citeseq data
+# Hao CD25 - same HGNC ID reported twice HGNC:6008|HGNC:6008
 
 # Session Info
 
