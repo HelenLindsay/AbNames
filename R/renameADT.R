@@ -21,11 +21,12 @@ setMethod("renameADT", as(structure(.Data = c("SingleCellExperiment",
                                     package = c("SingleCellExperiment", "")),
                           "signature"),
     function(obj, names, assay = "counts", ...) {
+        # names = named vector of new names, names are current names
 
         # For a SingleCellExperiment, the ADT may either be the main assay
         # or an altExp.
         # May need to replace the row data too
-        # SingleCellExperiment may have rowPairs
+        # sce may have rowPairs, but doesn't appear to inc names
 
         stopifnot(requireNamespace("SummarizedExperiment"),
                   requireNamespace("SingleCellExperiment"))
@@ -33,10 +34,18 @@ setMethod("renameADT", as(structure(.Data = c("SingleCellExperiment",
         if (assay %in% altExpNames(obj)){
             # If it's an altExperiment, rename all altExp rownames
             rp_func = altExp
-            nms <- rownames(altExp(obj, assay))
+            old_nms <- rownames(altExp(obj, assay))
+            new_nms <- dplyr::coalesce(names[old_nms], old_nms)
+            rownames(altExp(obj, assay)) <- new_nms
         } else {
-            nms <- .getRownames(obj, assay)
-    }
+            #nms <- .getRownames(obj, assay)
+
+            # Use coalesce in case there are missing values
+            new_nms <- dplyr::coalesce(names[rownames(obj)], rownames(obj))
+            rownames(obj) <- new_nms
+        }
+        print(obj)
+        return(obj)
 })
 
 
