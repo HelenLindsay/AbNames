@@ -1,4 +1,5 @@
 #'@importFrom methods setGeneric
+#'@export
 setGeneric("renameADT", signature = c("obj", "names"),
            function(obj, names, ...) {
     standardGeneric("renameADT")
@@ -15,12 +16,15 @@ setMethod("renameADT", signature(obj = "character", names = "character"),
 
 # renameADT for signature SingleCellExperiment ------
 #'@importFrom methods setMethod signature
+#'@export
 setMethod("renameADT", as(structure(.Data = c("SingleCellExperiment",
                                               "character"),
                                     names = c("obj", "names"),
                                     package = c("SingleCellExperiment", "")),
                           "signature"),
     function(obj, names, assay = "counts", ...) {
+        # to do - add old names to row data
+
         # names = named vector of new names, names are current names
 
         # For a SingleCellExperiment, the ADT may either be the main assay

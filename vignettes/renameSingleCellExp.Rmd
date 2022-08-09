@@ -31,6 +31,8 @@ To demonstrate, we will use the "kotliarov" dataset available in the package
 
 # May not need much renaming....
 library("scRNAseq")
+library("AbNames")
+
 kotliarov <- KotliarovPBMCData(mode = "adt")
 head(rownames(kotliarov))
 
