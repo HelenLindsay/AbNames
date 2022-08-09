@@ -132,6 +132,7 @@ setMethod("renameADT", as(structure(.Data = c("MultiAssayExperiment",
 }
 
 
+# matchToCiteseq -----
 # Probably want to standardise name via aliases table.....
 # At the moment relies on column names matching
 # Rename programmatically?
@@ -140,6 +141,18 @@ setMethod("renameADT", as(structure(.Data = c("MultiAssayExperiment",
 # Eventually, matching just by names may be enough
 # To do: check types of matching columns?
 # To do: add a column indicating group size?
+#
+#' Standardise names using the citeseq data set
+#'
+#'@description Groups antibody names and selects the most frequent name.  By
+#'default, the citeseq dataset is grouped by Antigen, Clone, Cat_Number
+#' (catalog number), HGNC_ID and ENSEMBL_ID.
+#'@param x A data.frame or tibble containing a column "Antigen" to match to the
+#' citeseq data set
+#'@param cols (character(n), default NULL) Optional additional columns to use
+#'for matching in citeseq data set.  ID columns from the citeseq dataset are
+#'used by default.  Antibodies are grouped by a match in any of the ID columns.
+#'@export
 matchToCiteseq <- function(x, cols = NULL){
     if (! "data.frame" %in% class(x)) {
         stop("x should be a data.frame or tibble")

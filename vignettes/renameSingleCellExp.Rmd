@@ -18,8 +18,8 @@ knitr::opts_chunk$set(echo = TRUE)
 This vignette shows how to standardize the names of the antibody-derived tags in
 a CITE-seq experiment in SingleCellExperiment format.
 
-To demonstrate, we will use the "cord_blood" dataset available in the package
-"SingleCellMultiModal".  
+To demonstrate, we will use the "kotliarov" dataset available in the package
+"scRNAseq".  
 
 
 ```{r, message = FALSE}
@@ -41,12 +41,17 @@ df <- data.frame(Original = rownames(kotliarov),
                  Antigen = gsub("_PROT", "", rownames(kotliarov)))
 
 # 2. Review suggested consensus names
+# Antibodies are grouped by matches in catalogue number, clone, antigen name
+# or gene identifier.  It is a good idea to review matches as errors in e.g.
+# catalogue number will lead to incorrect matches.
 df <- matchToCiteseq(df)
+print(head(df))
 
 # 3. Rename
 new_nms <- structure(df[[2]], names = rownames(kotliarov))
 kotliarov <- renameADT(kotliarov, new_nms)
 
+head(rownames(kotliarov))
 
 
 #library(CiteFuse)

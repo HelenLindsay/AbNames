@@ -15,5 +15,7 @@ specified, defaults to catalogue number then antigen then clone.}
 \description{
 Search for exact matches between antigen names in df and totalseq cocktails
 or between catalogue numbers. Relies on column names matching totalseq
-As the goal is to add gene IDs, clone is not used.
+As the goal is to add gene IDs, clone is not used.  This function works by
+successive left_joins and will add rows if columns HGNC_SYMBOL, HGNC_ID or
+ENSEMBL_ID are already in x.
 }
