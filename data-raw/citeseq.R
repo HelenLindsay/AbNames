@@ -8,14 +8,14 @@ citeseq_q <- citeseq %>% dplyr::select(ID, Antigen)
 query_df <- AbNames::makeQueryTable(citeseq_q, ab = "Antigen")
 alias_results <- searchAliases(query_df)
 
-id_cols <- c("HGNC_ID", "HGNC_SYMBOL", "ENSEMBL_ID", "UNIPROT_ID")
+id_cols <- c("HGNC_ID", "HGNC_SYMBOL", "ENSEMBL_ID", "UNIPROT_ID", "ENTREZ_ID")
 
 # Remove matches to several genes, select just columns of interest
 
-alias_results %>%
+alias_results <- alias_results %>%
     dplyr::select(matches("ID|HGNC"), name) %>% # Select ID and HGNC columns
     unique() %>% # Collapse results with same ID from different queries
-
+    group_by(ID) %>%
     # Collapse multi-subunit entries, convert "NA" to NA
     dplyr::summarise(dplyr::across(all_of(id_cols), ~toString(unique(.x)))) %>%
     dplyr::mutate(dplyr::across(all_of(id_cols), ~na_if(.x, "NA")))
