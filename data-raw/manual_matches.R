@@ -24,7 +24,7 @@ CD66 <- paste0("https://www.bdbiosciences.com/en-ch/products/reagents/",
 #IgG <- paste0("From BioLegend website: clone M1310G05 has stronger affinity ",
 #              "for IgG1 and IgG3 than for IgG2 and IgG4")
 
-TRAV7 <- paste0("Vα7.2 TCR with Jα33 forms invariant T cell receptor")
+#TRAV7 <- paste0("Vα7.2 TCR with Jα33 forms invariant T cell receptor")
 
 CLA <- paste0("From BioLegend website: ",
               "CLA is a scarbohydrate epitope of sialic acid ",
@@ -42,14 +42,12 @@ manual_matches <- tibble::tribble(~Antigen, ~Clone, ~HGNC_Symbol, ~HGNC_ID,
 
 #    "Mac-2", "M3/38", "LGALS3", "HGNC:6563", "", "", "", "",
 
-
     # This can be matched via the clone
     "FAS.L", "NOK-1", "FASLG", "HGNC:11936", "", "", "", "",
 
     "IFN-g R a chain", "GIR-208", "IFNGR1", "HGNC:5439",
         "PR:000001361", "", IFN_gamma,
 
-    "TCR Va7.2", "3C10","TRAV7", "HGNC:12145", "", TRAV7,
     #"TCR Vb13.1", "H131", "", "", "", "", "",
 
     "cKIT", "104D2","KIT", "HGNC:6342", "", "", "",
@@ -62,30 +60,33 @@ manual_matches <- tibble::tribble(~Antigen, ~Clone, ~HGNC_Symbol, ~HGNC_ID,
    # "PE", "PE001", NA, NA, NA, "",
    #     "anti-phycoerythrin, for binding PE-antibody labeled cells",
 
-    "integrin b7", "FIB504","ITGB7", "HGNC:6162", "", "", "",
 
-    "HLA-DR", "L243", NA, NA, "PR:P01903, PR:000050459", "", HLA_DR,
-    "HLA.A.B.C", "W6/32", "B2M", "HGNC:914", "", "", HLA_ABC,
-
-    "CD11a/CD18", "", "ITGB2, ITGAL", "", "", "", "",
 
    # "CD66","B1.1", "CEACAM1, CEACAM6, CEACAM3, CEACAM5", "", "", "", CD66,
 
 
+    #"CD158", "HP-MA4", "KIR2DL1, KIR2DS1, KIR2DS3, KIR2DS5",
+    #    "HGNC:6329, HGNC:6333, HGNC:6335, HGNC:6337", "", "", CD158,
 
+   # "CD45RA", "HI100", "", "PTPRC", "PR_000001015", "", "Isoform of CD45",
+    #"CD45RO", "UCHL1", "", "PTPRC", "PR_000001017", "", "Isoform of CD45",
 
-    "CD158", "HP-MA4", "KIR2DL1, KIR2DS1, KIR2DS3, KIR2DS5",
-        "HGNC:6329, HGNC:6333, HGNC:6335, HGNC:6337", "", "", CD158,
+   # "Ig light chain lambda", "MHL-38", "IGL", "HGNC:5853", "PR:000050185", "",
+#        "",
 
-    "CD45RA", "HI100", "", "PTPRC", "PR_000001015", "", "Isoform of CD45",
-    "CD45RO", "UCHL1", "", "PTPRC", "PR_000001017", "", "Isoform of CD45",
-
-    "Ig light chain lambda", "MHL-38", "IGL", "HGNC:5853", "PR:000050185", "",
-        "",
-
-    "IgG Fc", "M1310G05", "IGHG1,IGHG3", "HGNC:5525, HGNC:5527", "", "", IgG,
+    #"IgG Fc", "M1310G05", "IGHG1,IGHG3", "HGNC:5525, HGNC:5527", "", "", IgG,
 
     "c-Met", "12.1", "MET", "HGNC:7029", "", "", "",
 
-    "CLA", "HECA-452", "SELPLG", "HGNC:10722", "", "", ""
+    "CLA", "HECA-452", "SELPLG", "HGNC:10722", "", "", "",
+
+    "integrin b7", "FIB504","ITGB7", "HGNC:6162", "", "", "",
+
+   # "HLA-DR", "L243", NA, NA, "PR:P01903, PR:000050459", "", HLA_DR,
+#    "HLA.A.B.C", "W6/32", "B2M", "HGNC:914", "", "", HLA_ABC,
+
+    "CD11a/CD18", "", "ITGB2, ITGAL", "", "", "", ""
 )
+
+
+# Check what is happening with splitUnnest on TCR alpha/beta

@@ -1,4 +1,6 @@
 data(gene_aliases)
+gene_aliases <- as_tibble(gene_aliases) %>%
+    dplyr::filter(! SOURCE %in% c("CELLMARKER", "CSPA"))
 
 # Cell marker database ---------------------------------------------
 
@@ -9,6 +11,8 @@ data(gene_aliases)
 # Row Epithelial cell starting Adhesion molecules -
 # Number of cell markers is not equal to number of gene (groups),
 # is there an extra , Adhesion molecules, LFA1, Adhesion molecules LFA2?
+
+# There are some errors in the uniprot IDs, e.g. P08920 for CD2 is a mouse ID
 
 # http://bio-bigdata.hrbmu.edu.cn/CellMarker/index.jsp
 
@@ -66,21 +70,33 @@ cellmarker <- readr::read_delim(cellmarker_fname) %>%
     dplyr::mutate(across(c(ENTREZ_SYMBOL, ENTREZ_ID,
                            proteinName, UNIPROT_ID), ~na_if(., "NA")))
 
-# Patch missing ENTREZ or UNIPROT ids
+
+# Patch missing IDs or UNIPROT IDs that differ from HGNC IDs ----
 ga_patch <- gene_aliases %>%
     dplyr::select(value, UNIPROT_ID, ENTREZ_ID) %>%
     dplyr::rename(Antigen = value) %>%
     unique()
 
-ga_patch <- ga_patch[match(cellmarker$Antigen, ga_patch$Antigen), ]
+# Match by antigen for filling NA
+ga_coalesce <- ga_patch[match(cellmarker$Antigen, ga_patch$Antigen), ]
+
+# Remove Antigen for updating UNIPROT ID
+ga_patch <- ga_patch %>%
+    dplyr::select(-Antigen) %>%
+    dplyr::filter(complete.cases(UNIPROT_ID, ENTREZ_ID)) %>%
+    unique()
 
 cellmarker <- cellmarker %>%
-    dplyr::coalesce(ga_patch) %>%
+    # Fill NA values
+    dplyr::coalesce(ga_coalesce) %>%
 
     # Filter again, some cellNames include an NA in a list of markers
     # (some aren't protein-coding, some would have an ENTREZ ID)
     dplyr::filter(if_all(c(ENTREZ_ID, UNIPROT_ID), ~! is.na(.x))) %>%
     dplyr::mutate(across(everything(), ~stringr::str_squish(.x))) %>%
+
+    # Update UNIPROT IDs, matching by ENTREZ_ID
+    dplyr::rows_update(ga_patch, by = "ENTREZ_ID", unmatched = "ignore") %>%
 
     # Split the protein complexes
     dplyr::mutate(across(c(ENTREZ_SYMBOL, ENTREZ_ID, proteinName, UNIPROT_ID),

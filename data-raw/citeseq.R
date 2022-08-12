@@ -32,3 +32,32 @@ citeseq <- searchTotalseq(citeseq)
 # Create citeseq data set ----
 citeseq <- as.data.frame(citeseq)
 usethis::use_data(citeseq, overwrite = TRUE, compress = "bzip2")
+
+# TCR alpha/beta - not matched correctly
+# HGNC:12102 = TRAV1-2 = TCR Va7.2?
+# TRAV24, TRAJ18 = TCRVa24-Ja18
+# HLA2 != HLA-A
+# HLA-DR = HLA-DRA?
+# HLA.A.B.C != HGNC:914
+
+split_merge_str <- sprintf('grepl("TCR", %s)', ab)
+
+qdf <- citeseq %>% select(ID, Antigen) %>% unique()
+
+qry = list(purrr::partial(gsubAb, ab = !!ab), # Remove A/antis
+           purrr::partial(gsubAb, ab = !!ab, pattern = "\\s[Rr]ecombinant"),
+           purrr::partial(splitUnnest, ab = !!ab), # Brackets
+           purrr::partial(splitUnnest, ab = !!ab, split = ", "),  # Commas
+           # / _ or . if at least 3 on each side and not TCR
+           purrr::partial(splitUnnest, exclude = "TCR",
+                          split = "(?<=[A-z0-9-]{3})[\\/_\\.](?=[A-z0-9-]{3,})"),
+           purrr::partial(.reformatAb, ab = !!ab),
+           purrr::partial(.reformatAb, ab = !!ab),
+           purrr::partial(separateSubunits, ab = !!ab, new_col = "subunit"),
+           purrr::partial(splitMerge, ex = !!split_merge_str,
+                          f = formatTCR, tcr = "greek_letter")
+)
+
+qdf <- magrittr::freduce(qdf, qry)
+
+# For antigens like TCR alpha/beta, KIR2DL1/S1/S3/S5, want to split like subunit

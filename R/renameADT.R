@@ -181,9 +181,21 @@ matchToCiteseq <- function(x, cols = NULL){
     x <- dplyr::bind_rows(x %>% dplyr::mutate(ID = "KEEPME"), citeseq)
     x <- getCommonName(x, cols = keep_cols, ab = "Antigen",
                        fill_col = "Antigen_std", keep = TRUE)
+
+    # Check - one Clone should map to one ID
+    res <- .checkCiteseq(x, gp = "Cat_Number", id = "HGNC_ID")
+
+
     # Select new names
     x <- x %>% dplyr::filter(ID == "KEEPME") %>%
         dplyr::select(all_of(c("Antigen", "Antigen_std")))
 
     return(x)
+}
+
+
+.checkCiteseq <- function(x, gp = "Cat_Number", id = "HGNC_ID"){
+    x %>%
+        dplyr::group_by(!!sym(gp)) %>%
+        dplyr::filter(dplyr::n_distinct(!!sym(id), na.rm = TRUE) > 1)
 }
