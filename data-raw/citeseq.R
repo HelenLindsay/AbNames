@@ -8,12 +8,13 @@ citeseq_q <- citeseq %>% dplyr::select(ID, Antigen)
 query_df <- AbNames::makeQueryTable(citeseq_q, ab = "Antigen")
 alias_results <- searchAliases(query_df)
 
-id_cols <- c("HGNC_ID", "HGNC_SYMBOL", "ENSEMBL_ID", "UNIPROT_ID", "ENTREZ_ID")
+id_cols <- c("HGNC_ID", "HGNC_SYMBOL", "ENSEMBL_ID",
+             "UNIPROT_ID", "ENTREZ_ID", "SOURCE")
 
 # Remove matches to several genes, select just columns of interest
 
 alias_results <- alias_results %>%
-    dplyr::select(matches("ID|HGNC"), name) %>% # Select ID and HGNC columns
+    dplyr::select(matches("ID|HGNC"), name, SOURCE) %>% # Select ID and HGNC columns
     unique() %>% # Collapse results with same ID from different queries
     group_by(ID) %>%
     # Collapse multi-subunit entries, convert "NA" to NA
@@ -61,3 +62,11 @@ qry = list(purrr::partial(gsubAb, ab = !!ab), # Remove A/antis
 qdf <- magrittr::freduce(qdf, qry)
 
 # For antigens like TCR alpha/beta, KIR2DL1/S1/S3/S5, want to split like subunit
+# CD66a_c_e
+# CD18 associates with CD11a (LFA-1) CD11-b (Mac-1)
+# CD3.2__Mimitou_2021_cite_and_dogma_seq in query table, only matches through
+# totalseq = CD3E
+#  CD3 (CD3E)__Nathan_2021 should match CD3D,E and G?
+# Pombo DopamineD4receptor = "dopamine receptor D4" = "HGNC:3025
+
+

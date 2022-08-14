@@ -292,6 +292,7 @@ data(hgnc)
 hgnc <- hgnc %>%
     dplyr::select(HGNC_ID, HGNC_SYMBOL, ENSEMBL_ID) %>%
     dplyr::filter(! is.na(ENSEMBL_ID)) %>%
+    dplyr::mutate(SOURCE == "TotalSeq")
     unique()
 
 totalseq <- left_join(totalseq, hgnc, by = c("ENSEMBL_ID"))
