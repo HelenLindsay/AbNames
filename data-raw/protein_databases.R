@@ -196,7 +196,6 @@ gene_aliases <- gene_aliases %>%
 
 # Does not appear to contain protein complex names
 
-
 # Table of validated surfaceome proteins
 #cspa_loc <- "http://wlab.ethz.ch/cspa/data/S2_File.xlsx"
 #cspa_fname <- "~/Analyses/CITEseq_curation/data/cspa.xlsx"
