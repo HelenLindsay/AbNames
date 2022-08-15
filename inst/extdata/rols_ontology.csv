@@ -1,12 +1,27 @@
 Antigen,Clone,ProteinOntology,UniProtKB,NCIT,HGNC_SYMBOL,HGNC_ID,ISOFORM,Synonyms,Comments,ALT_ID
-Tau Phospho (Thr181),M7004D06,PR:000027448,UniProtKB:P10636-8,,MAPT,HGNC:6893,hMAPT/iso:Tau-F/Phos:1,,PRO-short-label: hMAPT/iso:Tau-F/Phos:1,PR:000027448
-Mac-2 (Galectin-3),M3/38,,,,LGALS3,HGNC:6563,,"Galectin-3, Mac-2, Gal-3, RL-29, galactose-specific lectin 3, CBP-35, L-34, εBP",,HGNC:6563
-CD66,B1.1/CD66,,,,"CEACAM1, CEACAM3, CEACAM5, CEACAM6","HGNC:1814, HGNC:1815, HGNC:1817, HGNC:1818  ",,,https://www.bdbiosciences.com/en-ch/products/reagents/flow-cytometry-reagents/research-reagents/single-color-antibodies-ruo/pe-mouse-anti-human-cd66.551480,CD66acde
-phycoerythrin (PE),PE001,,,,,,,,"anti-phycoerythrin, for binding PE and PE conjugated with antibody, streptavidin or dyes, InterPRO:IPR004228",PF02972
-IgG,G18-145,,,NCIT:C568,,,,,"Reacts with heavy chain of IgG1, IgG2, IgG3 and IgG4",NCIT:C568
+CD11a/CD18,m24,,,NCIT_C97746,"ITGAL, ITGB2","HGNC:6148, HGNC:6155",,LFA-1,,NCIT_C97746
 CD158 (KIR2DL1/S1/S3/S5),HP-MA4,,,NCIT_C104678,"KIR2DL1, KIR2DS1, KIR2DS3, KIR2DS5","HGNC:6329, HGNC:63333, HGNC:6335, HGNC:6337",,"KIR, Killer Ig Receptor, Killer-Cell Immunoglobulin-Like Receptor Family, Killer Cell Immunoglobulin-Like Receptor, Killer-Cell Immunoglobulin-Like Receptor, CD158 Family, CD158",,CD158_HP-MA4
+CD45R,,PR:000050216,,NCIT:C49531,PTPRC,,PTPRC/iso:CD45R,B220,,
+CD45RA,HI100,PR_000001015,UniProtKB:P08575-8,NCIT_C118492,PTPRC,,PTPRC/iso:CD45RA,,,
+CD45RB,,PR_000001016,UniProtKB:P08575-9,NCIT_C118493,PTPRC,,PTPRC/iso:CD45RB,,,
+CD45RO,UCHL1,PR_000001017,UniProtKB:P08575-4,NCIT_C118495,PTPRC,,PTPRC/iso:CD45RO,,,
+CD66,B1.1/CD66,,,,"CEACAM1, CEACAM3, CEACAM5, CEACAM6","HGNC:1814, HGNC:1815, HGNC:1817, HGNC:1818  ",,,https://www.bdbiosciences.com/en-ch/products/reagents/flow-cytometry-reagents/research-reagents/single-color-antibodies-ruo/pe-mouse-anti-human-cd66.551480,CD66acde
+CD66b,,PR:000001332,,NCIT_C118590,CEACAM8,HGNC:1820,,"carcinoembryonic antigen CGM6, non-specific cross-reacting antigen NCA-95, CD67 antigen, CEACAM8, CD66b",PR:P31997,
+CD77,5B5,,,,A4GALT,HGNC:18149,,,https://www.sinobiological.com/research/cd-antigens/cd77,
+DR3 (TRAMP),,PR:Q93038,,NCIT:C118332,TNFRSF25,,,,,
+GP130,,PR:P42704,,NCIT:C52804,LRPPRC,,,,PR:000009930,
+"HLA-A,B,C",W6/32,PR:P61769,,,B2M,HGNC:914,,,"Ontology ID is for beta-2-microglobulin, which this antibody binds","HLA-A,B,C"
+HLA-A2,BB7.2,,,NCIT_C16691,HLA-A,,,"1 MHC Class I Antigen A*2, HLA-A2 Antigen, HLA-A Class I Antigen 2, HLA-A Histocompatibility Type Antigen*02, HLA-A Histocompatibility Type Antigen 2, HLA-A*02, HLA-A, HLA-A2, Major Histocompatibility Complex, Class I, A2 Antigen, HLA Class I Histocompatibility Antigen, A-2 Alpha Chain, MHC Class I Antigen A*02",,HLA-A2
+HLA-DP,,,,NCIT_C71274,,,,,,HLA-DP
+HLA-DQ,Tü169,,,NCIT_C62792,,,,,,HLA-DQ
+HLA-DR,L243,,,NCIT_C16692,,,,,,HLA-DR
 Ig light chain lambda,MHL-38,PR:000050185,,NCIT:C16719,IGL,HGNC:5853,,,,HGNC:5853
+IgG,G18-145,,,NCIT:C568,,,,,"Reacts with heavy chain of IgG1, IgG2, IgG3 and IgG4",NCIT:C568
 IgG Fc,M1310G05,PR:000050252,,NCIT_C568 ,,,,,From BioLegend website: clone M1310G05 has stronger affinity for IgG1 and IgG3 than for IgG2 and IgG4,PR:000050252
+Mac-2 (Galectin-3),M3/38,,,,LGALS3,HGNC:6563,,"Galectin-3, Mac-2, Gal-3, RL-29, galactose-specific lectin 3, CBP-35, L-34, εBP",,HGNC:6563
+phycoerythrin (PE),PE001,,,,,,,,"anti-phycoerythrin, for binding PE and PE conjugated with antibody, streptavidin or dyes, InterPRO:IPR004228",PF02972
+Tau Phospho (Thr181),M7004D06,PR:000027448,UniProtKB:P10636-8,,MAPT,HGNC:6893,hMAPT/iso:Tau-F/Phos:1,,PRO-short-label: hMAPT/iso:Tau-F/Phos:1,PR:000027448
+TCR Va24-Ja18,6B11,,,,,,,,,
 TCR Vb13.1,H131,,,,TRBV13,"HGNC:12188
 
 ",,"T cell receptor Vβ13.1 chain, TCRBV13.1, TCRBV13
@@ -15,29 +30,5 @@ TCR Vb13.2,H132,,,,TRBV13,"HGNC:12188
 
 ",,"T cell receptor Vβ13.2 chain
 ",,TCR_Vb13.2
-TCR Va24-Ja18,6B11,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-Folate receptor beta,,PR:P14207,,NCIT_C104916,FOLR2,HGNC:3793,,,Protein ID (all species): PR:000007595,
-Podocalyxin,,,,NCIT_C106450,PODXL,,,,,
-LFA-1,,,,NCIT_C97746,"ITGAL, ITGB2",,,,,
-DR3 (TRAMP),,PR:Q93038,,NCIT:C118332,TNFRSF25,,,,,
-CD45R,,PR:000050216,,NCIT:C49531,PTPRC,,PTPRC/iso:CD45R,B220,,
-CD45RA,HI100,PR_000001015,UniProtKB:P08575-8,NCIT_C118492,PTPRC,,PTPRC/iso:CD45RA,,,
-CD45RO,UCHL1,PR_000001017,UniProtKB:P08575-4,NCIT_C118495,PTPRC,,PTPRC/iso:CD45RO,,,
-CD45RB,,PR_000001016,UniProtKB:P08575-9,NCIT_C118493,PTPRC,,PTPRC/iso:CD45RB,,,
-TRA-1-81,,,,NCIT_C178549,,,,"tra1-81, TRA-1-81, TRA-1-81 Antigen, TRA181",,
 TRA-1-60-R,,,,NCIT_C178550,,,,"TRA160, tra1-60, TRA-1-60 Antigen, TRA-1-60",,
-HLA-A2,BB7.2,,,NCIT_C16691,HLA-A,,,"1 MHC Class I Antigen A*2, HLA-A2 Antigen, HLA-A Class I Antigen 2, HLA-A Histocompatibility Type Antigen*02, HLA-A Histocompatibility Type Antigen 2, HLA-A*02, HLA-A, HLA-A2, Major Histocompatibility Complex, Class I, A2 Antigen, HLA Class I Histocompatibility Antigen, A-2 Alpha Chain, MHC Class I Antigen A*02",,
-"HLA-A,B,C",W6/32,PR:P61769,,,B2M,HGNC:914,,,"Ontology ID is for beta-2-microglobulin, which this antibody binds",
-HLA-DQ,Tü169,,,NCIT_C62792,,,,,,
-HLA-DR,L243,,,NCIT_C16692,,,,,,
-HLA-DP,,,,NCIT_C71274,,,,,,
-CD98,,,,,,,,,,
-GP130,,PR:P42704,,NCIT:C52804,LRPPRC,,,,PR:000009930,
-CD16,,,,,,,,,,
-CD66b,,PR:000001332,,NCIT_C118590,CEACAM8,HGNC:1820,,"carcinoembryonic antigen CGM6, non-specific cross-reacting antigen NCA-95, CD67 antigen, CEACAM8, CD66b",PR:P31997,
-IgG,,,,NCIT_C568,,,,,"Immunoglobulin G, IgG",
-CLA,,,,NCIT_C128478,SELPLG,,,,"CD162, CLA, PSGL-1, CD162 Antigen, Cutaneous Lymphocyte-Associated Associated Antigen, P-Selectin Glycoprotein Ligand 1, Selectin P Ligand, Cutaneous Lymphocyte Antigen, P-Selectin Glycoprotein Ligand",
+TRA-1-81,,,,NCIT_C178549,,,,"tra1-81, TRA-1-81, TRA-1-81 Antigen, TRA181",,

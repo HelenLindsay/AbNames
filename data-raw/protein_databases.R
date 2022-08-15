@@ -37,6 +37,11 @@ gsubCellmarker <- function(x){
 
 #cellmarker_loc <- paste0("http://bio-bigdata.hrbmu.edu.cn/CellMarker/download/",
 #                         "Human_cell_markers.txt")
+
+# Cellmarker is incorrect for CD77 / A4GALT
+# According to https://www.sinobiological.com/research/cd-antigens/cd77
+
+
 cellmarker_fname <- "~/Analyses/CITEseq_curation/data/CellMarker_human.txt"
 #download.file(cellmarker_loc, destfile = cellmarker_fname)
 

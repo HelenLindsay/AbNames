@@ -514,6 +514,7 @@ missing <- citeseq %>%
 # Keep source in ID result table?
 # Is TCRg clone B1 = TCRg/d?
 # across query columns - na_if equal to antigen and not is antigen
+# Replace greek symbols in totalseq
 
 # Session Info
 
