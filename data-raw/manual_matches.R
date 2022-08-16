@@ -1,3 +1,41 @@
+library("tidyverse")
+library("AbNames")
+
+data(totalseq)
+data(gene_aliases)
+
+mm_fname <- system.file("extdata", "rols_ontology.csv", package = "AbNames")
+mm <- read_delim(mm_fname) %>%
+    dplyr::mutate(across(where(is_character), stringr::str_squish))
+
+mm_long <- mm %>%
+    dplyr::mutate(across(c(HGNC_ID, HGNC_SYMBOL), ~strsplit(.x, ", "))) %>%
+    tidyr::pivot_longer()
+
+
+ts <- totalseq %>% union_join(mm, by = c("Antigen", "Clone"))
+
+# Check the antigens with NA HGNC_ID in totalseq, are they in gene_aliases and
+# are they correct?
+
+# (Anything that is in totalseq without ID and not in aliases may need a
+# manual match)
+
+
+
+# Left join any isn't working as intended
+ts2 <- totalseq %>% left_join_any(mm, cols = c("Antigen", "Clone", "HGNC_ID"))
+
+# Prevent false matches to the same gene by adding an ALT_ID column
+
+# Do we need to join by ID?
+
+
+# Totalseq - join if antigen, clone or HGNC_ID match
+
+
+# Initial version -----
+
 # CD158f/ KIR2DL5
 # https://doi.org/10.3389/fimmu.2012.00289
 # KIR2DL5 is highly polymorphic and exhibits copy number variation
@@ -8,11 +46,11 @@
 #IFN_gamma <- paste("https://proconsortium.org/app/entry/PR:000001361/",
 #                   "IFN-gamma receptor 1 and IFN-gamma-R-alpha are synonyms")
 
-HLA_DR <- paste("Grep in protein ontology for HLA-DR gives",
-                "wrong results PR:P04233, PR:000001822")
+#HLA_DR <- paste("Grep in protein ontology for HLA-DR gives",
+#                "wrong results PR:P04233, PR:000001822")
 
-HLA_ABC <- paste("Biolegend website: Clone W6/32 recognizes ",
-                 "human beta2-microglobulin")
+#HLA_ABC <- paste("Biolegend website: Clone W6/32 recognizes ",
+#                 "human beta2-microglobulin")
 
 #CD66 <- paste0("https://www.bdbiosciences.com/en-ch/products/reagents/",
 #               "flow-cytometry-reagents/research-reagents/",
@@ -33,8 +71,8 @@ HLA_ABC <- paste("Biolegend website: Clone W6/32 recognizes ",
 
 
 # Use ALT_ID when it is a modification, a complex, or not a protein
-manual_matches <- tibble::tribble(~Antigen, ~Clone, ~HGNC_Symbol, ~HGNC_ID,
-                                  ~PRO_ID, ~ALT_ID, ~Comments,
+#manual_matches <- tibble::tribble(~Antigen, ~Clone, ~HGNC_Symbol, ~HGNC_ID,
+#                                  ~PRO_ID, ~ALT_ID, ~Comments,
 
     #"Tau Phospho (Thr181)", "M7004D06", "MAPT", "HGNC:6893", "PR:000027448,
     #    PR:000027447", "PR:000027448",
@@ -84,7 +122,7 @@ manual_matches <- tibble::tribble(~Antigen, ~Clone, ~HGNC_Symbol, ~HGNC_ID,
 #    "HLA.A.B.C", "W6/32", "B2M", "HGNC:914", "", "", HLA_ABC,
 
    # "CD11a/CD18", "m24", "ITGB2, ITGAL", "", "", "", ""
-)
+#)
 
 
 # Check what is happening with splitUnnest on TCR alpha/beta

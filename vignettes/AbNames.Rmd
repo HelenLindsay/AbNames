@@ -465,7 +465,6 @@ missing <- citeseq %>%
 ## TO DO
 
 *An example of (interactively) deciding what to do if groups are inconsistent.
-*Standardise names in a singlecellexperiment
 *Check new annotations against previous
 *Isotype controls
 *Add control column to isotype controls to prevent false match to mouse IgG2a
@@ -488,7 +487,7 @@ missing <- citeseq %>%
 # ungroup(citeseq)
 #  b2-microglobin without dash
 # Add tag for non-human tagging antibodies
-# Problems: Tau (Phospho Thr181) Su and Stephenson?
+# Problems: 
 # HGNC_SYMBOL WRONG FOR CD158b (KIR2DL2/L3, NKAT2)?  (NKAT2 = only one gene)
 # Triana RRID same for CD235a and CD235a - match via combination of RRID
 # and Antigen
