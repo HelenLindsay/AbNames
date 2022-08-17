@@ -138,16 +138,28 @@ group_by_any <- function(df, groups, new_col = "group", ignore = NULL){
 # Perform successive inner joins, at each round only using unmatched
 # Allow cols in groups, e.g. "Cat_Number", c("Antigen", "Clone"), ...
 # Cols must be a list.  Assume that rows can be uniquely identified
-left_join_any <- function(x, y, cols){
+# shared: which function to use for shared columns?  rows_patch (fill NA) or
+# rows_update (overwrite)
+# order of cols matters as joining is successive
+# ignore option for patching?  Set patch_cn to NULL?
+left_join_any <- function(x, y, cols, shared = c("patch", "update")){
+
+    update_fun <- match.arg(shared)
+    update_fun <- if (update_fun == "patch"){
+        dplyr::rows_patch
+    } else {
+        dplyr::rows_update
+    }
 
     # For each join, we only want to include the join column of interest in y
     cn_y <- colnames(y)
     cn_x <- colnames(x)
     join_cns <- unique(unlist(cols))
-    add_cn <- setdiff(cn_y, join_cns)
 
     # Columns to add are columns not already in in x and not used for joining
-    #add_cn <- setdiff(cn_y, c(join_cns, cn_x))
+    # Shared columns are treated differently, by patching NA values
+    patch_cn <- intersect(cn_x, setdiff(cn_y, join_cns))
+    add_cn <- setdiff(cn_y, c(join_cns, patch_cn))
 
     res <- head(x, 0)
 
@@ -163,17 +175,26 @@ left_join_any <- function(x, y, cols){
         new_res <- x_aj %>%
             dplyr::inner_join(y_subs, by = col_set, na_matches = "never")
 
+        if (length(patch_cn) > 0){
+            y_patch <- y %>%
+                dplyr::select(all_of(c(patch_cn, col_set))) %>%
+                dplyr::filter(if_all(everything(), complete.cases)) %>%
+                unique()
+            new_res <- update_fun(new_res, y_patch,
+                                  unmatched = "ignore", by = col_set)
+        }
+
         res <- dplyr::bind_rows(res, new_res)
     }
 
     # Patch any values present in y but missing from x
-    res <- dplyr::rows_patch(res, y %>%
-                                 dplyr::select(all_of(join_cns)) %>%
-                                 unique(),
-                             unmatched = "ignore")
+    #res <- dplyr::rows_patch(res, y %>%
+    #                             dplyr::select(all_of(join_cns)) %>%
+    #                             unique(),
+    #                         unmatched = "ignore")
 
     # Add the unmatched rows back in
-    x_aj <- dplyr::anti_join(x, res, by = cn_x)
+    x_aj <- dplyr::anti_join(x, res, by = setdiff(cn_x, patch_cn))
     res <- dplyr::bind_rows(x_aj, res)
 
     return(res)

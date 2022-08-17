@@ -7,13 +7,21 @@ data(gene_aliases)
 mm_fname <- system.file("extdata", "rols_ontology.csv", package = "AbNames")
 mm <- read_delim(mm_fname) %>%
     dplyr::mutate(across(where(is_character), stringr::str_squish))
+mm_ids <- mm %>% select(Antigen, Clone, HGNC_ID, HGNC_SYMBOL, ALT_ID)
 
-mm_long <- mm %>%
-    dplyr::mutate(across(c(HGNC_ID, HGNC_SYMBOL), ~strsplit(.x, ", "))) %>%
-    tidyr::pivot_longer()
+# We do not want to join by HGNC_ID as e.g. TRA-1-60-R matches PODXL but is not
+# in the totalseq table
+ts <- totalseq %>% left_join_any(mm_ids, cols = c("Antigen", "Clone"))
+
+ts2 <- totalseq %>% left_join_any(mm_ids, cols = c("Antigen", "Clone"),
+                                   shared = "update")
 
 
-ts <- totalseq %>% union_join(mm, by = c("Antigen", "Clone"))
+
+#mm_long <- mm %>%
+#    dplyr::mutate(across(c(HGNC_ID, HGNC_SYMBOL), ~strsplit(.x, ", "))) %>%
+#    tidyr::pivot_longer()
+
 
 # Check the antigens with NA HGNC_ID in totalseq, are they in gene_aliases and
 # are they correct?
@@ -22,9 +30,6 @@ ts <- totalseq %>% union_join(mm, by = c("Antigen", "Clone"))
 # manual match)
 
 
-
-# Left join any isn't working as intended
-ts2 <- totalseq %>% left_join_any(mm, cols = c("Antigen", "Clone", "HGNC_ID"))
 
 # Prevent false matches to the same gene by adding an ALT_ID column
 
