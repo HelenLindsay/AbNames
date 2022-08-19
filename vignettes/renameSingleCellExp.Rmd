@@ -18,16 +18,11 @@ knitr::opts_chunk$set(echo = TRUE)
 This vignette shows how to standardize the names of the antibody-derived tags in
 a CITE-seq experiment in SingleCellExperiment format.
 
-To demonstrate, we will use the "kotliarov" dataset available in the package
+To demonstrate, we will use the "Kotliarov" dataset available in the package
 "scRNAseq".  
 
 
 ```{r, message = FALSE}
-
-#library(SingleCellMultiModal)
-#cord_blood <- CITEseq(DataType="cord_blood", modes="scADT_Counts",
-#                      dry.run=FALSE, DataClass = "SingleCellExperiment")
-#cord_blood
 
 # May not need much renaming....
 library("scRNAseq")
@@ -35,29 +30,69 @@ library("AbNames")
 
 kotliarov <- KotliarovPBMCData(mode = "adt")
 head(rownames(kotliarov))
+```
 
-# Step by step method
+## Put into a data frame to allow matching to the CITEseq data set
 
-# 1. Put into a data frame to allow matching to the CITEseq data set
+You can include information such as catalogue number and antibody clone
+to assist matching if it is available.  When matching to the CITEseq data
+set, the names of the columns to use for matching must equal those in the
+CITEseq data set.  For example, below we match using only the antigen name,
+using the column "Antigen".  By default, columns "Clone", "Antigen", and "Cat_Number" (catalogue number) are used for matching if available. 
+
+# HGNC_ID
+
+
+```{r}
 df <- data.frame(Original = rownames(kotliarov),
                  Antigen = gsub("_PROT", "", rownames(kotliarov)))
 
-# 2. Review suggested consensus names
-# Antibodies are grouped by matches in catalogue number, clone, antigen name
-# or gene identifier.  It is a good idea to review matches as errors in e.g.
-# catalogue number will lead to incorrect matches.
+
+```
+## Match to the CITEseq data set and review suggested consensus names
+
+It is a good idea to review matches as errors in e.g. catalogue number will lead to incorrect matches.
+
+The function `matchToCiteseq` will report which columns are used for matching.
+Note that unless specified otherwise, the entries of the CITEseq data set are matched using the default columns even if these do not exist in the new data set.
+
+
+```{r}
 df <- matchToCiteseq(df)
 print(head(df))
+```
 
-# 3. Rename
+
+## Rename single cell experiment
+```{r}
+
+# To rename the singleCellExperiment, we need a named vector of the new names,
+# with names being the original names of the singleCellExperiment.
 new_nms <- structure(df[[2]], names = rownames(kotliarov))
+print(head(new_nms))
+
 kotliarov <- renameADT(kotliarov, new_nms)
 
 head(rownames(kotliarov))
 
 
+
+```
+
+
+```{r}
+sessionInfo()
+```
+
+```{r}
+# alternative data sets
+#library(SingleCellMultiModal)
+#cord_blood <- CITEseq(DataType="cord_blood", modes="scADT_Counts",
+#                      dry.run=FALSE, DataClass = "SingleCellExperiment")
+#cord_blood
+
 #library(CiteFuse)
 #data("CITEseq_example", package = "CiteFuse")
 #sce_citeseq <- preprocessing(CITEseq_example)
 #rownames(altExp(sce_citeseq, "ADT"))
-```
+```{r}

@@ -177,6 +177,7 @@ matchToCiteseq <- function(x, cols = NULL){
 
     if (! is.null(keep_cols)) { keep_cols <- unique(c(keep_cols, "Antigen")) }
 
+
     # Match using specified columns
     x <- dplyr::bind_rows(x %>% dplyr::mutate(ID = "KEEPME"), citeseq)
     x <- getCommonName(x, cols = keep_cols, ab = "Antigen",
