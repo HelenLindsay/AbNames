@@ -39,8 +39,9 @@ gsubCellmarker <- function(x){
 #                         "Human_cell_markers.txt")
 
 # Cellmarker is incorrect for CD77 / A4GALT
-# According to https://www.sinobiological.com/research/cd-antigens/cd77
+# According to HGNC / https://www.sinobiological.com/research/cd-antigens/cd77
 
+cellmarker_exclude <- c("CD77")
 
 cellmarker_fname <- "~/Analyses/CITEseq_curation/data/CellMarker_human.txt"
 #download.file(cellmarker_loc, destfile = cellmarker_fname)
@@ -73,8 +74,8 @@ cellmarker <- readr::read_delim(cellmarker_fname) %>%
                   UNIPROT_ID = proteinID) %>%
     dplyr::mutate(SOURCE = "CELLMARKER") %>%
     dplyr::mutate(across(c(ENTREZ_SYMBOL, ENTREZ_ID,
-                           proteinName, UNIPROT_ID), ~na_if(., "NA")))
-
+                           proteinName, UNIPROT_ID), ~na_if(., "NA"))) %>%
+    dplyr::filter(! Antigen %in% cellmarker_exclude)
 
 # Patch missing IDs or UNIPROT IDs that differ from HGNC IDs ----
 ga_patch <- gene_aliases %>%

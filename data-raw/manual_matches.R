@@ -13,8 +13,10 @@ mm_ids <- mm %>% select(Antigen, Clone, HGNC_ID, HGNC_SYMBOL, ALT_ID)
 # in the totalseq table
 ts <- totalseq %>% left_join_any(mm_ids, cols = c("Antigen", "Clone"))
 
-ts2 <- totalseq %>% left_join_any(mm_ids, cols = c("Antigen", "Clone"),
-                                   shared = "update")
+ts2 <- totalseq %>%
+    left_join_any(mm_ids, cols = c("Antigen", "Clone"), shared = "update") %>%
+    dplyr::coalesce(ALT_ID, HGNC_ID)
+
 
 
 

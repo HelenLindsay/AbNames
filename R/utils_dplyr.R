@@ -160,13 +160,15 @@ left_join_any <- function(x, y, cols, shared = c("patch", "update")){
     # Shared columns are treated differently, by patching NA values
     patch_cn <- intersect(cn_x, setdiff(cn_y, join_cns))
     add_cn <- setdiff(cn_y, c(join_cns, patch_cn))
+    aj_cn <- c()
 
     res <- head(x, 0)
 
     # Successive inner joins, adding new results at each stage
     for (col_set in cols){
         # Select results that aren't already present in results table
-        x_aj <- dplyr::anti_join(x, res, by = cn_x)
+        aj_cn <- c(aj_cn, col_set)
+        x_aj <- dplyr::anti_join(x, res, by = aj_cn)
 
         y_subs <- y %>%
             dplyr::select(all_of(c(add_cn, col_set))) %>%
@@ -175,6 +177,7 @@ left_join_any <- function(x, y, cols, shared = c("patch", "update")){
         new_res <- x_aj %>%
             dplyr::inner_join(y_subs, by = col_set, na_matches = "never")
 
+        # If columns are shared, either update or patch values in x from y
         if (length(patch_cn) > 0){
             y_patch <- y %>%
                 dplyr::select(all_of(c(patch_cn, col_set))) %>%
@@ -186,12 +189,6 @@ left_join_any <- function(x, y, cols, shared = c("patch", "update")){
 
         res <- dplyr::bind_rows(res, new_res)
     }
-
-    # Patch any values present in y but missing from x
-    #res <- dplyr::rows_patch(res, y %>%
-    #                             dplyr::select(all_of(join_cns)) %>%
-    #                             unique(),
-    #                         unmatched = "ignore")
 
     # Add the unmatched rows back in
     x_aj <- dplyr::anti_join(x, res, by = setdiff(cn_x, patch_cn))
