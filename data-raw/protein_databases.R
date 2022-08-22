@@ -1,3 +1,6 @@
+# To do: CD98, cellmarker only lists one gene, totalseq 2
+
+
 data(gene_aliases)
 gene_aliases <- as_tibble(gene_aliases) %>%
     dplyr::filter(! SOURCE %in% c("CELLMARKER", "CSPA"))

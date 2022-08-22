@@ -8,7 +8,8 @@
 # Be careful of exceptions, e.g. Cat_Number == "custom made"
 getCommonName <- function(x, cols = NULL, ab = "Antigen",
                           fill_col = "Antigen_std",
-                          ignore = list(Cat_Number = "[Cc]ustom"), ...){
+                          ignore = list(Cat_Number = "[Cc]ustom"),
+                          verbose = TRUE, ...){
 
     keep_cols <- c(colnames(x), fill_col)
 
@@ -32,6 +33,12 @@ getCommonName <- function(x, cols = NULL, ab = "Antigen",
 
     # Group by any e.g. catalogue number or exact match to antigen
     tmp_grp <- .tempColName(x, nm = "group")
+
+    if (isTRUE(verbose)){
+        message(sprintf("Using these columns for matching:\n%s",
+                toString(cols)))
+    }
+
     x <- group_by_any(x, groups = cols, new_col = tmp_grp, ignore = ignore)
 
     # Fill with most common value
