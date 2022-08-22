@@ -48,7 +48,7 @@ gene_aliases <- gene_aliases %>%
     dplyr::mutate(ALT_ID = dplyr::coalesce(ALT_ID, HGNC_ID))
 
 # Recreate gene_aliases data set
-gene_aliases <- as.data.frame(hgnc)
+gene_aliases <- as.data.frame(gene_aliases)
 usethis::use_data(gene_aliases, overwrite = TRUE, compress = "bzip2")
 
 
