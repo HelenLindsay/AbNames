@@ -4,6 +4,10 @@ library("AbNames")
 data(totalseq)
 data(gene_aliases)
 
+# Add ALT_ID to totalseq data set -----
+
+original_nrow <- nrow(totalseq)
+
 mm_fname <- system.file("extdata", "rols_ontology.csv", package = "AbNames")
 mm <- read_delim(mm_fname) %>%
     dplyr::mutate(across(where(is_character), stringr::str_squish))
@@ -11,35 +15,44 @@ mm_ids <- mm %>% select(Antigen, Clone, HGNC_ID, HGNC_SYMBOL, ALT_ID)
 
 # We do not want to join by HGNC_ID as e.g. TRA-1-60-R matches PODXL but is not
 # in the totalseq table
-ts <- totalseq %>% left_join_any(mm_ids, cols = c("Antigen", "Clone"))
+totalseq <- totalseq %>%
+    left_join_any(mm_ids, cols = c("Antigen", "Clone"), shared = "update") %>%
+    dplyr::mutate(ALT_ID = dplyr::coalesce(ALT_ID, HGNC_ID))
 
-ts2 <- totalseq %>% left_join_any(mm_ids, cols = c("Antigen", "Clone"),
-                                   shared = "update")
+new_nrow <- nrow(totalseq)
 
-
-
-#mm_long <- mm %>%
-#    dplyr::mutate(across(c(HGNC_ID, HGNC_SYMBOL), ~strsplit(.x, ", "))) %>%
-#    tidyr::pivot_longer()
+# Check that totalseq did not gain rows during merge
+original_nrow == new_nrow
 
 
-# Check the antigens with NA HGNC_ID in totalseq, are they in gene_aliases and
-# are they correct?
+totalseq <- as.data.frame(totalseq)
+usethis::use_data(totalseq, overwrite = TRUE, compress = "bzip2")
 
-# (Anything that is in totalseq without ID and not in aliases may need a
-# manual match)
+# Manual check that all totalseq genes have a match
+# totalseq %>%
+# dplyr::filter(is.na(HGNC_ID), grepl("[Hh]uman", Reactivity)) %>%
+# select(Antigen, Clone) %>%
+# filter(! (Antigen %in% mm$Antigen |
+# Clone %in% mm$Clone | Antigen %in% gene_aliases$value)) %>%
+# unique() %>% arrange(Antigen) %>% data.frame()
+
+# Add ALT_ID to gene aliases data set -----
+
+mm_ids <- mm_ids %>%
+    select(-Clone) %>%
+    unique() %>%
+    dplyr::rename(value = Antigen)
+
+gene_aliases <- gene_aliases %>%
+    full_join(mm_ids, by = c("value", "HGNC_ID", "HGNC_SYMBOL")) %>%
+    dplyr::mutate(ALT_ID = dplyr::coalesce(ALT_ID, HGNC_ID))
+
+# Recreate gene_aliases data set
+gene_aliases <- as.data.frame(hgnc)
+usethis::use_data(gene_aliases, overwrite = TRUE, compress = "bzip2")
 
 
-
-# Prevent false matches to the same gene by adding an ALT_ID column
-
-# Do we need to join by ID?
-
-
-# Totalseq - join if antigen, clone or HGNC_ID match
-
-
-# Initial version -----
+# Antibody notes -----
 
 # CD158f/ KIR2DL5
 # https://doi.org/10.3389/fimmu.2012.00289
@@ -73,61 +86,3 @@ ts2 <- totalseq %>% left_join_any(mm_ids, cols = c("Antigen", "Clone"),
 #              "CLA is a scarbohydrate epitope of sialic acid ",
 #              "and fucose-modified P-selectin glycoprotein ligand-1 (PSGL-1) ",
 #              "Ligand for E-selectin, P-selectin, and L-selectin.")
-
-
-# Use ALT_ID when it is a modification, a complex, or not a protein
-#manual_matches <- tibble::tribble(~Antigen, ~Clone, ~HGNC_Symbol, ~HGNC_ID,
-#                                  ~PRO_ID, ~ALT_ID, ~Comments,
-
-    #"Tau Phospho (Thr181)", "M7004D06", "MAPT", "HGNC:6893", "PR:000027448,
-    #    PR:000027447", "PR:000027448",
-    #    "PRO-short-label: hMAPT/iso:Tau-F/Phos:1",
-
-#    "Mac-2", "M3/38", "LGALS3", "HGNC:6563", "", "", "", "",
-
-    # This can be matched via the clone
-    # "FAS.L", "NOK-1", "FASLG", "HGNC:11936", "", "", "", "",
-
-    #"IFN-g R a chain", "GIR-208", "IFNGR1", "HGNC:5439",
-    #    "PR:000001361", "", IFN_gamma,
-
-    #"TCR Vb13.1", "H131", "", "", "", "", "",
-
-    #"cKIT", "104D2","KIT", "HGNC:6342", "", "", "",
-
-    #"CD77", "","A4GALT", "HGNC:18149", "", "",
-    #    "https://www.sinobiological.com/research/cd-antigens/cd77",
-
-    #"[Ff]olate [Rr]eceptor b", "FOLR2", "HGNC:3793", "", "", "", "",
-
-   # "PE", "PE001", NA, NA, NA, "",
-   #     "anti-phycoerythrin, for binding PE-antibody labeled cells",
-
-   # "CD66","B1.1", "CEACAM1, CEACAM6, CEACAM3, CEACAM5", "", "", "", CD66,
-
-
-    #"CD158", "HP-MA4", "KIR2DL1, KIR2DS1, KIR2DS3, KIR2DS5",
-    #    "HGNC:6329, HGNC:6333, HGNC:6335, HGNC:6337", "", "", CD158,
-
-   # "CD45RA", "HI100", "", "PTPRC", "PR_000001015", "", "Isoform of CD45",
-    #"CD45RO", "UCHL1", "", "PTPRC", "PR_000001017", "", "Isoform of CD45",
-
-   # "Ig light chain lambda", "MHL-38", "IGL", "HGNC:5853", "PR:000050185", "",
-#        "",
-
-    #"IgG Fc", "M1310G05", "IGHG1,IGHG3", "HGNC:5525, HGNC:5527", "", "", IgG,
-
-    #"c-Met", "12.1", "MET", "HGNC:7029", "", "", "",
-
-    #"CLA", "HECA-452", "SELPLG", "HGNC:10722", "", "", "",
-
-    #"integrin b7", "FIB504","ITGB7", "HGNC:6162", "", "", "",
-
-   # "HLA-DR", "L243", NA, NA, "PR:P01903, PR:000050459", "", HLA_DR,
-#    "HLA.A.B.C", "W6/32", "B2M", "HGNC:914", "", "", HLA_ABC,
-
-   # "CD11a/CD18", "m24", "ITGB2, ITGAL", "", "", "", ""
-#)
-
-
-# Check what is happening with splitUnnest on TCR alpha/beta
