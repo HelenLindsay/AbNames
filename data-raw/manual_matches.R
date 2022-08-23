@@ -11,7 +11,7 @@ original_nrow <- nrow(totalseq)
 mm_fname <- system.file("extdata", "rols_ontology.csv", package = "AbNames")
 mm <- read_delim(mm_fname) %>%
     dplyr::mutate(across(where(is_character), stringr::str_squish))
-mm_ids <- mm %>% select(Antigen, Clone, HGNC_ID, HGNC_SYMBOL, ALT_ID)
+mm_ids <- mm %>% dplyr::select(Antigen, Clone, HGNC_ID, HGNC_SYMBOL, ALT_ID)
 
 # We do not want to join by HGNC_ID as e.g. TRA-1-60-R matches PODXL but is not
 # in the totalseq table
@@ -39,15 +39,15 @@ usethis::use_data(totalseq, overwrite = TRUE, compress = "bzip2")
 # Add ALT_ID to gene aliases data set -----
 
 mm_ids <- mm_ids %>%
-    select(-Clone) %>%
+    dplyr::select(-Clone) %>%
     unique() %>%
     dplyr::rename(value = Antigen)  %>%
-    mutate(SOURCE = "MANUAL_LOOKUP")
+    dplyr::mutate(SOURCE = "MANUAL_LOOKUP")
 
 gene_aliases <- gene_aliases %>%
     dplyr::full_join(mm_ids, by = c("value", "HGNC_ID", "HGNC_SYMBOL")) %>%
     dplyr::mutate(ALT_ID = dplyr::coalesce(ALT_ID, HGNC_ID),
-                  SOURCE = dplyr::coalesce(`SOURCE.x`, `SOURCE.y`)) %>%
+                  SOURCE = dplyr::coalesce(`SOURCE.y`, `SOURCE.x`)) %>%
     dplyr::select(-`SOURCE.x`, -`SOURCE.y`)
 
 # Recreate gene_aliases data set

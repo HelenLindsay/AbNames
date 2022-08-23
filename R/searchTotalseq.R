@@ -6,8 +6,7 @@
 #' Search for exact matches between antigen names in df and totalseq cocktails
 #' or between catalogue numbers. Relies on column names matching totalseq
 #' As the goal is to add gene IDs, clone is not used.  This function works by
-#' successive left_joins and will add rows if columns HGNC_SYMBOL, HGNC_ID or
-#' ENSEMBL_ID are already in x.
+#' repeated left_joins and will add rows ID columns.
 #'
 #'@param x data.frame, containing at minimum columns named "Antigen"
 #'@param cols list of columns to match sequentially in totalseq.  If not
@@ -20,7 +19,7 @@ searchTotalseq <- function(x, cols = NULL){
     }
 
 
-    id_cols <- c("ENSEMBL_ID", "HGNC_SYMBOL", "HGNC_ID")
+    id_cols <- c("ENSEMBL_ID", "HGNC_SYMBOL", "HGNC_ID", "ALT_ID")
 
     # If ID columns already exist, separate into filled and unfilled
     y <- head(x, 0)

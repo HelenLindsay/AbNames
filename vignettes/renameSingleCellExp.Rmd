@@ -62,8 +62,8 @@ Note that unless specified otherwise, the entries of the CITEseq data set are ma
 
 
 ```{r}
-df <- matchToCiteseq(df)
-print(head(df))
+df2 <- matchToCiteseq(df)
+print(head(df2))
 ```
 
 

@@ -150,7 +150,7 @@ setMethod("renameADT", as(structure(.Data = c("MultiAssayExperiment",
 #'
 #'@description Groups antibody names and selects the most frequent name.  By
 #'default, the citeseq dataset is grouped by Antigen, Clone, Cat_Number
-#' (catalog number), HGNC_ID and ENSEMBL_ID.
+#' (catalog number) and ALT_ID.
 #'@param x A data.frame or tibble containing a column "Antigen" to match to the
 #' citeseq data set
 #'@param cols (character(n), default NULL) Optional additional columns to use
@@ -177,21 +177,16 @@ matchToCiteseq <- function(x, cols = NULL, verbose = TRUE, ...){
         stop("x must contain a column 'Antigen'")
     }
 
-    keep_cols <- unique(c(keep_cols, "Antigen"))
+    # If keep_cols is specified, make sure Antigen is included
+    if (! is.null(keep_cols)) keep_cols <- unique(c(keep_cols, "Antigen"))
 
     # Match using specified columns
     id <- .tempColName(x, nm = "ID")
-    x %>% dplyr::mutate(!!id := "KEEPME")
+    x <- x %>% dplyr::mutate(!!id := "KEEPME")
     x <- dplyr::bind_rows(x, citeseq)
 
-    if (isTRUE(verbose)){
-        message(sprintf("Using these columns for matching:\n%s",
-                        toString(keep_cols)))
-    }
-
     x <- getCommonName(x, cols = keep_cols, ab = "Antigen",
-                       fill_col = "Antigen_std", keep = TRUE,
-                       verbose = FALSE, ...)
+                       fill_col = "Antigen_std", keep = TRUE, ...)
 
     #######
     # TO DO - ACT ON CHECKS!
@@ -199,9 +194,9 @@ matchToCiteseq <- function(x, cols = NULL, verbose = TRUE, ...){
     res <- .checkCiteseq(x, gp = "Cat_Number", id = "HGNC_ID")
     ######
 
-    # Select new names
-    x <- x %>% dplyr::filter(ID == "KEEPME") %>%
-        dplyr::select(all_of(c("Antigen", "Antigen_std")))
+    # Remove ID column
+    x <- x %>% dplyr::filter(!!sym(id) == "KEEPME") %>%
+        dplyr::select(-!!sym(id))
 
     return(x)
 }

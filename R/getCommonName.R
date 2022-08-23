@@ -18,7 +18,7 @@ getCommonName <- function(x, cols = NULL, ab = "Antigen",
     }
 
     if (is.null(cols)) {
-        cols <- c("Antigen", "Cat_Number", "Clone", "HGNC_SYMBOL", "ENSEMBL_ID")
+        cols <- c("Antigen", "Cat_Number", "Clone", "ALT_ID")
     }
 
     if (! fill_col %in% colnames(x)){

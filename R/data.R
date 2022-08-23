@@ -22,7 +22,7 @@
 #' chromosomes were fetched from Ensembl, i.e. not haplotypes or patches, with
 #' the result that some genes do not have Ensembl IDs.
 #'
-#' @format A data frame with 138564 rows and 9 variables:
+#' @format A data frame with 131533 rows and 10 variables:
 #' \describe{
 #'     \item{HGNC_ID}{HGNC gene IDs}
 #'     \item{ENSEMBL_ID}{Ensembl gene ID, from HGNC}
@@ -33,7 +33,10 @@
 #'     \item{symbol_type}{Source of the "value" column, e.g. "HGNC_SYMBOL",
 #'     "HGNC_NAME"}
 #'     \item{value}{A gene symbol, symbol alias, or name}
-#'     \item{SOURCE}{Source of the data.  Here always "HGNC"}
+#'     \item{ALT_ID}{HGNC ID or other relevant ID for a specific protein
+#'     modification, isoform or carbohydrate.  If no stable ID was found,
+#'     Antigen / Clone combination is used.}
+#'     \item{SOURCE}{Source of the data.}
 #' }
 #' @source \url{https://www.genenames.org/cgi-bin/genegroup/download-all}
 #' @source \url{http://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/tsv/locus_types/gene_with_protein_product.txt}
