@@ -41,15 +41,20 @@ searchAliases <- function(query_df, multisubunit = c("TCR_long", "subunit")){
         # If there is more than one type of symbol, remove the previous symbols
         dplyr::filter(! (symbol_type == "prev_symbol" & nsym_types > 1)) %>%
 
+        # If there is an exact match to a manual symbol, keep this one
+        dplyr::mutate(has_manual = any(SOURCE == "MANUAL_LOOKUP")) %>%
+        dplyr::filter(has_manual & SOURCE == "MANUAL_LOOKUP" | ! has_manual) %>%
+
         # If there is an exact match to the offical symbol, discard others
         dplyr::mutate(has_official = any(symbol_type %in% official_nms)) %>%
         dplyr::filter(has_official & symbol_type %in% official_nms |
                           ! has_official) %>%
-        dplyr::select(-has_official, -nsym_types) %>%
+        dplyr::select(-has_official, -nsym_types, -has_manual) %>%
 
         # If there are matches to both symbol and name, keep symbol only
-        dplyr::filter(! (any(symbol_type == "HGNC_SYMBOL") & !
-                          symbol_type == "HGNC_SYMBOL")) %>%
+        dplyr::filter(is.na(symbol_type) |
+                          ! (any(symbol_type == "HGNC_SYMBOL") & !
+                                 symbol_type == "HGNC_SYMBOL")) %>%
 
         # If there are only matches to aliases/previous symbols, aggregate
         group_by(ID, HGNC_ID, symbol_type) %>%
