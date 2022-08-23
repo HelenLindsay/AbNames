@@ -89,18 +89,23 @@ union_join <- function(df, df2 = NULL, rows = NULL, by = NULL){
 # df - data.frame
 # groups - character vector of grouping columns
 # ignore e.g. Cat_Number == "custom_made".  Regex?
-group_by_any <- function(df, groups, new_col = "group", ignore = NULL){
+group_by_any <- function(df, groups, new_col = "group", ignore = NULL,
+                         verbose = FALSE){
     if (length(groups) < 2){
-        warning("With only one group, group_by_any is equivalent to group_by")
+        if (isTRUE(verbose)){
+            message("With only one group, group_by_any is ",
+                    "equivalent to group_by\n")
+        }
         result <- df %>%
             dplyr::group_by(!!rlang::sym(groups)) %>%
-            dplyr::mutate(!!new_col := dplyr::group_indices())
+            dplyr::mutate(!!new_col := dplyr::cur_group_id())
         return(result)
     }
 
     idx <- purrr::map(groups,
                       ~dplyr::group_by(df, !!sym(.x)) %>%
-                          dplyr::group_indices())
+                          dplyr::mutate(idx = dplyr::cur_group_id()) %>%
+                          dplyr::pull(idx))
 
     idx <- do.call(dplyr::bind_cols, structure(idx, names = groups))
     idx[is.na(df[, groups])] <- NA

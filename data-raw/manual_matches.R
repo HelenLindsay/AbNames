@@ -41,11 +41,14 @@ usethis::use_data(totalseq, overwrite = TRUE, compress = "bzip2")
 mm_ids <- mm_ids %>%
     select(-Clone) %>%
     unique() %>%
-    dplyr::rename(value = Antigen)
+    dplyr::rename(value = Antigen)  %>%
+    mutate(SOURCE = "MANUAL_LOOKUP")
 
 gene_aliases <- gene_aliases %>%
-    full_join(mm_ids, by = c("value", "HGNC_ID", "HGNC_SYMBOL")) %>%
-    dplyr::mutate(ALT_ID = dplyr::coalesce(ALT_ID, HGNC_ID))
+    dplyr::full_join(mm_ids, by = c("value", "HGNC_ID", "HGNC_SYMBOL")) %>%
+    dplyr::mutate(ALT_ID = dplyr::coalesce(ALT_ID, HGNC_ID),
+                  SOURCE = dplyr::coalesce(`SOURCE.x`, `SOURCE.y`)) %>%
+    dplyr::select(-`SOURCE.x`, -`SOURCE.y`)
 
 # Recreate gene_aliases data set
 gene_aliases <- as.data.frame(gene_aliases)

@@ -156,8 +156,10 @@ setMethod("renameADT", as(structure(.Data = c("MultiAssayExperiment",
 #'@param cols (character(n), default NULL) Optional additional columns to use
 #'for matching in citeseq data set.  ID columns from the citeseq dataset are
 #'used by default.  Antibodies are grouped by a match in any of the ID columns.
+#'@param verbose Report which columns are used for matching? (default: TRUE)
+#'@param ... Options passed on to getCommonName
 #'@export
-matchToCiteseq <- function(x, cols = NULL){
+matchToCiteseq <- function(x, cols = NULL, verbose = TRUE, ...){
     if (! "data.frame" %in% class(x)) {
         stop("x should be a data.frame or tibble")
     }
@@ -175,17 +177,27 @@ matchToCiteseq <- function(x, cols = NULL){
         stop("x must contain a column 'Antigen'")
     }
 
-    if (! is.null(keep_cols)) { keep_cols <- unique(c(keep_cols, "Antigen")) }
-
+    keep_cols <- unique(c(keep_cols, "Antigen"))
 
     # Match using specified columns
-    x <- dplyr::bind_rows(x %>% dplyr::mutate(ID = "KEEPME"), citeseq)
-    x <- getCommonName(x, cols = keep_cols, ab = "Antigen",
-                       fill_col = "Antigen_std", keep = TRUE)
+    id <- .tempColName(x, nm = "ID")
+    x %>% dplyr::mutate(!!id := "KEEPME")
+    x <- dplyr::bind_rows(x, citeseq)
 
+    if (isTRUE(verbose)){
+        message(sprintf("Using these columns for matching:\n%s",
+                        toString(keep_cols)))
+    }
+
+    x <- getCommonName(x, cols = keep_cols, ab = "Antigen",
+                       fill_col = "Antigen_std", keep = TRUE,
+                       verbose = FALSE, ...)
+
+    #######
+    # TO DO - ACT ON CHECKS!
     # Check - one Clone should map to one ID
     res <- .checkCiteseq(x, gp = "Cat_Number", id = "HGNC_ID")
-
+    ######
 
     # Select new names
     x <- x %>% dplyr::filter(ID == "KEEPME") %>%

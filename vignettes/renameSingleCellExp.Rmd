@@ -32,7 +32,9 @@ kotliarov <- KotliarovPBMCData(mode = "adt")
 head(rownames(kotliarov))
 ```
 
-## Put into a data frame to allow matching to the CITEseq data set
+## Create a data frame to allow matching to the CITEseq data set
+
+To directly match to the CITEseq data set, some formatting of the antigen names may be required.  Here we remove the "_PROT" suffix.  An alternative is to first map antigen names to the gene_aliases data set and then match antigens and identifiers to the CITEseq data set. However, it is still a good idea to remove prefixes and suffixes to avoid false matches.  For example, "PROT" is an alias of the gene SLC6A7 and would match if not removed.
 
 You can include information such as catalogue number and antibody clone
 to assist matching if it is available.  When matching to the CITEseq data
@@ -44,9 +46,11 @@ using the column "Antigen".  By default, columns "Clone", "Antigen", and "Cat_Nu
 
 
 ```{r}
+# Create a data.frame for matching to the CITEseq data set
+# Column "Antigen" will be used for matching
 df <- data.frame(Original = rownames(kotliarov),
                  Antigen = gsub("_PROT", "", rownames(kotliarov)))
-
+head(df)
 
 ```
 ## Match to the CITEseq data set and review suggested consensus names
