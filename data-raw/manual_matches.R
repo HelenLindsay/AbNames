@@ -38,6 +38,11 @@ usethis::use_data(totalseq, overwrite = TRUE, compress = "bzip2")
 
 # Add ALT_ID to gene aliases data set -----
 
+# (for regenerating)
+gene_aliases <- gene_aliases %>%
+    dplyr::filter(! SOURCE == "MANUAL_LOOKUP") %>%
+    dplyr::select(-ALT_ID)
+
 mm_ids <- mm_ids %>%
     dplyr::select(-Clone) %>%
     unique() %>%
