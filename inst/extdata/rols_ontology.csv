@@ -5,9 +5,10 @@ CD158 (KIR2DL1/S1/S3/S5),HP-MA4,,,NCIT_C104678,"KIR2DL1, KIR2DS1, KIR2DS3, KIR2D
 CD158f,UP-R1,,,,"KIR2DL5A, KIR2DL5B","HGNC:16345, HGNC:16346",,,,CD158f_UP-R1
 CD45R,RA3-6B2,PR:000050216,,NCIT:C49531,PTPRC,HGNC:9666,PTPRC/iso:CD45R,B220,,PTPRC/iso:CD45R
 CD45RA,HI100,PR_000001015,UniProtKB:P08575-8,NCIT_C118492,PTPRC,HGNC:9666,PTPRC/iso:CD45RA,,,PTPRC/iso:CD45RA
-CD45RB,MEM-55 ,PR_000001016,UniProtKB:P08575-9,NCIT_C118493,PTPRC,HGNC:9666,PTPRC/iso:CD45RB,,,PTPRC/iso:CD45RB
+CD45RB,MEM-55,PR_000001016,UniProtKB:P08575-9,NCIT_C118493,PTPRC,HGNC:9666,PTPRC/iso:CD45RB,,,PTPRC/iso:CD45RB
 CD45RO,UCHL1,PR_000001017,UniProtKB:P08575-4,NCIT_C118495,PTPRC,HGNC:9666,PTPRC/iso:CD45RO,,,PTPRC/iso:CD45RO
 CD66,B1.1/CD66,,,,"CEACAM1, CEACAM3, CEACAM5, CEACAM6","HGNC:1814, HGNC:1815, HGNC:1817, HGNC:1818",,,https://www.bdbiosciences.com/en-ch/products/reagents/flow-cytometry-reagents/research-reagents/single-color-antibodies-ruo/pe-mouse-anti-human-cd66.551480,CD66acde
+CD77,5B5,,,,,,,"Globotriaosylceramide, Gb3 glycosphingolipid",Formation is catalysed by A4GALT.  ,CD77_5B5
 "HLA-A,B,C",W6/32,PR:P61769,,,B2M,HGNC:914,,,"Ontology ID is for beta-2-microglobulin, which this antibody binds","HLA-A,B,C"
 HLA-A2,BB7.2,,,NCIT_C16691,HLA-A,,,"1 MHC Class I Antigen A*2, HLA-A2 Antigen, HLA-A Class I Antigen 2, HLA-A Histocompatibility Type Antigen*02, HLA-A Histocompatibility Type Antigen 2, HLA-A*02, HLA-A, HLA-A2, Major Histocompatibility Complex, Class I, A2 Antigen, HLA Class I Histocompatibility Antigen, A-2 Alpha Chain, MHC Class I Antigen A*02",,HLA-A2
 "HLA-DR,DP,DQ",Tü39,,,,,,,,,HLA-DP

@@ -42,7 +42,7 @@ gsubCellmarker <- function(x){
 #                         "Human_cell_markers.txt")
 
 # Cellmarker is incorrect for CD77 / A4GALT
-# According to HGNC / https://www.sinobiological.com/research/cd-antigens/cd77
+# A4GALT synthesises CD77, CD77 is not a protein
 
 cellmarker_exclude <- c("CD77")
 

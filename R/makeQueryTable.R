@@ -1,28 +1,25 @@
 # makeQueryTable ----
-#@param funs A vector of string formatting functions to apply to df.  Each
-#should take a data.frame as a first argument and return a data.frame or
-#tibble, and optional arguments should be filled in e.g. with purrr::partial.
-#@param query_cols (character(n), default: NULL) Name(s) of columns containing
-#potential names to search.  If not provided, any columns that are added to df
-#after applying funs are used as query columns.
-#
+
 #'Separate Antibody/Antigen names into component parts
 #'
 #'Given a data.frame containing Antigen/Antibody names, reformat
 #'the names into possible gene names and return the data.frame in long format.
 #'
-#'@param df A data.frame or tibble
+#'@param df A data.frame or tibble.
 #'@param ab (character(1), default: "Antigen") Name of column in df containing
 #'antibody names
+#'@param id (default: "ID") Name of column in df containing IDs for each row.
 #'@param control_col (character(1), default: NA)  Optional name of a logical
 #'column indicating whether an antibody is an isotype control.  If present,
 #'controls will be removed to avoid spurious matches as they usually do not
 #'react against human genes.
 #'@param fun Optional custom function for formatting antigen names.  Must take
-#' an argument "ab" giving the column name (as above) as its only argument
+#' an argument "ab" giving the column name (as above) as its only argument.
+#' Other arguments can be prefilled e.g. with purrr::partial.
 #'@importFrom tidyr pivot_longer
 #'@export
-makeQueryTable <- function(df, ab = "Antigen", control_col = NA, fun = NA){
+makeQueryTable <- function(df, ab = "Antigen", id = "ID",
+                           control_col = NA, fun = NA){
     # Remove controls
     if (! is.na(control_col)) { df <- dplyr::filter(df, ! (!!sym(control_cl))) }
 
@@ -35,13 +32,13 @@ makeQueryTable <- function(df, ab = "Antigen", control_col = NA, fun = NA){
 
     # Make a list of column names that are query terms
     query_cols <- c(ab, setdiff(colnames(df), cn)) # New columns + original ab
-    query_cols <- setdiff(query_cols, "ID") # minus ID column
+    query_cols <- setdiff(query_cols, id) # minus ID column
 
     # Convert to long format
     df <- qryToLong(df, query_cols)
 
     # Remove redundant entries
-    df <- dplyr::group_by(df, value) %>%
+    query_df <- dplyr::group_by(query_df, dplyr::all_of(c(id, value))) %>%
         dplyr::slice(1) %>%
         dplyr::ungroup()
 
