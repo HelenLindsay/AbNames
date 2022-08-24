@@ -17,11 +17,13 @@
 #'dplyr::filter, e.g. 'grepl("X", colname)'
 #'@param f  A function to apply to the rows where ex is TRUE and returns a
 #'data.frame
+#'@param verbose Should a warning be issued if extra rows are added after
+#'applying f? (Default: TRUE)
 #'@param ... Extra arguments for f
 #'@return df where function f has been applied only to the rows where ex is TRUE
 #'@importFrom rlang parse_expr enexpr is_string expr
 #'@export
-splitMerge <- function(df, ex, f, ...){
+splitMerge <- function(df, ex, f, verbose = TRUE, ...){
 
 
     # Switch depending on whether ex is a string or an expression
@@ -49,7 +51,7 @@ splitMerge <- function(df, ex, f, ...){
     result <- suppressMessages(dplyr::full_join(df, df_not_ex)) %>%
         dplyr::select(-all_of(tmp))
 
-    if (! nrow(result) == original_nrow){
+    if (isTRUE(verbose) & ! nrow(result) == original_nrow){
         warning("Rows were added when merging split data.frames")
     }
 

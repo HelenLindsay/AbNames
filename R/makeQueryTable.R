@@ -18,15 +18,19 @@
 #'column indicating whether an antibody is an isotype control.  If present,
 #'controls will be removed to avoid spurious matches as they usually do not
 #'react against human genes.
+#'@param fun Optional custom function for formatting antigen names.  Must take
+#' an argument "ab" giving the column name (as above) as its only argument
 #'@importFrom tidyr pivot_longer
 #'@export
-makeQueryTable <- function(df, ab = "Antigen", control_col = NA){
+makeQueryTable <- function(df, ab = "Antigen", control_col = NA, fun = NA){
     # Remove controls
     if (! is.na(control_col)) { df <- dplyr::filter(df, ! (!!sym(control_cl))) }
 
+    if (is.na(fun)) query_fun <- defaultQuery
+
     cn <- colnames(df)
 
-    funs <- defaultQuery(ab = ab)
+    funs <- query_fun(ab = ab)
     df <- magrittr::freduce(df, funs)
 
     # Make a list of column names that are query terms
@@ -35,6 +39,11 @@ makeQueryTable <- function(df, ab = "Antigen", control_col = NA){
 
     # Convert to long format
     df <- qryToLong(df, query_cols)
+
+    # Remove redundant entries
+    df <- dplyr::group_by(df, value) %>%
+        dplyr::slice(1) %>%
+        dplyr::ungroup()
 
     return(df)
 }
@@ -63,21 +72,24 @@ defaultQuery <- function(ab = "Antigen"){
 
     # Default transformation sequence for making query table ----
 
-    # Check that all columns to act on are either in the table or created
+    # Add a check that all columns to act on are either in the table or created
     # earlier in the pipeline?
-    split_merge_str <- sprintf('grepl("TCR", %s)', ab)
+
+    nc <- "Antigen_split"
+    split_merge_str <- sprintf('grepl("TCR", %s)', nc)
+
 
     qry = list(purrr::partial(gsubAb, ab = !!ab), # Remove A/antis
                purrr::partial(gsubAb, ab = !!ab, pattern = "\\s[Rr]ecombinant"),
-               purrr::partial(splitUnnest, ab = !!ab), # Brackets
-               purrr::partial(splitUnnest, ab = !!ab, split = ", "),  # Commas
+               purrr::partial(splitUnnest, ab = !!ab, new_col = !!nc),# Brackets
+               purrr::partial(splitUnnest, ab = !!nc),  # Commas
                # / _ or . if at least 3 on each side and not TCR
                purrr::partial(splitUnnest, exclude = "TCR",
                         split = "(?<=[A-z0-9-]{3})[\\/_\\.](?=[A-z0-9-]{3,})"),
-               purrr::partial(.reformatAb, ab = !!ab),
-               purrr::partial(separateSubunits, ab = !!ab, new_col = "subunit"),
-               purrr::partial(splitMerge, ex = !!split_merge_str,
-                              f = formatTCR, tcr = "greek_letter"),
+               purrr::partial(.reformatAb, ab = !!nc),
+               purrr::partial(separateSubunits, ab = !!nc, new_col = "subunit"),
+               purrr::partial(splitMerge, ex = !!split_merge_str, f = formatTCR,
+                              tcr = "greek_letter", verbose = FALSE),
                purrr::partial(formatIg, ig = "greek_letter")
     )
 
