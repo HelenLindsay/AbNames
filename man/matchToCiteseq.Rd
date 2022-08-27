@@ -4,7 +4,7 @@
 \alias{matchToCiteseq}
 \title{Standardise names using the citeseq data set}
 \usage{
-matchToCiteseq(x, cols = NULL)
+matchToCiteseq(x, cols = NULL, verbose = TRUE, ...)
 }
 \arguments{
 \item{x}{A data.frame or tibble containing a column "Antigen" to match to the
@@ -13,9 +13,13 @@ citeseq data set}
 \item{cols}{(character(n), default NULL) Optional additional columns to use
 for matching in citeseq data set.  ID columns from the citeseq dataset are
 used by default.  Antibodies are grouped by a match in any of the ID columns.}
+
+\item{verbose}{Report which columns are used for matching? (default: TRUE)}
+
+\item{...}{Options passed on to getCommonName}
 }
 \description{
 Groups antibody names and selects the most frequent name.  By
 default, the citeseq dataset is grouped by Antigen, Clone, Cat_Number
-(catalog number), HGNC_ID and ENSEMBL_ID.
+(catalog number) and ALT_ID.
 }

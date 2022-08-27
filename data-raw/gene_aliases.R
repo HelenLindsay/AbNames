@@ -65,7 +65,7 @@ bm_ens_diff <- dplyr::anti_join(bm_ids, hgnc_ids,
 
 # Get the Ensembl IDs that HGNC assigns
 hgnc_ens_diff <- hgnc_ids %>%
-    AbNames:::union_join(bm_ens_diff %>% dplyr::select(-BIOTYPE))
+    AbNames:::filter_by_union(bm_ens_diff %>% dplyr::select(-BIOTYPE))
 
 # Check if these are also in the biomart table
 # (2 ENSEMBL_IDs to 1 HGNC_SYMBOL)

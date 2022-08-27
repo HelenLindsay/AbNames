@@ -4,7 +4,7 @@
 \alias{splitMerge}
 \title{Apply a function to a subset of a data.frame}
 \usage{
-splitMerge(df, ex, f, ...)
+splitMerge(df, ex, f, verbose = TRUE, ...)
 }
 \arguments{
 \item{df}{A data.frame or tibble}
@@ -14,6 +14,9 @@ dplyr::filter, e.g. 'grepl("X", colname)'}
 
 \item{f}{A function to apply to the rows where ex is TRUE and returns a
 data.frame}
+
+\item{verbose}{Should a warning be issued if extra rows are added after
+applying f? (Default: TRUE)}
 
 \item{...}{Extra arguments for f}
 }

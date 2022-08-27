@@ -31,6 +31,7 @@ setMethod("renameADT", as(structure(.Data = c("SingleCellExperiment",
         # or an altExp.
         # May need to replace the row data too
         # sce may have rowPairs, but doesn't appear to inc names
+        # toDo: add original names to the rowData
 
         stopifnot(requireNamespace("SummarizedExperiment"),
                   requireNamespace("SingleCellExperiment"))
@@ -164,9 +165,11 @@ matchToCiteseq <- function(x, cols = NULL, verbose = TRUE, ...){
         stop("x should be a data.frame or tibble")
     }
 
+    cn_x <- colnames(x)
+
     utils::data("citeseq", envir = environment())
 
-    # Setup names of columns for matching
+    # Set up names of columns for matching
     keep_cols <- intersect(cols, colnames(citeseq))
 
     if (! identical(keep_cols, cols)){
@@ -178,13 +181,27 @@ matchToCiteseq <- function(x, cols = NULL, verbose = TRUE, ...){
     }
 
     # If keep_cols is specified, make sure Antigen is included
-    if (! is.null(keep_cols)) keep_cols <- unique(c(keep_cols, "Antigen"))
+    if (! is.null(keep_cols)){
+        keep_cols <- unique(c(keep_cols, "Antigen"))
+        msg_cols <- toString(keep_cols)
 
-    # Match using specified columns
+    } else {
+        # If columns are not specified, check which of the default columns
+        # in getCommon name are present in x
+        default_cols <- c("Antigen", "Cat_Number", "Clone", "ALT_ID")
+        msg_cols <- toString(intersect(colnames(x), default_cols))
+    }
+
+    # Report which columns are used to match new data to cite seq data
+    msg <- "Matching new data to citeseq data using columns:\n%s"
+    message(sprintf(msg, msg_cols))
+
+    # Add temporary ID column and add new data to citeseq data set
     id <- .tempColName(x, nm = "ID")
     x <- x %>% dplyr::mutate(!!id := "KEEPME")
     x <- dplyr::bind_rows(x, citeseq)
 
+    # If keep_cols is NULL, the default column set is used for matching
     x <- getCommonName(x, cols = keep_cols, ab = "Antigen",
                        fill_col = "Antigen_std", keep = TRUE, ...)
 
@@ -194,9 +211,9 @@ matchToCiteseq <- function(x, cols = NULL, verbose = TRUE, ...){
     res <- .checkCiteseq(x, gp = "Cat_Number", id = "HGNC_ID")
     ######
 
-    # Remove ID column
+    # Remove ID column, select original columns
     x <- x %>% dplyr::filter(!!sym(id) == "KEEPME") %>%
-        dplyr::select(-!!sym(id))
+        dplyr::select(all_of(c("Antigen_std", cn_x, "n_matched")))
 
     return(x)
 }

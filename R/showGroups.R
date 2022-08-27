@@ -141,7 +141,7 @@ abAliases <- function(df, ex, by = "HGNC"){
         ex <- enex
     }
 
-    res <- union_join(df, df %>%
+    res <- filter_by_union(df, df %>%
                           dplyr::filter(!! ex) %>%
                           dplyr::select( {{ by }} ) )
 

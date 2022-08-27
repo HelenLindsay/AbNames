@@ -42,7 +42,6 @@
 # .gsubNA ----
 #
 # Wrapper for gsub, returns NA (or option provided) if pattern was not matched
-#
 .gsubNA <- function(pattern, replacement, x, no_match = NA){
     res <- gsub(pattern, replacement, x)
     return(.noDups(res, x, no_match))

@@ -15,16 +15,18 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-This vignette shows how to standardize the names of the antibody-derived tags in
+This sort vignette shows how to standardize the names of the antibody-derived tags in
 a CITE-seq experiment in SingleCellExperiment format.
+
+# Example 1: Kotliarov PBMC
 
 To demonstrate, we will use the "Kotliarov" dataset available in the package
 "scRNAseq".  
 
+## Matching using the CITEseq data set
 
-```{r, message = FALSE}
+```{r, message = FALSE, warning=FALSE}
 
-# May not need much renaming....
 library("scRNAseq")
 library("AbNames")
 
@@ -32,7 +34,7 @@ kotliarov <- KotliarovPBMCData(mode = "adt")
 head(rownames(kotliarov))
 ```
 
-## Create a data frame to allow matching to the CITEseq data set
+### Create a data frame to allow matching to the CITEseq data set
 
 To directly match to the CITEseq data set, some formatting of the antigen names may be required.  Here we remove the "_PROT" suffix.  An alternative is to first map antigen names to the gene_aliases data set and then match antigens and identifiers to the CITEseq data set. However, it is still a good idea to remove prefixes and suffixes to avoid false matches.  For example, "PROT" is an alias of the gene SLC6A7 and would match if not removed.
 
@@ -42,18 +44,17 @@ set, the names of the columns to use for matching must equal those in the
 CITEseq data set.  For example, below we match using only the antigen name,
 using the column "Antigen".  By default, columns "Clone", "Antigen", and "Cat_Number" (catalogue number) are used for matching if available. 
 
-# HGNC_ID
-
 
 ```{r}
 # Create a data.frame for matching to the CITEseq data set
 # Column "Antigen" will be used for matching
 df <- data.frame(Original = rownames(kotliarov),
-                 Antigen = gsub("_PROT", "", rownames(kotliarov)))
+                 # Remove _PROT (optionally with a space before)
+                 Antigen = gsub(" ?_PROT", "", rownames(kotliarov)))
 head(df)
 
 ```
-## Match to the CITEseq data set and review suggested consensus names
+### Match to the CITEseq data set and review suggested consensus names
 
 It is a good idea to review matches as errors in e.g. catalogue number will lead to incorrect matches.
 
@@ -62,41 +63,128 @@ Note that unless specified otherwise, the entries of the CITEseq data set are ma
 
 
 ```{r}
-df2 <- matchToCiteseq(df)
-print(head(df2))
+df <- matchToCiteseq(df)
+print(head(df))
+```
+
+In general, the names of the original experiment matched the most commonly used
+name in the CITEseq data set, but we can see that some have different "standard"
+names.
+
+```{r}
+df[! df$Antigen == df$Antigen_std, ]
+```
+
+By looking at the `n_matched` column, we can see how many entries in the
+cite-seq data set could be matched to each antigen.  Here we see that only
+AnnexinV and the isotype controls could not be matched by name only
+
+```{r}
+head(df[order(df$n_matched),], 10)
 ```
 
 
-## Rename single cell experiment
+
+### Rename single cell experiment
 ```{r}
 
 # To rename the singleCellExperiment, we need a named vector of the new names,
 # with names being the original names of the singleCellExperiment.
+
+# "structure" is a method that allows us to create a named vector in one step
 new_nms <- structure(df[[2]], names = rownames(kotliarov))
 print(head(new_nms))
 
 kotliarov <- renameADT(kotliarov, new_nms)
-
 head(rownames(kotliarov))
-
-
 
 ```
 
+
+# Example 2: CiteFuse example data
+
+In this example, the CITE-seq data are stored as an altExp.  The procedure for
+standardising the antibody names is the same.  
+
+### Matching directly to the CITEseq data set
+
+```{r, echo = FALSE}
+# Load CiteFuse example data
+
+library(CiteFuse)
+data("CITEseq_example", package = "CiteFuse")
+sce_citeseq <- preprocessing(CITEseq_example)
+rownames(altExp(sce_citeseq, "ADT"))
+
+# DO WE NEED TO DO ANY PREPROCESSING OF THE NAMES?  JUST PASS IN CITESEQ?
+df <- data.frame(Antigen = rownames(altExp(sce_citeseq, "ADT")))
+df <- matchToCiteseq(df)
+
+# Print entries that differ from the original
+df[! df$Antigen == df$Antigen_std, ]
+
+# Print the entries with the fewest matches
+head(df[order(df$n_matched),], 10)
+
+```
+
+Here we see that the consensus name for "IgG1" is
+"Mouse IgG1, kappa isotype Ctrl".  This is because when other studies refer to
+"IgG1", we can tell from the antibody clone ID that they are referring to an isotype control with unknown specificity.  Without further information, we 
+cannot tell whether the antibody in the CiteFuse example data is an isotype control or an anti-human secondary antibody.
+
+Similarly for TCRa and TCRb, we can tell by matching antigens by clone ID that
+these are more commonly referred to as TCR a/b (alpha/beta) and TCR g/d (gamma/delta) respectively.  
+
+### Check matching entries in CITEseq data set
+
+Suppose, as in the above example, we are not sure if a consensus name is
+correct.  We may wish to examine the matching entries in the `citeseq` data set.
+One way to do this is to load the `citeseq` data set and check the matching entries using the function ``.
+
+```{r, message = FALSE}
+# We load the tidyverse to simplify data.frame manipulations.
+library(tidyverse)
+
+# Load citeseq data set
+data(citeseq)
+
+tcrb <- citeseq %>%
+    # We will first select entries that equal "TCRb"
+    dplyr::filter(Antigen == "TCRb") %>%
+    # Then subset to just the columns we want to use for matching
+    dplyr::select(Antigen, Clone, Cat_Number, ALT_ID)
+
+# Then we will find entries in citeseq that match any of these columns.
+
+# filter_by_union is a function to return rows where any the value of any
+# column occurs in a reference data.frame
+citeseq %>%
+    filter_by_union(tcrb) %>%
+    # Select just columns of interest for viewing
+    dplyr::select(Study, Antigen, Clone, Cat_Number, ALT_ID)
+
+```
+
+From the above result we can confirm that two studies have an antigen named
+"TCRb".  By matching on antibody clone, we see that it is more commonly referred
+to as TCRab or TCR alpha/beta.
+
+# TO DO: NOT ON HOW THE ALT_IDs ARE ASSIGNED
+
+# Session Info
 
 ```{r}
 sessionInfo()
 ```
 
-```{r}
+
+```{r, echo = FALSE}
 # alternative data sets
 #library(SingleCellMultiModal)
 #cord_blood <- CITEseq(DataType="cord_blood", modes="scADT_Counts",
 #                      dry.run=FALSE, DataClass = "SingleCellExperiment")
 #cord_blood
 
-#library(CiteFuse)
-#data("CITEseq_example", package = "CiteFuse")
-#sce_citeseq <- preprocessing(CITEseq_example)
-#rownames(altExp(sce_citeseq, "ADT"))
-```{r}
+
+```

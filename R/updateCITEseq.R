@@ -80,7 +80,7 @@ updateCITEseq <- function(x, name = NULL, extra = FALSE){
     # Select complete cases from citeseq data where any column matches x
     #cs <- citeseq %>%
     #    tidyr::drop_na(dplyr::any_of(vendor_cols)) %>%
-    #    union_join(x %>% dplyr::select(vendor_cols))
+    #    filter_by_union(x %>% dplyr::select(vendor_cols))
 
 }
 

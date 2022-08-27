@@ -1,28 +1,5 @@
-# .groupsWith ----
-#
-# Select rows from a data.frame containing values from another.
-#
-# Simpler version of union_join
-#
-#@param df1 Filtered data.frame
-#@param df2 Unfiltered data.frame
-#@param col character(n) Name of column to use for selecting rows from df1
-#'@importFrom dplyr pull
-.groupsWith <- function(df1, df2, col){
-    # Only keep the columns in df2
-    col_vals <- df1 %>%
-        dplyr::pull(!!sym(col)) %>%
-        stats::na.omit()
-
-    df2 <- df2 %>%
-        dplyr::filter(!!sym(col) %in% col_vals)
-    return(df2)
-}
-
-
-# union_join ----
-# Note: names in "by" won't work as this isn't actually a join
-#'@title Select rows matching any column in another data.frame
+# filter_by_union ----
+#'@title Select rows matching any column present in another data.frame
 #'
 #'@description Select values from a data.frame df matching any
 #'column from another data.frame or a selection of row indices.  If a second
@@ -30,20 +7,33 @@
 #'any value in df2[rows, ] are returned.  If only rows indices are provided,
 #'rows matching any value in df[rows, ] are returned.  NAs are not matched.
 #'
+#'This is a wrapper around dplyr::filter with if_any for the case where the
+#'value should be in a reference set, with the option to choose whether to use
+#'another data frame or a subset of rows as the reference.
+#'
 #'@param df A data.frame from which to select matching rows
-#'@param df2 Optional, a second data
+#'@param df2 Optional, a second data frame
 #'@param rows Row indices for subsetting, either df2 if present or df
 #'@param by = columns to select from df2
-#'@keywords internal
-union_join <- function(df, df2 = NULL, rows = NULL, by = NULL){
+#'@export
+filter_by_union <- function(df, df2 = NULL, rows = NULL, by = NULL){
     if (! is.null(df2) & ! is.null(rows)){
         message("Row selection will be made from df2")
     }
+
     tmp <- .tempColName(df)
     qdf <- df
     if (! is.null(df2)) { qdf <- df2 }
     if (! is.null(rows)) qdf <- qdf[rows, ]
-    if (is.null(by)) by <- colnames(qdf)
+
+    # Check that values of by exist in qdf
+    if (! is.null(by) & ! all(by %in% colnames(qdf))){
+        stop("Not all columns in 'by' appear in df2:",
+             toString(setdiff(by, colnames(qdf))))
+    }
+
+    # If by is not specified, use all shared columns
+    if (is.null(by)) by <- intersect(colnames(qdf), colnames(df))
 
     # If there are names, assume they use dplyr join syntax, i.e. names
     # refer to columns in df, values to columns in df2
@@ -55,12 +45,6 @@ union_join <- function(df, df2 = NULL, rows = NULL, by = NULL){
         if (! all(names(by) %in% colnames(df))){
             stop("Not all columns in 'by' appear in df:",
                  toString(setdiff(names(by), colnames(df))))
-        }
-
-        # Check that values of by exist in qdf
-        if (! all(by %in% colnames(qdf))){
-            stop("Not all columns in 'by' appear in df2:",
-                 toString(setdiff(by, colnames(qdf))))
         }
 
         # Rename columns in qdf to match "by", set by to equal names of by
@@ -77,11 +61,14 @@ union_join <- function(df, df2 = NULL, rows = NULL, by = NULL){
     # Extra brackets needed, see https://github.com/tidyverse/dplyr/issues/6194
     df %>%
         dplyr::filter((dplyr::if_any(.cols = by,
-                                     .fns = ~.x %in% na.omit(qdf[[dplyr::cur_column()]]))))
+                                     .fns = ~.x %in%
+                                         na.omit(qdf[[dplyr::cur_column()]]))))
 }
 
 
 # group_by_any ----
+#
+# Group data.frame by a match in any of the grouping columns
 #
 # Not tested on more than 2 groups
 # Pairwise comparison necessary?
@@ -134,7 +121,7 @@ group_by_any <- function(df, groups, new_col = "group", ignore = NULL,
     }
 
     df[[new_col]] <- new_idxs
-    df %>% group_by(!!sym(new_col))
+    df %>% dplyr::group_by(!!sym(new_col))
 }
 
 

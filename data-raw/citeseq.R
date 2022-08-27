@@ -1,5 +1,10 @@
 library("tidyverse")
 library("AbNames")
+library("janitor")
+
+# To do: replace Greek symbols across all columns
+# To do: make sure human IDs are not assigned to non-human reactive Abs
+# To do: group and check differences in ALT_ID.
 
 citeseq_fname <- system.file("extdata", "citeseq.csv", package = "AbNames")
 citeseq <- read.csv(citeseq_fname) %>% unique()

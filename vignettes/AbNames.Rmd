@@ -515,6 +515,7 @@ missing <- citeseq %>%
 # across query columns - na_if equal to antigen and not is antigen
 # Replace greek symbols in totalseq
 # Check results in matchToCITEseq
+# keep ambiguous names in a separate column?
 
 # Session Info
 

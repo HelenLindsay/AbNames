@@ -74,6 +74,7 @@ fillByGroup <- function(df, group, fill, method = c("only_na", "all"),
     }
 
     df <- dplyr::select(df, -all_of(n_per_gp))
+
     return(df)
 }
 

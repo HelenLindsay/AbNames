@@ -38,7 +38,7 @@ makeQueryTable <- function(df, ab = "Antigen", id = "ID",
     df <- qryToLong(df, query_cols)
 
     # Remove redundant entries
-    query_df <- dplyr::group_by(query_df, dplyr::all_of(c(id, value))) %>%
+    df <- dplyr::group_by(df, !!sym(id), value) %>%
         dplyr::slice(1) %>%
         dplyr::ungroup()
 

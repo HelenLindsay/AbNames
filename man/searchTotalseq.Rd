@@ -9,13 +9,11 @@ searchTotalseq(x, cols = NULL)
 \arguments{
 \item{x}{data.frame, containing at minimum columns named "Antigen"}
 
-\item{cols}{list of columns to match sequentially in totalseq.  If not
-specified, defaults to catalogue number then antigen then clone.}
+\item{cols}{list of columns to match in TotalSeq.  If not
+specified, defaults to catalogue number, antigen and clone.}
 }
 \description{
 Search for exact matches between antigen names in df and totalseq cocktails
 or between catalogue numbers. Relies on column names matching totalseq
-As the goal is to add gene IDs, clone is not used.  This function works by
-successive left_joins and will add rows if columns HGNC_SYMBOL, HGNC_ID or
-ENSEMBL_ID are already in x.
+This function works by repeated left_joins and will add rows ID columns.
 }
