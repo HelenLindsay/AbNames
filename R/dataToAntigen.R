@@ -7,6 +7,8 @@
 # split_frac = fraction of entries that should include a potential delimiter in
 # order to split entries.  Entries are often name_clone or name_gene,
 # so isotype controls may have a different format
+# Returns a data.frame of original and preprocessed names
+# TO DO: proper loading of data set
 preprocessNames <- function(x, anti = TRUE, split_frac = 0.8){
     prefix1 = paste("ADT", "PROT", sep = "|")
     prefix2 = ifelse(isTRUE(anti), "[Aa]nti", "")
@@ -21,11 +23,28 @@ preprocessNames <- function(x, anti = TRUE, split_frac = 0.8){
     punct <- stringr::str_extract_all(y, "[[:punct:]]")
     frac_w_delim <- table(unlist(lapply(punct, unique))) / length(y)
     poss_delim <- names(frac_w_delim)[frac_w_delim > split_frac]
+    result <- data.frame(Original = x, value = y)
     if (length(poss_delim) > 1){
-        result <- data.frame(Original = x, value = strsplit(y, poss_delim)) %>%
-            tidyr::unnest(value)
-    } else {
-        result <- data.frame(Original = x, value = y)
+        result <- dplyr::mutate(result, value_sp = strsplit(value, poss_delim),
+                                value_sp = lapply(value_sp, unique)) %>%
+            tidyr::unnest_wider(value_sp, names_sep = "_")
+
+        # Quick match in the totalseq data set
+        data(totalseq)
+        totalseq <- totalseq %>% dplyr::select(Antigen, Clone) %>% unique()
+        result %>%
+            # Note that totalseq doesn't have NA in Antigen or Clone cols
+            dplyr::mutate(across(matches("value_sp"),
+                                 ~toupper(.x) %in% toupper(totalseq$Antigen),
+                                 .names = "{.col}_is_antigen"),
+                   across(matches("value_sp[0-9]$"),
+                          ~.x %in% totalseq$Clone,
+                          .names = "{.col}_is_clone"))
+
+        result_summary <- result %>%
+            dplyr::summarise(across(matches("_is_"), sum))
+
+
     }
 
     # Check for same antigen used multiple times - e.g. CD3.1
@@ -43,5 +62,7 @@ preprocessNames <- function(x, anti = TRUE, split_frac = 0.8){
                                              sort(temp_num) == 1:dplyr::n()),
                       value = ifelse(n_exp & num_exp, temp_val, value)) %>%
         dplyr::select(Original, value)
+
+    return(result)
 
 }
