@@ -26,23 +26,43 @@ preprocessNames <- function(x, anti = TRUE, split_frac = 0.8){
     result <- data.frame(Original = x, value = y)
     if (length(poss_delim) > 1){
         result <- dplyr::mutate(result, value_sp = strsplit(value, poss_delim),
+                                n_split = lengths(value_sp),
+                                # HERE CALC MODE SPLIT
+
                                 value_sp = lapply(value_sp, unique)) %>%
             tidyr::unnest_wider(value_sp, names_sep = "_")
 
         # Quick match in the totalseq data set
         data(totalseq)
         totalseq <- totalseq %>% dplyr::select(Antigen, Clone) %>% unique()
-        result %>%
+        result <- result %>%
             # Note that totalseq doesn't have NA in Antigen or Clone cols
             dplyr::mutate(across(matches("value_sp"),
-                                 ~toupper(.x) %in% toupper(totalseq$Antigen),
-                                 .names = "{.col}_is_antigen"),
-                   across(matches("value_sp[0-9]$"),
-                          ~.x %in% totalseq$Clone,
-                          .names = "{.col}_is_clone"))
+                ~ifelse(toupper(.x) %in% toupper(totalseq$Antigen),
+                        .x, NA_character_))) %>%
+            dplyr::mutate(value_sp = coalesce(across(matches("value_sp"))))
+        # HERE IF_ELSE unusual split or value_sp is na -
+        # value_sp not na - value_sp
 
-        result_summary <- result %>%
-            dplyr::summarise(across(matches("_is_"), sum))
+
+
+         #                        .names = "{.col}_is_antigen"),
+         #          across(matches("value_sp_[0-9]$"),
+         #                 ~.x %in% totalseq$Clone,
+         #                 .names = "{.col}_is_clone"))
+
+        #result_summary <- result %>%
+        #    dplyr::summarise(across(matches("_is_"), sum)) / nrow(result)
+
+        # If one of the columns frequently matched an antigen,
+        # assume that this column is the antigen unless the split was unusual
+        if (max(result_summary %>%
+                dplyr::select(matches("antigen"))) > split_frac){
+            # Cases: more than typical number of splits:
+
+            #
+
+        }
 
 
     }
