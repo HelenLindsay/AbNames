@@ -76,6 +76,7 @@ filter_by_union <- function(df, df2 = NULL, rows = NULL, by = NULL){
 # df - data.frame
 # groups - character vector of grouping columns
 # ignore e.g. Cat_Number == "custom_made".  Regex?
+#'@importFrom stats na.omit
 group_by_any <- function(df, groups, new_col = "group", ignore = NULL,
                          verbose = FALSE){
     if (length(groups) < 2){
@@ -139,6 +140,8 @@ group_by_any <- function(df, groups, new_col = "group", ignore = NULL,
 # Do we expect columns to be NA if they do not match?  Not necessarily,
 # Antigen may differ
 # As is, only one column is given the chance to match
+#'@importFrom dplyr if_all
+#'@importFrom dplyr everything
 left_join_any <- function(x, y, cols, shared = c("patch", "update")){
 
     update_fun <- match.arg(shared)
@@ -176,7 +179,7 @@ left_join_any <- function(x, y, cols, shared = c("patch", "update")){
         new_res <- x %>%
             dplyr::inner_join(y_subs, by = col_set, na_matches = "never")
 
-        # If columns are shared, either update or patch values in x from y
+       # If columns are shared, either update or patch values in x from y
         if (length(patch_cn) > 0){
             y_patch <- y %>%
                 dplyr::select(all_of(c(patch_cn, col_set))) %>%
@@ -189,7 +192,7 @@ left_join_any <- function(x, y, cols, shared = c("patch", "update")){
         res[[i]] <- new_res
     }
 
-    res <- do.call(bind_rows, new_res)
+    res <- do.call(dplyr::bind_rows, res)
     x_aj <- dplyr::anti_join(x, res, by = setdiff(cn_x, patch_cn))
 
     # Add the unmatched rows back in

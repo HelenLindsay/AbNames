@@ -9,8 +9,6 @@ defaultQuery(ab = "Antigen")
 \arguments{
 \item{ab}{(character(1), default "Antigen") Name of the column in df
 containing Antigen/Antibody names}
-
-\item{id_cols}{(character(n)) Names of columns to paste to form ID column}
 }
 \description{
 Default list of functions for making an antibody query table

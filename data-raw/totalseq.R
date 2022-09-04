@@ -5,11 +5,13 @@
 
 # Setup ----
 
-library(readxl)
-library(dplyr)
-library(readr)
-library(AbNames)
-library(stringr)
+library("readxl")
+library("dplyr")
+library("readr")
+library("AbNames")
+library("stringr")
+library("janitor")
+library("stringi")
 
 #---------------------------------------------------------------------------
 # Format TotalSeq barcode tables ----
@@ -296,6 +298,21 @@ hgnc <- hgnc %>%
     unique()
 
 totalseq <- left_join(totalseq, hgnc, by = c("ENSEMBL_ID"))
+
+
+# Remove non-ascii characters -----
+
+totalseq <- totalseq %>%
+    dplyr::mutate(across(where(is.character),
+                         ~stringi::stri_trans_general(.x,
+                                    id="Any-Latin;Greek-Latin;Latin-ASCII")))
+
+
+# Clean up column names -----
+
+
+
+
 
 # Create totalseq data set ----
 totalseq <- as.data.frame(totalseq)

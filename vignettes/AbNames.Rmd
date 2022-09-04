@@ -341,7 +341,7 @@ set.
 
 ```{r}
 
-table(is.na(cs$HGNC_ID))
+table(is.na(citeseq$HGNC_ID))
 cs <- citeseq %>%
     searchTotalseq()
 table(is.na(cs$HGNC_ID))
@@ -413,16 +413,18 @@ AbNames::showGroups(fill_demo, interactive = FALSE)
 ```
 
 In the above example, we can see that for antibodies with catalogue number "300475", a match was found if the antibody was named "CD3E" but not if it was named "CD3".  We can fill in the missing information using `fillByGroup`:
-
 ```{r}
 fill_demo <- AbNames::fillByGroup(fill_demo, "Cat_Number",
                                   fill = c("HGNC_ID", "TotalSeq_Cat", "Vendor",
-                                           "ENSEMBL_ID", "UNIPROT_ID")) %>%
+                                           "ENSEMBL_ID", "UNIPROT_ID"),
+                                  multiple = "mode") %>%
     dplyr::group_by(Cat_Number) # Re-group as fillByGroup ungroups
 
 # Print out the first group again
 AbNames::showGroups(fill_demo, interactive = FALSE)
 ```
+*In the above call to fillByGroup, we set multiple = "mode" *
+
 
 Now we will fill the gene information in the citeseq data similarly, and check
 how many antibodies have not been matched.
@@ -442,23 +444,6 @@ print("After filling:")
 nmatched_after_fill
 
 
-```
-
-
-# Querying the protein ontology
-
-Let's see which antibodies were not matched in the HGNC.
-
-```{r}
-citeseq %>%
-    dplyr::filter(is.na(HGNC_ID)) %>%
-    pull(Antigen) %>%
-    sort() %>%
-    unique()
-
-missing <- citeseq %>%
-    dplyr::filter(is.na(HGNC_ID)) %>%
-    dplyr::select(ID, Antigen)
 ```
 
 
@@ -516,6 +501,8 @@ missing <- citeseq %>%
 # Replace greek symbols in totalseq
 # Check results in matchToCITEseq
 # keep ambiguous names in a separate column?
+# translit characters in query table
+# find replacement dataset for diamonds in test
 
 # Session Info
 

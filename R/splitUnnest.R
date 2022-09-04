@@ -33,9 +33,9 @@ splitUnnest <- function(df, ab = "Antigen", split = "[\\(\\)]", new_col = NA,
 
     if (! is.na(exclude)){
         df <- dplyr::mutate(df, !!temp_col :=
-                                ifelse(grepl(exclude, !!dplyr::sym(ab)),
-                                       list(!!dplyr::sym(ab)),
-                                       !!dplyr::sym(temp_col)))
+                                ifelse(grepl(exclude, !!sym(ab)),
+                                       as.list(!!sym(ab)),
+                                       !!sym(temp_col)))
     }
 
     df <- tidyr::unnest(df, cols = all_of(temp_col)) %>%

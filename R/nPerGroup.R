@@ -29,7 +29,7 @@ nPerGroup <- function(df, group, col){
     }
 
     df <- df %>%
-        dplyr::group_by(across(all_of(group))) %>%
+        dplyr::group_by(dplyr::across(all_of(group))) %>%
         dplyr::mutate(dplyr::across(all_of(cols),
                                     .fns = list(ndistinct =
                                         ~dplyr::n_distinct(.x, na.rm = TRUE)),

@@ -1,6 +1,6 @@
 # Tests for filter_by_union -----
 
-data(diamonds)
+data(diamonds, package = "ggplot2")
 diamonds <- diamonds[1:20,] %>%
     dplyr::mutate(across(c("cut", "color", "clarity"), as.character))
 
@@ -82,7 +82,7 @@ test_that("left_join_any updates correctly", {
     exp <- data.frame(ID = c(1, 1, 2, 3, 4, 4),
                       A = c("a", "a", "b", "c", "a", "a"),
                       B = c("d", "d", "e", "f", "f", "f"),
-                      C = c(NA, NA, "h", "i", "f", "f"),
+                      C = c("g", "g", "h", "i", "f", "f"),
                       D = c("k", "j", "k", NA, "k", "j"))
 
     res <- left_join_any(df_x, df_y, cols = c("A","B")) %>% arrange(ID)

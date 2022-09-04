@@ -21,7 +21,9 @@
 makeQueryTable <- function(df, ab = "Antigen", id = "ID",
                            control_col = NA, fun = NA){
     # Remove controls
-    if (! is.na(control_col)) { df <- dplyr::filter(df, ! (!!sym(control_cl))) }
+    if (! is.na(control_col)) {
+        df <- dplyr::filter(df, ! (!!sym(control_col)))
+    }
 
     if (is.na(fun)) query_fun <- defaultQuery
 
@@ -38,7 +40,7 @@ makeQueryTable <- function(df, ab = "Antigen", id = "ID",
     df <- qryToLong(df, query_cols)
 
     # Remove redundant entries
-    df <- dplyr::group_by(df, !!sym(id), value) %>%
+    df <- dplyr::group_by(df, !!sym(id), .data$value) %>%
         dplyr::slice(1) %>%
         dplyr::ungroup()
 
@@ -52,7 +54,7 @@ makeQueryTable <- function(df, ab = "Antigen", id = "ID",
 qryToLong <- function(df, query_cols){
     df <- df %>%
         tidyr::pivot_longer(cols = all_of(query_cols)) %>%
-        dplyr::filter(!is.na(value)) %>%
+        dplyr::filter(!is.na(.data$value)) %>%
         unique()
     return(df)
 }
@@ -63,7 +65,6 @@ qryToLong <- function(df, query_cols){
 #'
 #'@param ab (character(1), default "Antigen") Name of the column in df
 #' containing Antigen/Antibody names
-#'@param id_cols (character(n)) Names of columns to paste to form ID column
 #'@export
 defaultQuery <- function(ab = "Antigen"){
 
@@ -131,7 +132,7 @@ addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",
         warning("ID columns do not uniquely identify rows, row numbers added.")
     }
 
-    df <- df %>% dplyr::select(-n, -i)
+    df <- df %>% dplyr::select(-.data$n, -.data$i)
 
     return(df)
 }

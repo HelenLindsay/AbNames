@@ -77,8 +77,8 @@ print_n <- function(df, n = 20){
     brks <- seq_len(nrow(df))[seq_len(nrow(df)) %% n == 0]
 
     # If last break equals number of rows, remove
-    if (tail(brks, 1) == nrow(df)){
-        brks <- head(brks, -1)
+    if (utils::tail(brks, 1) == nrow(df)){
+        brks <- utils::head(brks, -1)
     }
     starts <- c(1, brks + 1)
     ends <- c(brks, nrow(df))

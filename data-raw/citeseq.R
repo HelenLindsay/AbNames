@@ -1,6 +1,7 @@
 library("tidyverse")
 library("AbNames")
 library("janitor")
+library("stringi")
 
 # To do: replace Greek symbols across all columns
 # To do: make sure human IDs are not assigned to non-human reactive Abs
@@ -8,6 +9,15 @@ library("janitor")
 
 citeseq_fname <- system.file("extdata", "citeseq.csv", package = "AbNames")
 citeseq <- read.csv(citeseq_fname) %>% unique()
+
+# Remove non-ascii characters -----
+
+citeseq <- citeseq %>%
+    dplyr::mutate(across(where(is.character),
+                         ~stringi::stri_trans_general(.x,
+                                id="Any-Latin;Greek-Latin;Latin-ASCII")))
+
+
 citeseq <- AbNames::addID(citeseq)
 citeseq_q <- citeseq %>% dplyr::select(ID, Antigen)
 query_df <- AbNames::makeQueryTable(citeseq_q, ab = "Antigen")
@@ -37,7 +47,7 @@ citeseq <- citeseq %>%
 
 citeseq <- searchTotalseq(citeseq)
 
-# Patch the antigens that are still missing
+# Patch the antigens that are still missing -----
 cs_patch <- tibble::tribble(~Antigen, ~value,
                             "DopamineD4receptor", "dopamine receptor D4",
                             "DopamineReceptorD4", "dopamine receptor D4")

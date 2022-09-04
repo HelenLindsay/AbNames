@@ -36,12 +36,12 @@ setMethod("renameADT", as(structure(.Data = c("SingleCellExperiment",
         stopifnot(requireNamespace("SummarizedExperiment"),
                   requireNamespace("SingleCellExperiment"))
 
-        if (assay %in% altExpNames(obj)){
+        if (assay %in% SingleCellExperiment::altExpNames(obj)){
             # If it's an altExperiment, rename all altExp rownames
             rp_func = altExp
-            old_nms <- rownames(altExp(obj, assay))
+            old_nms <- rownames(SingleCellExperiment::altExp(obj, assay))
             new_nms <- dplyr::coalesce(names[old_nms], old_nms)
-            rownames(altExp(obj, assay)) <- new_nms
+            rownames(SingleCellExperiment::altExp(obj, assay)) <- new_nms
         } else {
             #nms <- .getRownames(obj, assay)
 
@@ -49,7 +49,6 @@ setMethod("renameADT", as(structure(.Data = c("SingleCellExperiment",
             new_nms <- dplyr::coalesce(names[rownames(obj)], rownames(obj))
             rownames(obj) <- new_nms
         }
-        print(obj)
         return(obj)
 })
 
@@ -65,7 +64,7 @@ setMethod("renameADT", as(structure(.Data = c("MultiAssayExperiment",
     function(obj, names, ...) {
         stopifnot(requireNamespace("SummarizedExperiment"),
                   requireNamespace("MultiAssayExperiment"))
-        nms <- rownames(experiments(obj)[[assay]])
+        nms <- rownames(SingleCellExperiment::experiments(obj)[[assay]])
         #nms <- .getRownames(obj, assay)
 })
 

@@ -9,6 +9,7 @@
 # so isotype controls may have a different format
 # Returns a data.frame of original and preprocessed names
 # TO DO: proper loading of data set
+#'@importFrom dplyr across
 preprocessNames <- function(x, anti = TRUE, split_frac = 0.8){
     prefix1 = paste("ADT", "PROT", sep = "|")
     prefix2 = ifelse(isTRUE(anti), "[Aa]nti", "")
@@ -25,19 +26,22 @@ preprocessNames <- function(x, anti = TRUE, split_frac = 0.8){
     poss_delim <- names(frac_w_delim)[frac_w_delim > split_frac]
     result <- data.frame(Original = x, value = y)
     if (length(poss_delim) > 1){
-        result <- dplyr::mutate(result, value_sp = strsplit(value, poss_delim),
-                                n_split = lengths(value_sp),
-                                # HERE CALC MODE SPLIT
-
-                                value_sp = lapply(value_sp, unique)) %>%
+        result <- result %>%
+            dplyr::mutate(value_sp = strsplit(.data$value, poss_delim),
+                          n_split = lengths(.data$value_sp),
+                          # HERE CALC MODE SPLIT
+                          value_sp = lapply(.data$value_sp, unique)) %>%
             tidyr::unnest_wider(value_sp, names_sep = "_")
 
         # Quick match in the totalseq data set
         data(totalseq)
-        totalseq <- totalseq %>% dplyr::select(Antigen, Clone) %>% unique()
+        totalseq <- totalseq %>%
+            dplyr::select(dplyr::all_of("Antigen", "Clone")) %>%
+            unique()
+
         result <- result %>%
             # Note that totalseq doesn't have NA in Antigen or Clone cols
-            dplyr::mutate(across(matches("value_sp"),
+            dplyr::mutate(across(dplyr::matches("value_sp"),
                 ~ifelse(toupper(.x) %in% toupper(totalseq$Antigen),
                         .x, NA_character_))) %>%
             dplyr::mutate(value_sp = coalesce(across(matches("value_sp"))))
@@ -51,8 +55,8 @@ preprocessNames <- function(x, anti = TRUE, split_frac = 0.8){
          #                 ~.x %in% totalseq$Clone,
          #                 .names = "{.col}_is_clone"))
 
-        #result_summary <- result %>%
-        #    dplyr::summarise(across(matches("_is_"), sum)) / nrow(result)
+        result_summary <- result %>%
+            dplyr::summarise(across(matches("_is_"), sum)) / nrow(result)
 
         # If one of the columns frequently matched an antigen,
         # assume that this column is the antigen unless the split was unusual
@@ -76,12 +80,14 @@ preprocessNames <- function(x, anti = TRUE, split_frac = 0.8){
     # (This will not detect entries that have been split, but it becomes
     # complicated to figure out whether the entry is an antibody or clone)
     result <- result %>%
-        dplyr::group_by(temp_val) %>%
-        dplyr::mutate(n_exp = sum(dups) == dplyr::n() & dplyr::n() > 1,
-                      num_exp = ifelse(is.na(temp_num), NA,
-                                             sort(temp_num) == 1:dplyr::n()),
-                      value = ifelse(n_exp & num_exp, temp_val, value)) %>%
-        dplyr::select(Original, value)
+        dplyr::group_by(.data$temp_val) %>%
+        dplyr::mutate(n_exp = sum(.data$dups) == dplyr::n() & dplyr::n() > 1,
+                      num_exp =
+                          ifelse(is.na(.data$temp_num), NA,
+                                 sort(.data$temp_num) == 1:dplyr::n()),
+                      value = ifelse(.data$n_exp & .data$num_exp,
+                                     .data$temp_val, .data$value)) %>%
+        dplyr::select(dplyr::all_of("Original", "value"))
 
     return(result)
 

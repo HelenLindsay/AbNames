@@ -29,21 +29,23 @@ searchAliases <- function(query_df, multisubunit = c("TCR_long", "subunit")){
     utils::data("gene_aliases", envir = environment())
 
     res <- dplyr::left_join(query_df, gene_aliases) %>%
-        dplyr::filter(! is.na(ALT_ID)) %>%
+        dplyr::filter(! is.na(.data$ALT_ID)) %>%
 
         # If it is a multi-subunit protein, we expect all subunits to match
         .checkSubunitMatches(query_df) %>%
-        dplyr::group_by(ID) %>%
+        dplyr::group_by(.data$ID) %>%
 
         # Count number of gene symbols per antibody ID
-        dplyr::mutate(nsym_types = length(unique(symbol_type))) %>%
+        dplyr::mutate(nsym_types = length(unique(.data$symbol_type))) %>%
 
         # If there is more than one type of symbol, remove the previous symbols
-        dplyr::filter(! (symbol_type == "prev_symbol" & nsym_types > 1)) %>%
+        dplyr::filter(! (.data$symbol_type == "prev_symbol" &
+                             .data$nsym_types > 1)) %>%
 
         # If there is an exact match to a manual symbol, keep this one
-        dplyr::mutate(has_manual = any(SOURCE == "MANUAL_LOOKUP")) %>%
-        dplyr::filter(has_manual & SOURCE == "MANUAL_LOOKUP" | ! has_manual) %>%
+        dplyr::mutate(has_manual = any(.data$SOURCE == "MANUAL_LOOKUP")) %>%
+        dplyr::filter(has_manual & .data$SOURCE == "MANUAL_LOOKUP" |
+                          ! has_manual) %>%
 
         # If there is an exact match to the offical symbol, discard others
         dplyr::mutate(has_official = any(symbol_type %in% official_nms)) %>%
@@ -52,13 +54,13 @@ searchAliases <- function(query_df, multisubunit = c("TCR_long", "subunit")){
         dplyr::select(-has_official, -nsym_types, -has_manual) %>%
 
         # If there are matches to both symbol and name, keep symbol only
-        dplyr::filter(is.na(symbol_type) |
-                          ! (any(symbol_type == "HGNC_SYMBOL") & !
-                                 symbol_type == "HGNC_SYMBOL")) %>%
+        dplyr::filter(is.na(.data$symbol_type) |
+                          ! (any(.data$symbol_type == "HGNC_SYMBOL") & !
+                                 .data$symbol_type == "HGNC_SYMBOL")) %>%
 
         # If there are only matches to aliases/previous symbols, aggregate
-        group_by(ID, HGNC_ID, symbol_type) %>%
-        dplyr::mutate(across(c(name, value),
+        dplyr::group_by(dplyr::all_of(c("ID", "HGNC_ID", "symbol_type"))) %>%
+        dplyr::mutate(across(dplyr::all_of(c("name", "value")),
                          ~ifelse(symbol_type %in% c("HGNC_SYMBOL", "HGNC_NAME"),
                                  .x, paste(unique(.x), collapse = "|")))) %>%
         unique() %>%

@@ -25,6 +25,8 @@ Imports:
     utils
 Suggests:
     BiocStyle,
+    CiteFuse,
+    ggplot2,
     knitr,
     MultiAssayExperiment,
     readr,
