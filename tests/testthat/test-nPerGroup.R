@@ -4,37 +4,21 @@ df <- data.frame(A = rep(1:3, each = 2),
                  D = rep(11:12, c(4,2)),
                  nB = c(11:16))
 
-test_that(".addNPerGroup works quoted or unquoted", {
+test_that(".addNPerGroup works with multiple columns", {
     # One grouping column, two columns for n_distinct
     exp1 <- cbind(df[, c("A","B","C","D")], data.frame(nB = 2,
                                  nC = rep(c(1,2,1), each = 2)))
-
-    # Col unquoted
-    res1_1 <- .addNPerGroup(df, A, c("B", "C"))
-    expect_equal(as.data.frame(res1_1), exp1)
-
-    # Both unquoted
-    res1_2 <- .addNPerGroup(df, A, c(B, C))
-    expect_equal(as.data.frame(res1_2), exp1)
 
     # Both quoted
     res1_3 <- .addNPerGroup(df, "A", c("B", "C"))
     expect_equal(as.data.frame(res1_3), exp1)
 
 
-    # Two grouping columns, one columns for n_distinct
+    # Two grouping columns, one column for n_distinct
     exp2 <- cbind(df[,c("A","B","C","D")],
                  data.frame(nB = c(2,2,1,1,2,2)))
     res2_1 <- .addNPerGroup(df, c("A","C"), "B")
     expect_equal(as.data.frame(res2_1), exp2)
-
-    # Unquoted col
-    exp2_1 <- .addNPerGroup(df, c("A","C"), col = B)
-    expect_equal(as.data.frame(exp2_1), exp2)
-
-    # Unquoted col and group
-    exp2_2 <- .addNPerGroup(df, c(A,C), col = B)
-    expect_equal(as.data.frame(exp2_2), exp2)
 
     # Two grouping columns, two columns for n_distinct
     res3 <- .addNPerGroup(df, c("A","C"), c("B", "D"))

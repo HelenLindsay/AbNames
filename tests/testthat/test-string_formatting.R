@@ -13,7 +13,7 @@ test_that("addID warns if ID is not unique", {
 test_that("addID allows more than two ID columns", {
     df <- data.frame(x = rep("A", 2), y = rep("B", 2), z = c("C","D"))
     result <- addID(df, c("x","y","z"))$ID
-    expect_equal(result, c("A-B-C", "A-B-D"))
+    expect_equal(result, c("A__B__C", "A__B__D"))
 })
 
 # splitUnnest ----

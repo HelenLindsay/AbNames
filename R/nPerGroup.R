@@ -21,8 +21,8 @@ nPerGroup <- function(df, group, col){
 }
 
 
-# group and col may be quoted or unquoted
-# since changing to across(all_of()) group must be quoted?
+
+# group and cols must be character
 .addNPerGroup <- function(df, group, cols){
     if (identical(group, cols)) {
         stop("Column to group must differ from column to count")
