@@ -84,9 +84,9 @@ print_n <- function(df, n = 20){
     ends <- c(brks, nrow(df))
 
     # If last start equals number of rows, remove
-    if (tail(starts, 1) == nrow(df)){
-        starts <- head(starts, -1)
-        ends <- head(ends, -1)
+    if (utils::tail(starts, 1) == nrow(df)){
+        starts <- utils::head(starts, -1)
+        ends <-  utils::head(ends, -1)
     }
 
     for (i in seq_along(starts)){

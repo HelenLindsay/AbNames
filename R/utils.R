@@ -138,8 +138,8 @@
 rm_ambiguous <- function(df, gp, id){
     df %>% dplyr::group_by({{ gp }}) %>%
         dplyr::mutate(n_genes = dplyr::n_distinct( {{ id }} )) %>%
-        dplyr::filter(n_genes == 1) %>%
-        dplyr::select(-n_genes) %>%
+        dplyr::filter(.data$n_genes == 1) %>%
+        dplyr::select(-.data$n_genes) %>%
         dplyr::ungroup()
 }
 

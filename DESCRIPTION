@@ -1,7 +1,7 @@
 Package: AbNames
 Type: Package
 Title: Standardize Antibody Names
-Version: 0.1.0
+Version: 0.2.0
 Authors@R:
     person("Helen", "Lindsay", email = "helen.lindsay@chuv.ch", 
     role = c("aut", "cre"))

@@ -10,6 +10,7 @@
 # Returns a data.frame of original and preprocessed names
 # TO DO: proper loading of data set
 #'@importFrom dplyr across
+#'@importFrom dplyr matches
 preprocessNames <- function(x, anti = TRUE, split_frac = 0.8){
     prefix1 = paste("ADT", "PROT", sep = "|")
     prefix2 = ifelse(isTRUE(anti), "[Aa]nti", "")
@@ -31,17 +32,17 @@ preprocessNames <- function(x, anti = TRUE, split_frac = 0.8){
                           n_split = lengths(.data$value_sp),
                           # HERE CALC MODE SPLIT
                           value_sp = lapply(.data$value_sp, unique)) %>%
-            tidyr::unnest_wider(value_sp, names_sep = "_")
+            tidyr::unnest_wider(.data$value_sp, names_sep = "_")
 
         # Quick match in the totalseq data set
-        data(totalseq)
+        data(totalseq,  envir = environment())
         totalseq <- totalseq %>%
             dplyr::select(dplyr::all_of("Antigen", "Clone")) %>%
             unique()
 
         result <- result %>%
             # Note that totalseq doesn't have NA in Antigen or Clone cols
-            dplyr::mutate(across(dplyr::matches("value_sp"),
+            dplyr::mutate(across(matches("value_sp"),
                 ~ifelse(toupper(.x) %in% toupper(totalseq$Antigen),
                         .x, NA_character_))) %>%
             dplyr::mutate(value_sp = coalesce(across(matches("value_sp"))))
@@ -74,6 +75,8 @@ preprocessNames <- function(x, anti = TRUE, split_frac = 0.8){
     # Check for same antigen used multiple times - e.g. CD3.1
     result$temp_val <- .gsubNA("[[:punct:]][1-9]$", "", y)
     result$temp_num <- .gsubNA(".*[[:punct:]]([1-9]$)", "\\1", y)
+
+    # TO DO: should this be temp_val?
     result$dups <- .dups(temp) & ! is.na(temp)
     # Because lots of gene names also end with numbers, we will require all
     # sequential numbers to be present

@@ -4,7 +4,8 @@
 #'
 #'@description Search gene symbols, aliases and names for an exact match
 #'to an value, assumed to be an antigen name or part of an antigen name.
-#'query_df must have columns named "ID", "name" and "value".
+#'query_df must have columns named "ID", "name" and "value".  "name" is used
+#'for checking whether the value is formatted as a multi-subunit protein.
 #'
 #'@param query_df A data.frame in long format for searching for exact matches to
 #'HGNC names.  Must contain a column "value" containing potential gene symbols
@@ -17,11 +18,13 @@
 #'a column "n_matches" giving the number of matches to different genes.
 #'@importFrom utils data
 #'@importFrom dplyr left_join
+#'@importFrom dplyr across
+#'@importFrom dplyr all_of
 #'@export
 searchAliases <- function(query_df, multisubunit = c("TCR_long", "subunit")){
 
     if (! all(c("ID", "name", "value") %in% colnames(query_df))){
-        stop("Query data frame must contain columns named ID and value")
+        stop("Query data frame must contain columns name, ID, and value")
     }
 
     official_nms <- c("HGNC_SYMBOL", "HGNC_NAME")
@@ -39,7 +42,8 @@ searchAliases <- function(query_df, multisubunit = c("TCR_long", "subunit")){
         dplyr::mutate(nsym_types = length(unique(.data$symbol_type))) %>%
 
         # If there is more than one type of symbol, remove the previous symbols
-        dplyr::filter(! (.data$symbol_type == "prev_symbol" &
+        dplyr::filter(is.na(.data$symbol_type) |
+                          ! (.data$symbol_type == "prev_symbol" &
                              .data$nsym_types > 1)) %>%
 
         # If there is an exact match to a manual symbol, keep this one
@@ -59,9 +63,9 @@ searchAliases <- function(query_df, multisubunit = c("TCR_long", "subunit")){
                                  .data$symbol_type == "HGNC_SYMBOL")) %>%
 
         # If there are only matches to aliases/previous symbols, aggregate
-        dplyr::group_by(dplyr::all_of(c("ID", "HGNC_ID", "symbol_type"))) %>%
+        dplyr::group_by(across(all_of(c("ID", "HGNC_ID", "symbol_type")))) %>%
         dplyr::mutate(across(dplyr::all_of(c("name", "value")),
-                         ~ifelse(symbol_type %in% c("HGNC_SYMBOL", "HGNC_NAME"),
+                         ~ifelse(symbol_type %in% official_nms,
                                  .x, paste(unique(.x), collapse = "|")))) %>%
         unique() %>%
 

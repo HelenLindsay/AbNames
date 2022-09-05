@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
 
 AbNames performs three tasks:
 
-* Extracting potential gene names from antibody names, 
+* Formatting antibody names for querying a gene aliases, 
 
 * Matching human antibody names to gene names, IDs and protein complex IDs, and
 
@@ -503,6 +503,17 @@ nmatched_after_fill
 # keep ambiguous names in a separate column?
 # translit characters in query table
 # find replacement dataset for diamonds in test
+# make a pipeline for regenerating gene_aliases
+# From gene_aliases, remove entries where everything is identical except
+# symbol_type - prefer alias to alias name, previous_symbol to previous_name
+# etc - cellmarker %>% unique()
+# cellmarker Alkaline phosphatase maps to 2 IDs
+# symbol_type is NA
+# biomart gives different entrez ids?
+# CD1b has two different HGNC_IDs
+# SIGLEC5 
+# To do: what is the point of "name" in query table?
+# why two rows for CD124|IL4RA in alias_results - aggregate source
 
 # Session Info
 
