@@ -29,7 +29,7 @@ test_that("searchAliases prefers hgnc symbols to previous symbols", {
                       value = c("CD8", "CD8A"),
                       name = NA)
     res <- searchAliases(qdf)
-    expect_equal(res$symbol_type, "HGNC_ID")
+    expect_equal(res$symbol_type, "HGNC_SYMBOL")
 })
 
 

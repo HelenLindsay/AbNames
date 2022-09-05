@@ -48,13 +48,15 @@ searchAliases <- function(query_df, multisubunit = c("TCR_long", "subunit")){
 
         # If there is an exact match to a manual symbol, keep this one
         dplyr::mutate(has_manual = any(.data$SOURCE == "MANUAL_LOOKUP")) %>%
-        dplyr::filter(has_manual & .data$SOURCE == "MANUAL_LOOKUP" |
-                          ! has_manual) %>%
+        dplyr::filter(.data$has_manual & .data$SOURCE == "MANUAL_LOOKUP" |
+                          ! .data$has_manual) %>%
 
         # If there is an exact match to the offical symbol, discard others
-        dplyr::mutate(has_official = any(symbol_type %in% official_nms)) %>%
-        dplyr::filter(has_official & symbol_type %in% official_nms |
-                          ! has_official) %>%
+        dplyr::mutate(has_official =
+                          any(.data$symbol_type %in% official_nms)) %>%
+        dplyr::filter(.data$has_official & .data$symbol_type
+                      %in% official_nms |
+                          ! .data$has_official) %>%
         dplyr::select(-has_official, -nsym_types, -has_manual) %>%
 
         # If there are matches to both symbol and name, keep symbol only

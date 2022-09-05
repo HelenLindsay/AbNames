@@ -23,5 +23,6 @@ a column "n_matches" giving the number of matches to different genes.
 \description{
 Search gene symbols, aliases and names for an exact match
 to an value, assumed to be an antigen name or part of an antigen name.
-query_df must have columns named "ID", "name" and "value".
+query_df must have columns named "ID", "name" and "value".  "name" is used
+for checking whether the value is formatted as a multi-subunit protein.
 }

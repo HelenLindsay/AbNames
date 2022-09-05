@@ -19,5 +19,6 @@ group share a word with at least one other member of the group.
 \examples{
 # "fox" occurs in groups 1 and 3, and "box" occurs in groups 3 and 4,
 # so these groups are grouped together
-sharedSubstr(c("fox", "cat", "fox", "in", "box", "box"), c(1, 2, 3, 3, 3, 4))
+AbNames:::.sharedSubstr(c("fox", "cat", "fox", "in", "box", "box"),
+c(1, 2, 3, 3, 3, 4))
 }
