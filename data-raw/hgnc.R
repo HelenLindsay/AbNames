@@ -64,7 +64,7 @@ hgnc_groups <- hgnc_groups %>%
 
 hgnc <- dplyr::full_join(hgnc_proteins, hgnc_groups)
 
-# Check that one HGNC ID maps to one ID ----
+# Check that one HGNC ID maps to one ENTREZ/ENSEMBL ID ----
 temp <- hgnc %>%
     AbNames:::nPerGroup(group = "HGNC_ID",
                        col = c("ENTREZ_ID", "ENSEMBL_ID")) %>%

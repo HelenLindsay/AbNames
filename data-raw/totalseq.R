@@ -313,6 +313,13 @@ totalseq <- totalseq %>%
 
 
 
+# Remove Greek and other special characters ----
+totalseq <- totalseq %>%
+    dplyr::mutate(across(where(is.character), replaceGreekSyms("sym2letter"))) %>%
+    dplyr::mutate(across(where(is.character),
+                         ~stringi::stri_trans_general(.x,
+                                     id="Any-Latin;Greek-Latin;Latin-ASCII")))
+
 
 # Create totalseq data set ----
 totalseq <- as.data.frame(totalseq)

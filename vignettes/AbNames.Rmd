@@ -457,20 +457,17 @@ nmatched_after_fill
 * CD25 (good example, multiple genes), CD270, CD279 matched in HGNC?
 # CD279 PD-1 - example where only some are matched
 # Fix Hao Clone CD25 - Is it custom?  No Oligo or Cat_Number for this one 
-# Search for similar genes in master table
 # Generate camel case regexp?
 # Unintuitive to use quoted for splitUnnest
 # uniprot?
 # Redocument data sets
 # HAO CD45 should have catalogue numbers!
 # union join back gene ID / get info by antigen
-# Include clones when standardising names?
 # Put RRID into CITEseq
 # Export and demonstrate group_by_any? e.g. 
 # citeseq <- citeseq %>% group_by_any(c("Antigen", "Cat_Number") 
 # showGroups(citeseq, 2, interactive = FALSE)
 # ungroup(citeseq)
-#  b2-microglobin without dash
 # Add tag for non-human tagging antibodies
 # Problems: 
 # HGNC_SYMBOL WRONG FOR CD158b (KIR2DL2/L3, NKAT2)?  (NKAT2 = only one gene)
@@ -478,7 +475,6 @@ nmatched_after_fill
 # and Antigen
 # Triana group 5... - matching because of NA?
 # CD3.1 should not have HGNC symbol PECAM1
-# CD45 MATCHING THROUGH GENE SYMBOL
 # Update BIOMART entrez ids to match entrez / HGNC??
 # Check that UNIPROT IDs are valid (not all from CSPA are up to date)
 # Change name of data gene_aliases to just aliases
@@ -493,12 +489,10 @@ nmatched_after_fill
 # Hao CD25 - same HGNC ID reported twice HGNC:6008|HGNC:6008 and CD45RA
 # Tasks - getting a correct identifier
 # Matching groups (don't necessarily need to correct the identifier mapping in this case)
-# Can fill IDs by majority clone / Cat_Number
 # KLG / MAFA
 # Keep source in ID result table?
 # Is TCRg clone B1 = TCRg/d?
 # across query columns - na_if equal to antigen and not is antigen
-# Replace greek symbols in totalseq
 # Check results in matchToCITEseq
 # keep ambiguous names in a separate column?
 # translit characters in query table
@@ -514,6 +508,11 @@ nmatched_after_fill
 # SIGLEC5 
 # To do: what is the point of "name" in query table?
 # why two rows for CD124|IL4RA in alias_results - aggregate source
+# export left_join_any
+# when study includes same antigen multiple times, give an underscore # suffix?
+# Convenience function - find alternative names for an antibody
+# To do: indicate cocktail membership
+# Should the ALT_ID be the symbol not the ID to allow easier matching?
 
 # Session Info
 

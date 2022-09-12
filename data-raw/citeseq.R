@@ -3,9 +3,9 @@ library("AbNames")
 library("janitor")
 library("stringi")
 
-# To do: replace Greek symbols across all columns
 # To do: make sure human IDs are not assigned to non-human reactive Abs
 # To do: group and check differences in ALT_ID.
+# Chung c-Fos has wrong catalogue number?
 
 citeseq_fname <- system.file("extdata", "citeseq.csv", package = "AbNames")
 citeseq <- read.csv(citeseq_fname) %>% unique()
@@ -50,7 +50,8 @@ citeseq <- searchTotalseq(citeseq)
 # Patch the antigens that are still missing -----
 cs_patch <- tibble::tribble(~Antigen, ~value,
                             "DopamineD4receptor", "dopamine receptor D4",
-                            "DopamineReceptorD4", "dopamine receptor D4")
+                            "DopamineReceptorD4", "dopamine receptor D4",
+                            "c-Fos", "FOS")
 cs_patch <- cs_patch %>%
     dplyr::left_join(gene_aliases, by = "value") %>%
     dplyr::select(any_of(colnames(citeseq)))

@@ -128,12 +128,11 @@ group_by_any <- function(df, groups, new_col = "group", ignore = NULL,
 
 # left_join_any ----
 # Join by matches in any set of columns
-# Perform successive inner joins, at each round only using unmatched
-# Allow cols in groups, e.g. "Cat_Number", c("Antigen", "Clone"), ...
+# Perform successive inner joins
+# Allows cols in groups, e.g. "Cat_Number", c("Antigen", "Clone"), ...
 # Cols must be a list.  Assume that rows can be uniquely identified
 # shared: which function to use for shared columns?  rows_patch (fill NA) or
 # rows_update (overwrite)
-# order of cols matters as joining is successive
 # ignore option for patching?  Set patch_cn to NULL?
 # What to do if Antigen matches one row and Clone matches a different one?
 # Probably should include both rows

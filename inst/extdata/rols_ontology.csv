@@ -8,10 +8,10 @@ CD45RA,HI100,PR_000001015,UniProtKB:P08575-8,NCIT_C118492,PTPRC,HGNC:9666,PTPRC/
 CD45RB,MEM-55,PR_000001016,UniProtKB:P08575-9,NCIT_C118493,PTPRC,HGNC:9666,PTPRC/iso:CD45RB,,,PTPRC/iso:CD45RB
 CD45RO,UCHL1,PR_000001017,UniProtKB:P08575-4,NCIT_C118495,PTPRC,HGNC:9666,PTPRC/iso:CD45RO,,,PTPRC/iso:CD45RO
 CD66,B1.1/CD66,,,,"CEACAM1, CEACAM3, CEACAM5, CEACAM6","HGNC:1814, HGNC:1815, HGNC:1817, HGNC:1818",,,https://www.bdbiosciences.com/en-ch/products/reagents/flow-cytometry-reagents/research-reagents/single-color-antibodies-ruo/pe-mouse-anti-human-cd66.551480,CD66acde
-CD77,5B5,,,,,,,"Globotriaosylceramide, Gb3 glycosphingolipid",Formation is catalysed by A4GALT.  ,CD77_5B5
+CD77,5B5,,,,,,,"Globotriaosylceramide, Gb3 glycosphingolipid",Formation is catalysed by A4GALT.,CD77_5B5
 "HLA-A,B,C",W6/32,PR:P61769,,,B2M,HGNC:914,,,"Ontology ID is for beta-2-microglobulin, which this antibody binds","HLA-A,B,C"
 HLA-A2,BB7.2,,,NCIT_C16691,HLA-A,,,"1 MHC Class I Antigen A*2, HLA-A2 Antigen, HLA-A Class I Antigen 2, HLA-A Histocompatibility Type Antigen*02, HLA-A Histocompatibility Type Antigen 2, HLA-A*02, HLA-A, HLA-A2, Major Histocompatibility Complex, Class I, A2 Antigen, HLA Class I Histocompatibility Antigen, A-2 Alpha Chain, MHC Class I Antigen A*02",,HLA-A2
-"HLA-DR,DP,DQ",Tü39,,,,,,,,,HLA-DP
+"HLA-DR,DP,DQ",Tü39,,,,,,,,,"HLA-DR,DP,DQ"
 HLA-DQ,Tü169,,,NCIT_C62792,,,,,,HLA-DQ
 HLA-DR,L243,,,NCIT_C16692,,,,,,HLA-DR
 Ig light chain lambda,MHL-38,PR:000050185,,NCIT:C16719,IGL,HGNC:5853,,,,HGNC:5853
