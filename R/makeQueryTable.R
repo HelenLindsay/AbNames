@@ -20,6 +20,11 @@
 #'@export
 makeQueryTable <- function(df, ab = "Antigen", id = "ID",
                            control_col = NA, fun = NA){
+
+    if (! all(c(ab, id) %in% colnames(df))){
+        stop(sprintf("%s and %s must be columns in df", ab, id))
+    }
+
     # Remove controls
     if (! is.na(control_col)) {
         df <- dplyr::filter(df, ! (!!sym(control_col)))
@@ -76,11 +81,11 @@ defaultQuery <- function(ab = "Antigen"){
     nc <- "Antigen_split"
     split_merge_str <- sprintf('grepl("TCR", %s)', nc)
 
-
     qry = list(purrr::partial(gsubAb, ab = !!ab), # Remove A/antis
                purrr::partial(gsubAb, ab = !!ab, pattern = "\\s[Rr]ecombinant"),
                purrr::partial(splitUnnest, ab = !!ab, new_col = !!nc),# Brackets
-               purrr::partial(splitUnnest, ab = !!nc),  # Commas
+               # Commas, | or _
+               purrr::partial(splitUnnest, ab = !!nc, split = ", ?|_|\\|"),
                # / _ or . if at least 3 on each side and not TCR
                purrr::partial(splitUnnest, exclude = "TCR",
                         split = "(?<=[A-z0-9-]{3})[\\/_\\.](?=[A-z0-9-]{3,})"),
@@ -168,30 +173,20 @@ addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",
 #'Convenience function to remove a pattern from a column in a data.frame
 #'
 #'Remove a pattern from a column, either modifying in place or creating a new
-#'column.  The default pattern removes the prefix "anti-" or "Anti-".
+#'column.  The default pattern removes the prefix "anti-" or "Anti-", optionally
+#'followed by Human or human, then optionally a space or underscore
 #'
 #'@param df A data.frame or tibble
 #'@param ab (character(1), default "Antigen) Name of the column to remove
 #'prefixes from
 #'@param pattern (character(1)) A regular expression for matching in column ab.
 #'@param replacement (character(1)) Replacement value, default "" (i.e. remove)
-#'@param exclude (Default: NA) - DOES NOTHING YET
-#'@param restrict (Default: NA) - DOES NOTHING YET
 #'@param new_col (character(1), default NA Name of the column to add to df.
 #'If NA, column ab is modified
-gsubAb <- function(df, ab = "Antigen", pattern = "[Aa]nti-", replacement = "",
-                   exclude = NA, restrict = NA, new_col = NA){
+gsubAb <- function(df, ab = "Antigen", pattern = "[Aa]nti-([Hh]uman?)([ _]?)",
+                   replacement = "", new_col = NA){
     if (is.na(new_col)) new_col <- ab
     df <- dplyr::mutate(df, !!new_col := gsub(pattern, replacement, !!sym(ab)))
-
-    # Restrict would have to be a filter expression, e.g. a particular study
-    # Would need to use a temp column as in splitUnnest
-    # Is this actually important?
-
-    #@param exclude (character(1), default NA) a regex - do not split if ab
-    #matches.
-    #@param restrict (character(1), default NA) a regex replace only if restrict
-    # matches in column ab
 
     return(df)
 }

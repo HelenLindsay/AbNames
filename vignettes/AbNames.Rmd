@@ -509,10 +509,13 @@ nmatched_after_fill
 # To do: what is the point of "name" in query table?
 # why two rows for CD124|IL4RA in alias_results - aggregate source
 # export left_join_any
+# make a wrapper for group_by_any which ignores clone duplicates
 # when study includes same antigen multiple times, give an underscore # suffix?
 # Convenience function - find alternative names for an antibody
 # To do: indicate cocktail membership
 # Should the ALT_ID be the symbol not the ID to allow easier matching?
+# Add checks in makeQueryTable, e.g. for brackets?
+
 
 # Session Info
 
