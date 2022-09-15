@@ -15,15 +15,14 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-This sort vignette shows how to standardize the names of the antibody-derived tags in
-a CITE-seq experiment in SingleCellExperiment format.
+This short vignette shows how to standardize the names of the antibody-derived tags in a CITE-seq experiment in SingleCellExperiment format.
 
 # Example 1: Kotliarov PBMC
 
 To demonstrate, we will use the "Kotliarov" dataset available in the package
 "scRNAseq".  
 
-## Matching using the CITEseq data set
+## Load the Kotliarov CITE-seq data
 
 ```{r, message = FALSE, warning=FALSE}
 
@@ -34,7 +33,7 @@ kotliarov <- KotliarovPBMCData(mode = "adt")
 head(rownames(kotliarov))
 ```
 
-### Create a data frame to allow matching to the CITEseq data set
+## Create a data frame to allow matching to the CITEseq data set
 
 To directly match to the CITEseq data set, some formatting of the antigen names may be required.  Here we remove the "_PROT" suffix.  An alternative is to first map antigen names to the gene_aliases data set and then match antigens and identifiers to the CITEseq data set. However, it is still a good idea to remove prefixes and suffixes to avoid false matches.  For example, "PROT" is an alias of the gene SLC6A7 and would match if not removed.
 
@@ -76,8 +75,7 @@ df[! df$Antigen == df$Antigen_std, ]
 ```
 
 By looking at the `n_matched` column, we can see how many entries in the
-cite-seq data set could be matched to each antigen.  Here we see that only
-AnnexinV and the isotype controls could not be matched by name only
+cite-seq data set (includeing the new query data) could be matched to each antigen.  Here we see that only AnnexinV and the isotype controls could not be matched by name only.  That is, the only match came from the Kotliarov data set itself.
 
 ```{r}
 head(df[order(df$n_matched),], 10)
@@ -108,7 +106,7 @@ standardising the antibody names is the same.
 
 ### Matching directly to the CITEseq data set
 
-```{r, echo = FALSE}
+```{r, message = FALSE}
 # Load CiteFuse example data
 
 library(CiteFuse)
@@ -116,7 +114,6 @@ data("CITEseq_example", package = "CiteFuse")
 sce_citeseq <- preprocessing(CITEseq_example)
 rownames(altExp(sce_citeseq, "ADT"))
 
-# DO WE NEED TO DO ANY PREPROCESSING OF THE NAMES?  JUST PASS IN CITESEQ?
 df <- data.frame(Antigen = rownames(altExp(sce_citeseq, "ADT")))
 df <- matchToCiteseq(df)
 
@@ -170,7 +167,9 @@ From the above result we can confirm that two studies have an antigen named
 "TCRb".  By matching on antibody clone, we see that it is more commonly referred
 to as TCRab or TCR alpha/beta.
 
-# TO DO: NOT ON HOW THE ALT_IDs ARE ASSIGNED
+# A note about the ALT_IDs
+
+The column ALT_ID in the data set `gene_aliases` is an ID that allows the antigens in the `citeseq` data set to be distinguished.  If the HGNC ID is sufficient, then the ALT_ID will be the HGNC_ID.  If not, it may be an ID from e.g. the protein ontology or the National Cancer Institute thesaurus, or if no stable ID was found, the antibody and clone name.
 
 # Session Info
 
