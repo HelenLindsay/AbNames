@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">AbNames</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -84,67 +84,357 @@
 
     
     
-<p>This vignette shows how to standardize the names of the antibody-derived tags in a CITE-seq experiment in SingleCellExperiment format.</p>
-<p>To demonstrate, we will use the “cord_blood” dataset available in the package “SingleCellMultiModal”.</p>
+<p>This short vignette shows how to standardize the names of the antibody-derived tags in a CITE-seq experiment in SingleCellExperiment format.</p>
+<div class="section level2">
+<h2 id="example-1-kotliarov-pbmc">Example 1: Kotliarov PBMC<a class="anchor" aria-label="anchor" href="#example-1-kotliarov-pbmc"></a>
+</h2>
+<p>To demonstrate, we will use the “Kotliarov” dataset available in the package “scRNAseq”.</p>
+<div class="section level3">
+<h3 id="load-the-kotliarov-cite-seq-data">Load the Kotliarov CITE-seq data<a class="anchor" aria-label="anchor" href="#load-the-kotliarov-cite-seq-data"></a>
+</h3>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">#library(SingleCellMultiModal)</span></span>
-<span><span class="co">#cord_blood &lt;- CITEseq(DataType="cord_blood", modes="scADT_Counts",</span></span>
-<span><span class="co">#                      dry.run=FALSE, DataClass = "SingleCellExperiment")</span></span>
-<span><span class="co">#cord_blood</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st">"scRNAseq"</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st"><a href="https://github.com/HelenLindsay/AbNames" class="external-link">"AbNames"</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># May not need much renaming....</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="st">"scRNAseq"</span><span class="op">)</span></span>
 <span><span class="va">kotliarov</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scRNAseq/man/KotliarovPBMCData.html" class="external-link">KotliarovPBMCData</a></span><span class="op">(</span>mode <span class="op">=</span> <span class="st">"adt"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">kotliarov</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##  [1] "AnnexinV_PROT"               "BTLA_PROT"                  </span></span>
-<span><span class="co">##  [3] "CD117_PROT"                  "CD123_PROT"                 </span></span>
-<span><span class="co">##  [5] "CD13_PROT"                   "CD133_PROT"                 </span></span>
-<span><span class="co">##  [7] "CD134_PROT"                  "CD137_PROT"                 </span></span>
-<span><span class="co">##  [9] "CD141_PROT"                  "CD152_PROT"                 </span></span>
-<span><span class="co">## [11] "CD161_PROT"                  "CD163_PROT"                 </span></span>
-<span><span class="co">## [13] "CD18_PROT"                   "CD184_PROT"                 </span></span>
-<span><span class="co">## [15] "CD19_PROT"                   "CD1c_PROT"                  </span></span>
-<span><span class="co">## [17] "CD1d_PROT"                   "CD2_PROT"                   </span></span>
-<span><span class="co">## [19] "CD206_PROT"                  "CD21_PROT"                  </span></span>
-<span><span class="co">## [21] "CD223_PROT"                  "CD24_PROT"                  </span></span>
-<span><span class="co">## [23] "CD244_PROT"                  "CD273_PROT"                 </span></span>
-<span><span class="co">## [25] "CD294_PROT"                  "CD3_PROT"                   </span></span>
-<span><span class="co">## [27] "CD303_PROT"                  "CD32_PROT"                  </span></span>
-<span><span class="co">## [29] "CD357_PROT"                  "CD366_PROT"                 </span></span>
-<span><span class="co">## [31] "CD39_PROT"                   "CD40_PROT"                  </span></span>
-<span><span class="co">## [33] "CD57_PROT"                   "CD62L_PROT"                 </span></span>
-<span><span class="co">## [35] "CD64_PROT"                   "CD69_PROT"                  </span></span>
-<span><span class="co">## [37] "CD70_PROT"                   "CD71_PROT"                  </span></span>
-<span><span class="co">## [39] "HLA-ABC_PROT"                "HLA-DR_PROT"                </span></span>
-<span><span class="co">## [41] "IgA_PROT"                    "KLRG1_PROT"                 </span></span>
-<span><span class="co">## [43] "TCRgd_PROT"                  "CX3CR1_PROT"                </span></span>
-<span><span class="co">## [45] "CD10_PROT"                   "CD11c_PROT"                 </span></span>
-<span><span class="co">## [47] "CD138_PROT"                  "CD14_PROT"                  </span></span>
-<span><span class="co">## [49] "CD16_PROT"                   "CD185_PROT"                 </span></span>
-<span><span class="co">## [51] "CD195_PROT"                  "CD196_PROT"                 </span></span>
-<span><span class="co">## [53] "CD197_PROT"                  "CD25_PROT"                  </span></span>
-<span><span class="co">## [55] "CD27_PROT"                   "CD278 _PROT"                </span></span>
-<span><span class="co">## [57] "CD279_PROT"                  "CD31_PROT"                  </span></span>
-<span><span class="co">## [59] "CD314 _PROT"                 "CD38_PROT"                  </span></span>
-<span><span class="co">## [61] "CD4_PROT"                    "CD45RA_PROT"                </span></span>
-<span><span class="co">## [63] "CD56_PROT"                   "CD8_PROT"                   </span></span>
-<span><span class="co">## [65] "IgD_PROT"                    "IgM_PROT"                   </span></span>
-<span><span class="co">## [67] "MouseIgG1kappaisotype_PROT"  "MouseIgG2akappaisotype_PROT"</span></span>
-<span><span class="co">## [69] "Mouse IgG2bkIsotype_PROT"    "RatIgG2bkIsotype_PROT"      </span></span>
-<span><span class="co">## [71] "CD103_PROT"                  "CD275_PROT"                 </span></span>
-<span><span class="co">## [73] "CD28_PROT"                   "CD45RO_PROT"                </span></span>
-<span><span class="co">## [75] "CD5_PROT"                    "CD90_PROT"                  </span></span>
-<span><span class="co">## [77] "CD11b_PROT"                  "CD127_PROT"                 </span></span>
-<span><span class="co">## [79] "CD194_PROT"                  "CD274_PROT"                 </span></span>
-<span><span class="co">## [81] "CD33_PROT"                   "CD7_PROT"                   </span></span>
-<span><span class="co">## [83] "CD80_PROT"                   "CD86_PROT"                  </span></span>
-<span><span class="co">## [85] "CD183_PROT"                  "CD34_PROT"                  </span></span>
-<span><span class="co">## [87] "CD20_PROT"</span></span></code></pre>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">kotliarov</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] "AnnexinV_PROT" "BTLA_PROT"     "CD117_PROT"    "CD123_PROT"   </span></span>
+<span><span class="co">## [5] "CD13_PROT"     "CD133_PROT"</span></span></code></pre>
+</div>
+<div class="section level3">
+<h3 id="create-a-data-frame-to-allow-matching-to-the-citeseq-data-set">Create a data frame to allow matching to the CITEseq data set<a class="anchor" aria-label="anchor" href="#create-a-data-frame-to-allow-matching-to-the-citeseq-data-set"></a>
+</h3>
+<p>To directly match to the CITEseq data set, some formatting of the antigen names may be required. Here we remove the "_PROT" suffix. An alternative is to first map antigen names to the gene_aliases data set and then match antigens and identifiers to the CITEseq data set. However, it is still a good idea to remove prefixes and suffixes to avoid false matches. For example, “PROT” is an alias of the gene SLC6A7 and would match if not removed.</p>
+<p>You can include information such as catalogue number and antibody clone to assist matching if it is available. When matching to the CITEseq data set, the names of the columns to use for matching must equal those in the CITEseq data set. For example, below we match using only the antigen name, using the column “Antigen”. By default, columns “Clone”, “Antigen”, and “Cat_Number” (catalogue number) are used for matching if available.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">#library(CiteFuse)</span></span>
-<span><span class="co">#data("CITEseq_example", package = "CiteFuse")</span></span>
-<span><span class="co">#sce_citeseq &lt;- preprocessing(CITEseq_example)</span></span>
-<span><span class="co">#rownames(altExp(sce_citeseq, "ADT"))</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># Create a data.frame for matching to the CITEseq data set</span></span>
+<span><span class="co"># Column "Antigen" will be used for matching</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Original <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">kotliarov</span><span class="op">)</span>,</span>
+<span>                 <span class="co"># Remove _PROT (optionally with a space before)</span></span>
+<span>                 Antigen <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">" ?_PROT"</span>, <span class="st">""</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">kotliarov</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##        Original  Antigen</span></span>
+<span><span class="co">## 1 AnnexinV_PROT AnnexinV</span></span>
+<span><span class="co">## 2     BTLA_PROT     BTLA</span></span>
+<span><span class="co">## 3    CD117_PROT    CD117</span></span>
+<span><span class="co">## 4    CD123_PROT    CD123</span></span>
+<span><span class="co">## 5     CD13_PROT     CD13</span></span>
+<span><span class="co">## 6    CD133_PROT    CD133</span></span></code></pre>
+<div class="section level4">
+<h4 id="match-to-the-citeseq-data-set-and-review-suggested-consensus-names">Match to the CITEseq data set and review suggested consensus names<a class="anchor" aria-label="anchor" href="#match-to-the-citeseq-data-set-and-review-suggested-consensus-names"></a>
+</h4>
+<p>It is a good idea to review matches as errors in e.g. catalogue number will lead to incorrect matches.</p>
+<p>The function <code>matchToCiteseq</code> will report which columns are used for matching. Note that unless specified otherwise, the entries of the CITEseq data set are matched using the default columns even if these do not exist in the new data set.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/matchToCiteseq.html">matchToCiteseq</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Matching new data to citeseq data using columns:</span></span>
+<span><span class="co">## Antigen</span></span></code></pre>
+<pre><code><span><span class="co">## Grouping data using columns:</span></span>
+<span><span class="co">## Antigen, Cat_Number, Clone, ALT_ID</span></span></code></pre>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
+<span><span class="co">##   Antigen_std Original      Antigen  n_matched</span></span>
+<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span> AnnexinV    AnnexinV_PROT AnnexinV         1</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span> CD272       BTLA_PROT     BTLA            12</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span> CD117       CD117_PROT    CD117           18</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">4</span> CD123       CD123_PROT    CD123           24</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">5</span> CD13        CD13_PROT     CD13             9</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">6</span> CD133       CD133_PROT    CD133           15</span></span></code></pre>
+<p>In general, the names of the original experiment matched the most commonly used name in the CITEseq data set, but we can see that some have different “standard” names.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">df</span><span class="op">[</span><span class="op">!</span> <span class="va">df</span><span class="op">$</span><span class="va">Antigen</span> <span class="op">==</span> <span class="va">df</span><span class="op">$</span><span class="va">Antigen_std</span>, <span class="op">]</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 2 × 4</span></span></span>
+<span><span class="co">##   Antigen_std Original     Antigen n_matched</span></span>
+<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span> CD272       BTLA_PROT    BTLA           12</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span> HLA-A,B,C   HLA-ABC_PROT HLA-ABC        15</span></span></code></pre>
+<p>By looking at the <code>n_matched</code> column, we can see how many entries in the cite-seq data set (includeing the new query data) could be matched to each antigen. Here we see that only AnnexinV and the isotype controls could not be matched by name only. That is, the only match came from the Kotliarov data set itself.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">df</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">n_matched</span><span class="op">)</span>,<span class="op">]</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 10 × 4</span></span></span>
+<span><span class="co">##    Antigen_std            Original                    Antigen            n_mat…¹</span></span>
+<span><span class="co">##    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 1</span> AnnexinV               AnnexinV_PROT               AnnexinV                 1</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 2</span> MouseIgG1kappaisotype  MouseIgG1kappaisotype_PROT  MouseIgG1kappaiso…       1</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 3</span> MouseIgG2akappaisotype MouseIgG2akappaisotype_PROT MouseIgG2akappais…       1</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 4</span> Mouse IgG2bkIsotype    Mouse IgG2bkIsotype_PROT    Mouse IgG2bkIsoty…       1</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 5</span> RatIgG2bkIsotype       RatIgG2bkIsotype_PROT       RatIgG2bkIsotype         1</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 6</span> CD13                   CD13_PROT                   CD13                     9</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 7</span> CX3CR1                 CX3CR1_PROT                 CX3CR1                   9</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 8</span> IgA                    IgA_PROT                    IgA                     10</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 9</span> CD18                   CD18_PROT                   CD18                    11</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">10</span> CD70                   CD70_PROT                   CD70                    11</span></span>
+<span><span class="co">## <span style="color: #949494;"># … with abbreviated variable name ¹​n_matched</span></span></span></code></pre>
+</div>
+<div class="section level4">
+<h4 id="rename-single-cell-experiment">Rename single cell experiment<a class="anchor" aria-label="anchor" href="#rename-single-cell-experiment"></a>
+</h4>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># To rename the singleCellExperiment, we need a named vector of the new names,</span></span>
+<span><span class="co"># with names being the original names of the singleCellExperiment.</span></span>
+<span></span>
+<span><span class="co"># "structure" is a method that allows us to create a named vector in one step</span></span>
+<span><span class="va">new_nms</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/structure.html" class="external-link">structure</a></span><span class="op">(</span><span class="va">df</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span>, names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">kotliarov</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">new_nms</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##   AnnexinV_PROT       BTLA_PROT      CD117_PROT      CD123_PROT       CD13_PROT </span></span>
+<span><span class="co">## "AnnexinV_PROT"     "BTLA_PROT"    "CD117_PROT"    "CD123_PROT"     "CD13_PROT" </span></span>
+<span><span class="co">##      CD133_PROT </span></span>
+<span><span class="co">##    "CD133_PROT"</span></span></code></pre>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">kotliarov</span> <span class="op">&lt;-</span> <span class="fu">renameADT</span><span class="op">(</span><span class="va">kotliarov</span>, <span class="va">new_nms</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">kotliarov</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] "AnnexinV_PROT" "BTLA_PROT"     "CD117_PROT"    "CD123_PROT"   </span></span>
+<span><span class="co">## [5] "CD13_PROT"     "CD133_PROT"</span></span></code></pre>
+</div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="example-2-citefuse-example-data">Example 2: CiteFuse example data<a class="anchor" aria-label="anchor" href="#example-2-citefuse-example-data"></a>
+</h2>
+<p>In this example, the CITE-seq data are stored as an altExp. The procedure for standardising the antibody names is the same.</p>
+<div class="section level4">
+<h4 id="matching-directly-to-the-citeseq-data-set">Matching directly to the CITEseq data set<a class="anchor" aria-label="anchor" href="#matching-directly-to-the-citeseq-data-set"></a>
+</h4>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Load CiteFuse example data</span></span>
+<span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">CiteFuse</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"CITEseq_example"</span>, package <span class="op">=</span> <span class="st">"CiteFuse"</span><span class="op">)</span></span>
+<span><span class="va">sce_citeseq</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/CiteFuse/man/preprocessing.html" class="external-link">preprocessing</a></span><span class="op">(</span><span class="va">CITEseq_example</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html" class="external-link">altExp</a></span><span class="op">(</span><span class="va">sce_citeseq</span>, <span class="st">"ADT"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##  [1] "B220 (CD45R)"      "B7-H1 (PD-L1)"     "C-kit (CD117)"    </span></span>
+<span><span class="co">##  [4] "CCR7"              "CD11b"             "CD11c"            </span></span>
+<span><span class="co">##  [7] "CD138"             "CD14"              "CD16"             </span></span>
+<span><span class="co">## [10] "CD19"              "CD1a"              "CD2"              </span></span>
+<span><span class="co">## [13] "CD223 (lag3)"      "CD24"              "CD26 (Adenosine)" </span></span>
+<span><span class="co">## [16] "CD27"              "CD28"              "CD3"              </span></span>
+<span><span class="co">## [19] "CD34"              "CD366 (tim3)"      "CD4"              </span></span>
+<span><span class="co">## [22] "CD44"              "CD45"              "CD45RA"           </span></span>
+<span><span class="co">## [25] "CD45RO"            "CD5"               "CD56"             </span></span>
+<span><span class="co">## [28] "CD62L"             "CD66b"             "CD69"             </span></span>
+<span><span class="co">## [31] "CD7"               "CD77"              "CD8"              </span></span>
+<span><span class="co">## [34] "CTLA4"             "EpCAM (CD326)"     "HLA-A,B,C"        </span></span>
+<span><span class="co">## [37] "IL7Ralpha (CD127)" "IgG1"              "IgG2a"            </span></span>
+<span><span class="co">## [40] "LAMP1"             "MHCII (HLA-DR)"    "Ox40 (CD134)"     </span></span>
+<span><span class="co">## [43] "PD-1 (CD279)"      "PD-L1 (CD274)"     "PD1 (CD279)"      </span></span>
+<span><span class="co">## [46] "PECAM (CD31)"      "Siglec-8"          "TCRb"             </span></span>
+<span><span class="co">## [49] "TCRg"</span></span></code></pre>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Antigen <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html" class="external-link">altExp</a></span><span class="op">(</span><span class="va">sce_citeseq</span>, <span class="st">"ADT"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/matchToCiteseq.html">matchToCiteseq</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Print entries that differ from the original</span></span>
+<span><span class="va">df</span><span class="op">[</span><span class="op">!</span> <span class="va">df</span><span class="op">$</span><span class="va">Antigen</span> <span class="op">==</span> <span class="va">df</span><span class="op">$</span><span class="va">Antigen_std</span>, <span class="op">]</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 21 × 3</span></span></span>
+<span><span class="co">##    Antigen_std Antigen           n_matched</span></span>
+<span><span class="co">##    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 1</span> B220        B220 (CD45R)              6</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 2</span> B7-H1       B7-H1 (PD-L1)             1</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 3</span> CD117       C-kit (CD117)            18</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 4</span> CD197       CCR7                     26</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 5</span> CD223       CD223 (lag3)             18</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 6</span> CD26        CD26 (Adenosine)         17</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 7</span> CD366       CD366 (tim3)             18</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 8</span> CD152       CTLA4                    18</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 9</span> CD326       EpCAM (CD326)            11</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">10</span> CD127       IL7Ralpha (CD127)        29</span></span>
+<span><span class="co">## <span style="color: #949494;"># … with 11 more rows</span></span></span></code></pre>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Print the entries with the fewest matches</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">df</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">n_matched</span><span class="op">)</span>,<span class="op">]</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 10 × 3</span></span></span>
+<span><span class="co">##    Antigen_std Antigen       n_matched</span></span>
+<span><span class="co">##    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 1</span> B7-H1       B7-H1 (PD-L1)         1</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 2</span> CD77        CD77                  3</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 3</span> B220        B220 (CD45R)          6</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 4</span> Siglec-8    Siglec-8              6</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 5</span> CD326       EpCAM (CD326)        11</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 6</span> CD1a        CD1a                 12</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 7</span> CD107a      LAMP1                12</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 8</span> CD66b       CD66b                14</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 9</span> CD134       Ox40 (CD134)         14</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">10</span> HLA-A,B,C   HLA-A,B,C            15</span></span></code></pre>
+<p>Here we see that the consensus name for “IgG1” is “Mouse IgG1, kappa isotype Ctrl”. This is because when other studies refer to “IgG1”, we can tell from the antibody clone ID that they are referring to an isotype control with unknown specificity. Without further information, we cannot tell whether the antibody in the CiteFuse example data is an isotype control or an anti-human secondary antibody.</p>
+<p>Similarly for TCRa and TCRb, we can tell by matching antigens by clone ID that these are more commonly referred to as TCR a/b (alpha/beta) and TCR g/d (gamma/delta) respectively.</p>
+</div>
+<div class="section level4">
+<h4 id="check-matching-entries-in-citeseq-data-set">Check matching entries in CITEseq data set<a class="anchor" aria-label="anchor" href="#check-matching-entries-in-citeseq-data-set"></a>
+</h4>
+<p>Suppose, as in the above example, we are not sure if a consensus name is correct. We may wish to examine the matching entries in the <code>citeseq</code> data set. One way to do this is to load the <code>citeseq</code> data set and check the matching entries using the function ``.</p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># We load dplyr to simplify data.frame manipulations.</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Load citeseq data set</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">citeseq</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">tcrb</span> <span class="op">&lt;-</span> <span class="va">citeseq</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="co"># We will first select entries that equal "TCRb"</span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">Antigen</span> <span class="op">==</span> <span class="st">"TCRb"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="co"># Then subset to just the columns we want to use for matching</span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">Antigen</span>, <span class="va">Clone</span>, <span class="va">Cat_Number</span>, <span class="va">ALT_ID</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Then we will find entries in citeseq that match any of these columns.</span></span>
+<span></span>
+<span><span class="co"># filter_by_union is a function to return rows where any the value of any</span></span>
+<span><span class="co"># column occurs in a reference data.frame</span></span>
+<span><span class="va">citeseq</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="../reference/filter_by_union.html">filter_by_union</a></span><span class="op">(</span><span class="va">tcrb</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="co"># Select just columns of interest for viewing</span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">Study</span>, <span class="va">Antigen</span>, <span class="va">Clone</span>, <span class="va">Cat_Number</span>, <span class="va">ALT_ID</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##                Study                    Antigen Clone Cat_Number</span></span>
+<span><span class="co">## 1           Hao_2021             TCR alpha/beta  IP26     306737</span></span>
+<span><span class="co">## 2           Liu_2021             TCR alpha/beta  IP26     306743</span></span>
+<span><span class="co">## 3        Nathan_2021 TCR alpha/beta (TRAC/TRBC)  IP26     306737</span></span>
+<span><span class="co">## 4       Mimitou_2021                    TCR a/b  IP26     306737</span></span>
+<span><span class="co">## 5          Qian_2020                    TCR a/b  IP26     306737</span></span>
+<span><span class="co">## 6    Stephenson_2021                    TCR a/b  IP26     306743</span></span>
+<span><span class="co">## 7            Su_2020                    TCR a/b  IP26     306743</span></span>
+<span><span class="co">## 8         LeCoz_2021                    TCR a/b  IP26     306743</span></span>
+<span><span class="co">## 9            Wu_2021                      TCRab  IP26     306737</span></span>
+<span><span class="co">## 10 PomboAntunes_2021                      TCRab  IP26     306737</span></span>
+<span><span class="co">## 11         Buus_2021                      TCRab  IP26     306743</span></span>
+<span><span class="co">## 12          Hao_2021                       TCRb  IP26       &lt;NA&gt;</span></span>
+<span><span class="co">## 13      Mimitou_2019                       TCRb  IP26       &lt;NA&gt;</span></span>
+<span><span class="co">##                    ALT_ID</span></span>
+<span><span class="co">## 1  HGNC:12027, HGNC:12155</span></span>
+<span><span class="co">## 2  HGNC:12027, HGNC:12155</span></span>
+<span><span class="co">## 3  HGNC:12027, HGNC:12155</span></span>
+<span><span class="co">## 4  HGNC:12027, HGNC:12155</span></span>
+<span><span class="co">## 5  HGNC:12027, HGNC:12155</span></span>
+<span><span class="co">## 6  HGNC:12027, HGNC:12155</span></span>
+<span><span class="co">## 7  HGNC:12027, HGNC:12155</span></span>
+<span><span class="co">## 8  HGNC:12027, HGNC:12155</span></span>
+<span><span class="co">## 9  HGNC:12027, HGNC:12155</span></span>
+<span><span class="co">## 10 HGNC:12027, HGNC:12155</span></span>
+<span><span class="co">## 11 HGNC:12027, HGNC:12155</span></span>
+<span><span class="co">## 12             HGNC:12155</span></span>
+<span><span class="co">## 13             HGNC:12155</span></span></code></pre>
+<p>From the above result we can confirm that two studies have an antigen named “TCRb”. By matching on antibody clone, we see that it is more commonly referred to as TCRab or TCR alpha/beta.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="a-note-about-the-alt_ids">A note about the ALT_IDs<a class="anchor" aria-label="anchor" href="#a-note-about-the-alt_ids"></a>
+</h2>
+<p>The column ALT_ID in the data set <code>gene_aliases</code> is an ID that allows the antigens in the <code>citeseq</code> data set to be distinguished. If the HGNC ID is sufficient, then the ALT_ID will be the HGNC_ID. If not, it may be an ID from e.g. the protein ontology or the National Cancer Institute thesaurus, or if no stable ID was found, the antibody and clone name.</p>
+</div>
+<div class="section level2">
+<h2 id="session-info">Session Info<a class="anchor" aria-label="anchor" href="#session-info"></a>
+</h2>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## R version 4.2.1 (2022-06-23)</span></span>
+<span><span class="co">## Platform: x86_64-pc-linux-gnu (64-bit)</span></span>
+<span><span class="co">## Running under: Ubuntu 20.04.5 LTS</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## Matrix products: default</span></span>
+<span><span class="co">## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.9.0</span></span>
+<span><span class="co">## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.9.0</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## locale:</span></span>
+<span><span class="co">##  [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       </span></span>
+<span><span class="co">##  [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8   </span></span>
+<span><span class="co">##  [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          </span></span>
+<span><span class="co">## [10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   </span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## attached base packages:</span></span>
+<span><span class="co">## [1] stats4    stats     graphics  grDevices utils     datasets  methods  </span></span>
+<span><span class="co">## [8] base     </span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## other attached packages:</span></span>
+<span><span class="co">##  [1] dplyr_1.0.10                CiteFuse_1.8.0             </span></span>
+<span><span class="co">##  [3] AbNames_0.2.0               scRNAseq_2.10.0            </span></span>
+<span><span class="co">##  [5] SingleCellExperiment_1.18.0 SummarizedExperiment_1.26.1</span></span>
+<span><span class="co">##  [7] Biobase_2.56.0              GenomicRanges_1.48.0       </span></span>
+<span><span class="co">##  [9] GenomeInfoDb_1.32.4         IRanges_2.30.1             </span></span>
+<span><span class="co">## [11] S4Vectors_0.34.0            BiocGenerics_0.42.0        </span></span>
+<span><span class="co">## [13] MatrixGenerics_1.8.1        matrixStats_0.62.0         </span></span>
+<span><span class="co">## [15] BiocStyle_2.24.0           </span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## loaded via a namespace (and not attached):</span></span>
+<span><span class="co">##   [1] utf8_1.2.2                    tidyselect_1.1.2             </span></span>
+<span><span class="co">##   [3] RSQLite_2.2.17                AnnotationDbi_1.58.0         </span></span>
+<span><span class="co">##   [5] grid_4.2.1                    BiocParallel_1.30.3          </span></span>
+<span><span class="co">##   [7] Rtsne_0.16                    munsell_0.5.0                </span></span>
+<span><span class="co">##   [9] ScaledMatrix_1.4.1            codetools_0.2-18             </span></span>
+<span><span class="co">##  [11] ragg_1.2.2                    statmod_1.4.37               </span></span>
+<span><span class="co">##  [13] scran_1.24.1                  withr_2.5.0                  </span></span>
+<span><span class="co">##  [15] colorspace_2.0-3              filelock_1.0.2               </span></span>
+<span><span class="co">##  [17] knitr_1.40                    GenomeInfoDbData_1.2.8       </span></span>
+<span><span class="co">##  [19] polyclip_1.10-0               bit64_4.0.5                  </span></span>
+<span><span class="co">##  [21] farver_2.1.1                  pheatmap_1.0.12              </span></span>
+<span><span class="co">##  [23] rhdf5_2.40.0                  rprojroot_2.0.3              </span></span>
+<span><span class="co">##  [25] vctrs_0.4.1                   generics_0.1.3               </span></span>
+<span><span class="co">##  [27] xfun_0.33                     BiocFileCache_2.4.0          </span></span>
+<span><span class="co">##  [29] randomForest_4.7-1.1          R6_2.5.1                     </span></span>
+<span><span class="co">##  [31] graphlayouts_0.8.1            rsvd_1.0.5                   </span></span>
+<span><span class="co">##  [33] locfit_1.5-9.6                AnnotationFilter_1.20.0      </span></span>
+<span><span class="co">##  [35] bitops_1.0-7                  rhdf5filters_1.8.0           </span></span>
+<span><span class="co">##  [37] cachem_1.0.6                  DelayedArray_0.22.0          </span></span>
+<span><span class="co">##  [39] assertthat_0.2.1              promises_1.2.0.1             </span></span>
+<span><span class="co">##  [41] BiocIO_1.6.0                  scales_1.2.1                 </span></span>
+<span><span class="co">##  [43] ggraph_2.0.6                  gtable_0.3.1                 </span></span>
+<span><span class="co">##  [45] beachmat_2.12.0               tidygraph_1.2.2              </span></span>
+<span><span class="co">##  [47] ensembldb_2.20.2              rlang_1.0.5                  </span></span>
+<span><span class="co">##  [49] systemfonts_1.0.4             splines_4.2.1                </span></span>
+<span><span class="co">##  [51] rtracklayer_1.56.1            lazyeval_0.2.2               </span></span>
+<span><span class="co">##  [53] BiocManager_1.30.18           yaml_2.3.5                   </span></span>
+<span><span class="co">##  [55] reshape2_1.4.4                GenomicFeatures_1.48.3       </span></span>
+<span><span class="co">##  [57] httpuv_1.6.6                  tools_4.2.1                  </span></span>
+<span><span class="co">##  [59] bookdown_0.29                 ggplot2_3.3.6                </span></span>
+<span><span class="co">##  [61] ellipsis_0.3.2                jquerylib_0.1.4              </span></span>
+<span><span class="co">##  [63] RColorBrewer_1.1-3            ggridges_0.5.3               </span></span>
+<span><span class="co">##  [65] Rcpp_1.0.9                    plyr_1.8.7                   </span></span>
+<span><span class="co">##  [67] sparseMatrixStats_1.8.0       progress_1.2.2               </span></span>
+<span><span class="co">##  [69] zlibbioc_1.42.0               purrr_0.3.4                  </span></span>
+<span><span class="co">##  [71] RCurl_1.98-1.8                prettyunits_1.1.1            </span></span>
+<span><span class="co">##  [73] dbscan_1.1-10                 viridis_0.6.2                </span></span>
+<span><span class="co">##  [75] cowplot_1.1.1                 ggrepel_0.9.1                </span></span>
+<span><span class="co">##  [77] cluster_2.1.4                 fs_1.5.2                     </span></span>
+<span><span class="co">##  [79] magrittr_2.0.3                ProtGenerics_1.28.0          </span></span>
+<span><span class="co">##  [81] hms_1.1.2                     mime_0.12                    </span></span>
+<span><span class="co">##  [83] evaluate_0.16                 xtable_1.8-4                 </span></span>
+<span><span class="co">##  [85] XML_3.99-0.10                 gridExtra_2.3                </span></span>
+<span><span class="co">##  [87] compiler_4.2.1                biomaRt_2.52.0               </span></span>
+<span><span class="co">##  [89] tibble_3.1.8                  crayon_1.5.1                 </span></span>
+<span><span class="co">##  [91] htmltools_0.5.3               segmented_1.6-0              </span></span>
+<span><span class="co">##  [93] later_1.3.0                   propr_4.2.6                  </span></span>
+<span><span class="co">##  [95] tidyr_1.2.1                   DBI_1.1.3                    </span></span>
+<span><span class="co">##  [97] tweenr_2.0.2                  ExperimentHub_2.4.0          </span></span>
+<span><span class="co">##  [99] dbplyr_2.2.1                  MASS_7.3-58.1                </span></span>
+<span><span class="co">## [101] rappdirs_0.3.3                Matrix_1.5-1                 </span></span>
+<span><span class="co">## [103] cli_3.4.0                     metapod_1.4.0                </span></span>
+<span><span class="co">## [105] parallel_4.2.1                igraph_1.3.4                 </span></span>
+<span><span class="co">## [107] pkgconfig_2.0.3               pkgdown_2.0.6                </span></span>
+<span><span class="co">## [109] GenomicAlignments_1.32.1      scuttle_1.6.3                </span></span>
+<span><span class="co">## [111] xml2_1.3.3                    bslib_0.4.0                  </span></span>
+<span><span class="co">## [113] dqrng_0.3.0                   XVector_0.36.0               </span></span>
+<span><span class="co">## [115] stringr_1.4.1                 digest_0.6.29                </span></span>
+<span><span class="co">## [117] Biostrings_2.64.1             rmarkdown_2.16               </span></span>
+<span><span class="co">## [119] uwot_0.1.14                   edgeR_3.38.4                 </span></span>
+<span><span class="co">## [121] DelayedMatrixStats_1.18.0     restfulr_0.0.15              </span></span>
+<span><span class="co">## [123] curl_4.3.2                    kernlab_0.9-31               </span></span>
+<span><span class="co">## [125] shiny_1.7.2                   Rsamtools_2.12.0             </span></span>
+<span><span class="co">## [127] rjson_0.2.21                  lifecycle_1.0.2              </span></span>
+<span><span class="co">## [129] nlme_3.1-159                  jsonlite_1.8.0               </span></span>
+<span><span class="co">## [131] Rhdf5lib_1.18.2               BiocNeighbors_1.14.0         </span></span>
+<span><span class="co">## [133] desc_1.4.2                    viridisLite_0.4.1            </span></span>
+<span><span class="co">## [135] limma_3.52.3                  fansi_1.0.3                  </span></span>
+<span><span class="co">## [137] pillar_1.8.1                  lattice_0.20-45              </span></span>
+<span><span class="co">## [139] KEGGREST_1.36.3               fastmap_1.1.0                </span></span>
+<span><span class="co">## [141] httr_1.4.4                    survival_3.4-0               </span></span>
+<span><span class="co">## [143] interactiveDisplayBase_1.34.0 glue_1.6.2                   </span></span>
+<span><span class="co">## [145] png_0.1-7                     bluster_1.6.0                </span></span>
+<span><span class="co">## [147] BiocVersion_3.15.2            bit_4.0.4                    </span></span>
+<span><span class="co">## [149] ggforce_0.3.4                 stringi_1.7.8                </span></span>
+<span><span class="co">## [151] sass_0.4.2                    mixtools_1.2.0               </span></span>
+<span><span class="co">## [153] blob_1.2.3                    textshaping_0.3.6            </span></span>
+<span><span class="co">## [155] BiocSingular_1.12.0           AnnotationHub_3.4.0          </span></span>
+<span><span class="co">## [157] memoise_2.0.1                 irlba_2.3.5</span></span></code></pre>
+</div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
 </div>

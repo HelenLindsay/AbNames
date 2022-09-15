@@ -44,7 +44,7 @@ the result that some genes do not have Ensembl IDs.'><!-- mathjax --><script src
     
     <a class="navbar-brand me-2" href="../index.html">AbNames</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -116,7 +116,7 @@ the result that some genes do not have Ensembl IDs.</p>
 
     <div class="section level2">
     <h2 id="format">Format<a class="anchor" aria-label="anchor" href="#format"></a></h2>
-    <p>A data frame with 138564 rows and 9 variables:</p><dl><dt>HGNC_ID</dt>
+    <p>A data frame with 131533 rows and 10 variables:</p><dl><dt>HGNC_ID</dt>
 <dd><p>HGNC gene IDs</p></dd>
 
     <dt>ENSEMBL_ID</dt>
@@ -141,8 +141,13 @@ the result that some genes do not have Ensembl IDs.</p>
     <dt>value</dt>
 <dd><p>A gene symbol, symbol alias, or name</p></dd>
 
+    <dt>ALT_ID</dt>
+<dd><p>HGNC ID or other relevant ID for a specific protein
+    modification, isoform or carbohydrate.  If no stable ID was found,
+    Antigen / Clone combination is used.</p></dd>
+
     <dt>SOURCE</dt>
-<dd><p>Source of the data.  Here always "HGNC"</p></dd>
+<dd><p>Source of the data.</p></dd>
 
 
 </dl></div>

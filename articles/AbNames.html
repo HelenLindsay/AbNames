@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">AbNames</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -86,21 +86,13 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>AbNames performs two tasks:</p>
+<p>AbNames performs three tasks:</p>
 <ul>
-<li><p>Extracting potential gene names from antibody names, and</p></li>
-<li><p>Matching human antibody names to gene names, IDs and protein complex IDs.</p></li>
+<li><p>Formatting antibody names for querying a gene aliases,</p></li>
+<li><p>Matching human antibody names to gene names, IDs and protein complex IDs, and</p></li>
+<li><p>Standardising antibody names to match a reference data set</p></li>
 </ul>
 <p>Antibody names are not reported in a consistent format in published data. Antibodies are often named according to the antigen they target, which may not be the same as the name of the protein (complex) the antigen is part of. Antibodies may target multi-subunit protein complexes, and this can be reflected in the name, e.g. an antibody against the T-cell receptor alpha and beta subunits might be named TCRab. Antibody names may also include the name of the clone the antibody is derived from or the names of fluorophores or DNA-oligos the antibody is conjugated with. For these reasons, it can be difficult to exactly match antibody names with gene or protein names. As cell surface antigens often have very similar names, searching for partial matches to names in free-text gene descriptions is challenging and error-prone.</p>
-</div>
-<div class="section level2">
-<h2 id="goals">Goals<a class="anchor" aria-label="anchor" href="#goals"></a>
-</h2>
-<p>Standardise names of data sets for combined analysis</p>
-<div class="section level3">
-<h3 id="identify-all-members-of-a-protein-complex-bound-by-an-antibody">Identify all members of a protein complex bound by an antibody<a class="anchor" aria-label="anchor" href="#identify-all-members-of-a-protein-complex-bound-by-an-antibody"></a>
-</h3>
-</div>
 </div>
 <div class="section level2">
 <h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a>
@@ -109,7 +101,8 @@
 <div class="section level3">
 <h3 id="gene-aliases">Gene aliases<a class="anchor" aria-label="anchor" href="#gene-aliases"></a>
 </h3>
-<p>The <code>gene_aliases</code> data set is primarily based on the protein-coding and gene groups tables from the Human Gene Names Consortium (HGNC). These include previous (obsolete) gene names and aliases, which in our experience have been useful for matching to antibody names. Non-ambiguous gene aliases from Ensembl (fetched via Bioconductor package biomaRt) and NCBI (fetched via the NCBI ftp site and the Bioconductor package org.Hs.eg.db) have been added. Mappings between HGNC, Ensembl and NCBI (Entrez) IDs are mostly based on HGNC, with some corrections of obsolete Ensembl IDs using the Ensembl data. The <code>gene_aliases</code> data set is in long format (one alias per row).</p>
+<p>The <code>gene_aliases</code> data set is primarily based on the protein-coding and gene groups tables from the Human Gene Names Consortium (HGNC). These include previous (obsolete) gene names and aliases, which in our experience have been useful for matching to antibody names. Non-ambiguous gene aliases from Ensembl (fetched via Bioconductor package biomaRt) and NCBI (fetched via the NCBI ftp site and the Bioconductor package org.Hs.eg.db), and non-ambiguous proteins from the Cell-Surface Protein Atlas (CSPA, Cell-Surface Protein Atlas) and Cellmarker protein database (<a href="http://xteam.xbio.top/CellMarker/" class="external-link uri">http://xteam.xbio.top/CellMarker/</a>) have been added. Mappings between HGNC, Ensembl and NCBI (Entrez) IDs are mostly based on HGNC, with some corrections of obsolete Ensembl IDs using the Ensembl data.</p>
+<p>The <code>gene_aliases</code> data set is in long format (one alias per row).</p>
 <p>Load using:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/HelenLindsay/AbNames" class="external-link">AbNames</a></span><span class="op">)</span></span>
@@ -120,8 +113,8 @@
 <span><span class="co"># Show the first entries of gene_aliases,</span></span>
 <span><span class="co"># where each row is the start of one column</span></span>
 <span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="va">gene_aliases</span><span class="op">)</span> </span>
-<span><span class="co">#&gt; Rows: 129,598</span></span>
-<span><span class="co">#&gt; Columns: 9</span></span>
+<span><span class="co">#&gt; Rows: 131,444</span></span>
+<span><span class="co">#&gt; Columns: 10</span></span>
 <span><span class="co">#&gt; $ HGNC_ID     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "HGNC:100", "HGNC:100", "HGNC:100", "HGNC:100", "HGNC:100"…</span></span>
 <span><span class="co">#&gt; $ ENSEMBL_ID  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "ENSG00000110881", "ENSG00000110881", "ENSG00000110881", "…</span></span>
 <span><span class="co">#&gt; $ UNIPROT_ID  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "P78348", "P78348", "P78348", "P78348", "P78348", "P78348"…</span></span>
@@ -130,6 +123,7 @@
 <span><span class="co">#&gt; $ BIOTYPE     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "protein_coding", "protein_coding", "protein_coding", "pro…</span></span>
 <span><span class="co">#&gt; $ symbol_type <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "ALIAS", "ALIAS", "HGNC_NAME", "HGNC_SYMBOL", "PREVIOUS_NA…</span></span>
 <span><span class="co">#&gt; $ value       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "BNaC2", "hBNaC2", "acid sensing ion channel subunit 1", "…</span></span>
+<span><span class="co">#&gt; $ ALT_ID      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "HGNC:100", "HGNC:100", "HGNC:100", "HGNC:100", "HGNC:100"…</span></span>
 <span><span class="co">#&gt; $ SOURCE      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "HGNC", "HGNC", "HGNC", "HGNC", "HGNC", "HGNC", "HGNC", "H…</span></span>
 <span></span>
 <span><span class="co"># (Note: it isn't necessary to use dplyr:: to call "glimpse" as dplyr is loaded</span></span>
@@ -139,13 +133,13 @@
 <div class="section level3">
 <h3 id="biolegend-antibodies">BioLegend antibodies<a class="anchor" aria-label="anchor" href="#biolegend-antibodies"></a>
 </h3>
-<p>BioLegend is a major supplier of antibodies, and provides several antibody panels for CITE-seq analyses. The data set “totalseq” is a re-formatted version of the TotalSeq barcodes data sheets available from the BioLegend website, including BioLegend antibody names and Ensembl gene IDs. The isotypes of the antibodies are not included in the TotalSeq data sheets, and only human antibodies and isotype controls are included. Missing and incomplete Ensembl IDs have been manually fixed.</p>
+<p>BioLegend is a major supplier of antibodies, and provides several antibody panels for CITE-seq analyses. The data set “totalseq” is a re-formatted version of the TotalSeq barcodes data sheets available from the BioLegend website, including BioLegend antibody names and Ensembl gene IDs. The isotypes of the antibodies are not included in the TotalSeq data sheets, and only human antibodies and isotype controls are included. Missing and incomplete Ensembl IDs have been manually corrected.</p>
 <p>Load using:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"totalseq"</span>, package <span class="op">=</span> <span class="st">"AbNames"</span><span class="op">)</span></span>
 <span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="va">totalseq</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: 977</span></span>
-<span><span class="co">#&gt; Columns: 12</span></span>
+<span><span class="co">#&gt; Columns: 13</span></span>
 <span><span class="co">#&gt; $ Cat_Number       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "305239", "305443", "329743", "329619", "309413", "33…</span></span>
 <span><span class="co">#&gt; $ Oligo_ID         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "0005", "0006", "0007", "0008", "0009", "0010", "0014…</span></span>
 <span><span class="co">#&gt; $ Antigen          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "CD80", "CD86", "CD274", "CD273", "CD275", "CD276", "…</span></span>
@@ -157,7 +151,8 @@
 <span><span class="co">#&gt; $ Date_Released    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "07/13/2018", "06/08/2018", "07/24/2018", "06/08/2018…</span></span>
 <span><span class="co">#&gt; $ ENSEMBL_ID       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "ENSG00000121594", "ENSG00000114013", "ENSG0000012021…</span></span>
 <span><span class="co">#&gt; $ HGNC_ID          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "HGNC:1700", "HGNC:1705", "HGNC:17635", "HGNC:18731",…</span></span>
-<span><span class="co">#&gt; $ HGNC_SYMBOL      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "CD80", "CD86", "CD274", "PDCD1LG2", "ICOSLG", "CD276…</span></span></code></pre></div>
+<span><span class="co">#&gt; $ HGNC_SYMBOL      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "CD80", "CD86", "CD274", "PDCD1LG2", "ICOSLG", "CD276…</span></span>
+<span><span class="co">#&gt; $ ALT_ID           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "HGNC:1700", "HGNC:1705", "HGNC:17635", "HGNC:18731",…</span></span></code></pre></div>
 <p>Note that the “Antigen” column here refers to antibody names with prefixes such as “anti-human” removed.</p>
 </div>
 <div class="section level3">
@@ -172,18 +167,18 @@
 <span><span class="va">citeseq_fname</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"citeseq.csv"</span>, package <span class="op">=</span> <span class="st">"AbNames"</span><span class="op">)</span></span>
 <span><span class="va">citeseq</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">citeseq_fname</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="va">citeseq</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Rows: 2,203</span></span>
+<span><span class="co">#&gt; Rows: 2,760</span></span>
 <span><span class="co">#&gt; Columns: 11</span></span>
 <span><span class="co">#&gt; $ Antigen         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "2B4", "4.1BB", "4.1BBL", "Annexin V", "anti-c-Met", "…</span></span>
-<span><span class="co">#&gt; $ Study           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "Wu_2021_b", "Wu_2021_b", "Wu_2021_b", "Kotliarov_2020…</span></span>
-<span><span class="co">#&gt; $ Clone           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "C1.7", "4B4-1", "5F4", NA, "12.1", "12.1", "12.1", "P…</span></span>
+<span><span class="co">#&gt; $ Study           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "Wu_2021", "Wu_2021", "Wu_2021", "Kotliarov_2020", "Li…</span></span>
+<span><span class="co">#&gt; $ Clone           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "C1.7", "4B4-1", "5F4", NA, "12.1", "12.1", "PE001", "…</span></span>
 <span><span class="co">#&gt; $ Cat_Number      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "329527", "309835", "311509", "custom made (similar to…</span></span>
-<span><span class="co">#&gt; $ Oligo_ID        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "0189", "0355", "0022", "0025", "1055", "1055", NA, "0…</span></span>
-<span><span class="co">#&gt; $ TotalSeq_Cat    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "A", "A", "A", "A", "C", "C", NA, "A", "A", "C", "A", …</span></span>
+<span><span class="co">#&gt; $ Oligo_ID        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "0189", "0355", "0022", "0025", "1055", NA, "0911", "0…</span></span>
+<span><span class="co">#&gt; $ TotalSeq_Cat    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "A", "A", "A", "A", "C", NA, "A", "A", "C", "A", "A", …</span></span>
 <span><span class="co">#&gt; $ Vendor          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "BioLegend", "BioLegend", "BioLegend", "BioLegend", "B…</span></span>
 <span><span class="co">#&gt; $ Control         <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span></span>
-<span><span class="co">#&gt; $ RRID            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> NA, NA, NA, NA, NA, NA, NA, NA, NA, "AB_2832723", NA, …</span></span>
-<span><span class="co">#&gt; $ Lot             <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> NA, NA, NA, "B270560", NA, NA, NA, NA, NA, NA, NA, NA,…</span></span>
+<span><span class="co">#&gt; $ RRID            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "AB_2750007", "AB_2783173", "AB_2734284", NA, NA, NA, …</span></span>
+<span><span class="co">#&gt; $ Lot             <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> NA, NA, NA, "B270560", NA, NA, NA, NA, NA, NA, NA, "B2…</span></span>
 <span><span class="co">#&gt; $ Custom_Antibody <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> NA, NA, NA, TRUE, NA, NA, NA, NA, NA, NA, NA, NA, NA, …</span></span>
 <span></span>
 <span><span class="co"># TO DO: AS THIS IS ONLY A SUBSET OF THE CITESEQ INFO, THERE ARE APPARENT</span></span>
@@ -215,8 +210,7 @@
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Add an ID column to the citeseq data set to allow the results table to be merged</span></span>
 <span><span class="va">citeseq</span> <span class="op">&lt;-</span> <span class="fu">AbNames</span><span class="fu">::</span><span class="fu"><a href="../reference/addID.html">addID</a></span><span class="op">(</span><span class="va">citeseq</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in AbNames::addID(citeseq): ID columns do not uniquely identify rows,</span></span>
-<span><span class="co">#&gt; row numbers added.</span></span>
+<span><span class="co">#&gt; ID columns do not uniquely identify rows, row numbers added.</span></span>
 <span></span>
 <span><span class="co"># Remove control columns, as we are only searching human proteins</span></span>
 <span><span class="va">controls</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">citeseq</span>, <span class="va">Control</span><span class="op">)</span></span>
@@ -227,22 +221,19 @@
 <span></span>
 <span><span class="co"># Apply the default transformation sequence and make a query table in long format</span></span>
 <span><span class="va">query_df</span> <span class="op">&lt;-</span> <span class="fu">AbNames</span><span class="fu">::</span><span class="fu"><a href="../reference/makeQueryTable.html">makeQueryTable</a></span><span class="op">(</span><span class="va">citeseq_q</span>, ab <span class="op">=</span> <span class="st">"Antigen"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in (function (df, ex, f, ...) : Rows were added when merging split</span></span>
-<span><span class="co">#&gt; data.frames</span></span>
 <span></span>
 <span><span class="co"># Print one example antigen from the query table:</span></span>
 <span><span class="va">query_df</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">ID</span> <span class="op">==</span> <span class="st">"TCR alpha/beta__Hao_2021"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 7 × 3</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 3</span></span></span>
 <span><span class="co">#&gt;   ID                       name          value                      </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> TCR alpha/beta__Hao_2021 Antigen       TCR alpha/beta             </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> TCR alpha/beta__Hao_2021 greek_word    TCR alpha/beta             </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> TCR alpha/beta__Hao_2021 greek_letter  TCR a/b                    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> TCR alpha/beta__Hao_2021 upper_no_dash TCR A/B                    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> TCR alpha/beta__Hao_2021 lower_no_dash tcr a/b                    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> TCR alpha/beta__Hao_2021 TCR_long      T cell receptor alpha locus</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> TCR alpha/beta__Hao_2021 TCR_long      T cell receptor beta locus</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> TCR alpha/beta__Hao_2021 TCR_long      T cell receptor alpha locus</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> TCR alpha/beta__Hao_2021 TCR_long      T cell receptor beta locus </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> TCR alpha/beta__Hao_2021 lower_no_dash tcr a/b                    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> TCR alpha/beta__Hao_2021 greek_letter  TCR a/b                    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> TCR alpha/beta__Hao_2021 upper_no_dash TCR A/B                    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> TCR alpha/beta__Hao_2021 Antigen       TCR alpha/beta</span></span></code></pre></div>
 <p>The example above shows that each antibody name has been reformatted in several ways. When querying a data set, we search for an exact match to any of these strings.</p>
 </div>
 <div class="section level3">
@@ -330,18 +321,18 @@
 <span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/sample_n.html" class="external-link">sample_n</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 10 × 4</span></span></span>
-<span><span class="co">#&gt;    ID                                    name                      value symbo…¹</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                 <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> CD24__Mimitou_2019                    greek_letter              CD24  HGNC_S…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> CD46__Mimitou_2021_cite_and_dogma_seq greek_letter              CD46  HGNC_S…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> CD209 (DC-SIGN)__Qian_2020            greek_letter              CD209 HGNC_S…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> CD33__Su_2020                         Antigen                   CD33  HGNC_S…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> CD70__Kotliarov_2020                  greek_letter              CD70  HGNC_S…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> CD13__Mimitou_2021_cite_and_dogma_seq Antigen|greek_word|greek… CD13  PREVIO…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> CD52__Hao_2021                        Antigen                   CD52  HGNC_S…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> CD66a/c/e__Su_2020                    subunit                   CD66e ALIAS  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> CD274 (B7-H1, PD-L1)__Hao_2021        Antigen                   CD274 HGNC_S…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> CR1__Wu_2021_b                        greek_letter              CR1   HGNC_S…</span></span>
+<span><span class="co">#&gt;    ID                            name                        value       symbo…¹</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> CD29 (mouse)__Mimitou_2019    Antigen_split               CD29        ALIAS  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> CD85j (ILT2)__Stephenson_2021 Antigen_split|upper_no_dash CD85j|CD85… ALIAS  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> CD27__Stuart_2019             Antigen                     CD27        HGNC_S…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> CD45RO__Mimitou_2019          Antigen                     CD45RO      <span style="color: #BB0000;">NA</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> Siglec-8__Hao_2021__1         upper_no_dash               SIGLEC8     HGNC_S…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> CD137L__PomboAntunes_2021     Antigen                     CD137L      ALIAS  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> CX3CR1__Qian_2020             Antigen                     CX3CR1      HGNC_S…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> IgM__Mimitou_2021             Ig                          IGHM        HGNC_S…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> CD335 (NKp46)__Mimitou_2021   Antigen_split               NKp46       CELLMA…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> CD268 (BAFF-R)__LeCoz_2021    Antigen_split|upper_no_dash BAFF-R|BAF… ALIAS  </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># … with abbreviated variable name ¹​symbol_type</span></span></span></code></pre></div>
 <p>The results table above contains (just) the matches between the query table and the HGNC table. In the example above, we see in the “name” column the formatting function that generated the string in the “value” column that was matched, and in the “symbol_type” column which column of the HGNC data was matched. If there are multiple matches for a given ID, the official symbol (“HGNC_SYMBOL”) is preferred over aliases or previous symbols.</p>
 <p>We may wish to review the matches before merging the results into the original table. For example, we can check for matches to different genes where the name was not guessed to be a multi-subunit protein.</p>
@@ -359,10 +350,11 @@
 <span><span class="co"># Look at the first group in multi_gene.</span></span>
 <span><span class="co"># Set interactive = FALSE for interactive exploration</span></span>
 <span><span class="fu"><a href="../reference/showGroups.html">showGroups</a></span><span class="op">(</span><span class="va">multi_gene</span>, <span class="fl">1</span>, interactive <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Group 1 of 9: 2 rows</span></span>
-<span><span class="co">#&gt;                      ID                            name value   HGNC_ID</span></span>
-<span><span class="co">#&gt; 1 CD11a.CD18__Wu_2021_b                   upper_no_dash CD11A HGNC:6148</span></span>
-<span><span class="co">#&gt; 2 CD11a.CD18__Wu_2021_b Antigen|greek_word|greek_letter  CD18 HGNC:6155</span></span>
+<span><span class="co">#&gt; Group 1 of 10: 3 rows</span></span>
+<span><span class="co">#&gt;                                      ID          name value   HGNC_ID</span></span>
+<span><span class="co">#&gt; 1 CD11a_CD18 (LFA-1)__PomboAntunes_2021       Antigen CD11a HGNC:6148</span></span>
+<span><span class="co">#&gt; 2 CD11a_CD18 (LFA-1)__PomboAntunes_2021 upper_no_dash CD11A HGNC:6148</span></span>
+<span><span class="co">#&gt; 3 CD11a_CD18 (LFA-1)__PomboAntunes_2021 Antigen_split  CD18 HGNC:6155</span></span>
 <span></span>
 <span><span class="co"># This is an example where the antibody is against a heterodimeric protein.</span></span>
 <span><span class="co"># We can confirm this by looking up the vendor catalogue number:</span></span>
@@ -372,29 +364,43 @@
 <span><span class="co">#&gt; Adding missing grouping variables: `ID`</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 0 × 4</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># Groups:   ID [0]</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># … with 4 variables: ID &lt;chr&gt;, Antigen &lt;chr&gt;, Cat_Number &lt;chr&gt;, Vendor &lt;chr&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ Use `colnames()` to see all variable names</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># … with 4 variables: ID &lt;chr&gt;, Antigen &lt;chr&gt;, Cat_Number &lt;chr&gt;, Vendor &lt;chr&gt;</span></span></span></code></pre></div>
 <p>NOTE: I haven’t written a convenience function for merging back into the original table yet. TODO: * QUERY FOR CD11/CD18 in protein ontology * Remove redundant results because of Antigen/greek_letter e.g. “KLRG1 (MAFA)-Qian_2020”</p>
 <p>Examples to discuss?</p>
 <p><em>“KIR2DL5” matches two genes HGNC:16345 HGNC:16346 </em>"DR3 (TRAMP)__Liu_2021" - tramp alias is ambiguous</p>
 <p>For now I will remove all genes with multiple matches before merging the results into the citeseq data.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">alias_results</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 3495</span></span>
+<span><span class="co">#&gt; [1] 2900</span></span>
+<span></span>
+<span><span class="va">id_cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"HGNC_ID"</span>, <span class="st">"HGNC_SYMBOL"</span>, <span class="st">"ENSEMBL_ID"</span>, <span class="st">"UNIPROT_ID"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Remove matches to several genes, select just columns of interest</span></span>
-<span><span class="va">alias_results</span> <span class="op">&lt;-</span> <span class="va">alias_results</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">n_ids</span> <span class="op">==</span> <span class="fl">1</span> <span class="op">|</span> <span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="va">name</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TCR_long"</span>, <span class="st">"subunit"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span></span>
+<span><span class="va">alias_results</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">matches</a></span><span class="op">(</span><span class="st">"ID|HGNC"</span><span class="op">)</span>, <span class="va">name</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="co"># Select ID and HGNC columns</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="co"># Collapse results with same ID from different queries</span></span>
-<span>    <span class="co"># Collapse multi-subunit entries</span></span>
-<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">across</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">HGNC_ID</span>, <span class="va">HGNC_SYMBOL</span>,</span>
-<span>                                     <span class="va">ENSEMBL_ID</span>, <span class="va">UNIPROT_ID</span><span class="op">)</span>,</span>
-<span>                                   <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/toString.html" class="external-link">toString</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">.x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
+<span>    </span>
+<span>    <span class="co"># Collapse multi-subunit entries, convert "NA" to NA</span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">across</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/all_of.html" class="external-link">all_of</a></span><span class="op">(</span><span class="va">id_cols</span><span class="op">)</span>, <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/toString.html" class="external-link">toString</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">.x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">across</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/all_of.html" class="external-link">all_of</a></span><span class="op">(</span><span class="va">id_cols</span><span class="op">)</span>, <span class="op">~</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/na_if.html" class="external-link">na_if</a></span><span class="op">(</span><span class="va">.x</span>, <span class="st">"NA"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>   </span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2,608 × 5</span></span></span>
+<span><span class="co">#&gt;    ID                         HGNC_ID    HGNC_SYMBOL ENSEMBL_ID      UNIPROT_ID</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 2B4__Wu_2021               HGNC:18171 CD244       ENSG00000122223 Q9BZW8    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 4.1BB__Wu_2021             HGNC:11924 TNFRSF9     ENSG00000049249 Q07011    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 4.1BBL__Wu_2021            HGNC:11939 TNFSF9      ENSG00000125657 P41273    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Annexin V__Kotliarov_2020  HGNC:543   ANXA5       ENSG00000164111 P08758    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> B220 (CD45R)__Hao_2021     HGNC:9666  PTPRC       <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> B220 (CD45R)__Mimitou_2019 HGNC:9666  PTPRC       <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span>        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> B7-H4__Hao_2021            HGNC:28873 VTCN1       ENSG00000134258 Q7Z7D3    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> B7-H4__Liu_2021            HGNC:28873 VTCN1       ENSG00000134258 Q7Z7D3    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> B7-H4__Mimitou_2021        HGNC:28873 VTCN1       ENSG00000134258 Q7Z7D3    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> B7-H4__Qian_2020           HGNC:28873 VTCN1       ENSG00000134258 Q7Z7D3    </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># … with 2,598 more rows</span></span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">alias_results</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 1896</span></span>
+<span><span class="co">#&gt; [1] 2900</span></span>
 <span></span>
 <span><span class="va">citeseq</span> <span class="op">&lt;-</span> <span class="va">citeseq</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span><span class="va">alias_results</span>, by <span class="op">=</span> <span class="st">"ID"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
@@ -402,20 +408,21 @@
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">citeseq</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 16</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 25</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># Groups:   ID [6]</span></span></span>
 <span><span class="co">#&gt;   ID    Antigen Cat_N…¹ HGNC_ID Study Clone Oligo…² Total…³ Vendor Control RRID </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 2B4_… 2B4     329527  HGNC:1… Wu_2… C1.7  0189    A       BioLe… FALSE   <span style="color: #BB0000;">NA</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 4.1B… 4.1BB   309835  HGNC:1… Wu_2… 4B4-1 0355    A       BioLe… FALSE   <span style="color: #BB0000;">NA</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 4.1B… 4.1BBL  311509  HGNC:1… Wu_2… 5F4   0022    A       BioLe… FALSE   <span style="color: #BB0000;">NA</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Anne… Annexi… custom… <span style="color: #BB0000;">NA</span>      Kotl… <span style="color: #BB0000;">NA</span>    0025    A       BioLe… FALSE   <span style="color: #BB0000;">NA</span>   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 2B4_… 2B4     329527  HGNC:1… Wu_2… C1.7  0189    A       BioLe… FALSE   AB_2…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 4.1B… 4.1BB   309835  HGNC:1… Wu_2… 4B4-1 0355    A       BioLe… FALSE   AB_2…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 4.1B… 4.1BBL  311509  HGNC:1… Wu_2… 5F4   0022    A       BioLe… FALSE   AB_2…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Anne… Annexi… custom… HGNC:5… Kotl… <span style="color: #BB0000;">NA</span>    0025    A       BioLe… FALSE   <span style="color: #BB0000;">NA</span>   </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> anti… anti-c… <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>      Liu_… 12.1  1055    C       BioLe… FALSE   <span style="color: #BB0000;">NA</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> anti… anti-c… <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>      Su_2… 12.1  1055    C       <span style="color: #BB0000;">NA</span>     FALSE   <span style="color: #BB0000;">NA</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># … with 5 more variables: Lot &lt;chr&gt;, Custom_Antibody &lt;lgl&gt;, HGNC_SYMBOL &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   ENSEMBL_ID &lt;chr&gt;, UNIPROT_ID &lt;chr&gt;, and abbreviated variable names</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   ¹​Cat_Number, ²​Oligo_ID, ³​TotalSeq_Cat</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ Use `colnames()` to see all variable names</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> anti… anti-c… <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>      Step… 12.1  <span style="color: #BB0000;">NA</span>      <span style="color: #BB0000;">NA</span>      BioLe… FALSE   <span style="color: #BB0000;">NA</span>   </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># … with 14 more variables: Lot &lt;chr&gt;, Custom_Antibody &lt;lgl&gt;, name &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   value &lt;chr&gt;, ENSEMBL_ID &lt;chr&gt;, UNIPROT_ID &lt;chr&gt;, HGNC_SYMBOL &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   ENTREZ_ID &lt;chr&gt;, BIOTYPE &lt;chr&gt;, symbol_type &lt;chr&gt;, ALT_ID &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   SOURCE &lt;chr&gt;, n_matches &lt;int&gt;, n_ids &lt;int&gt;, and abbreviated variable names</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   ¹​Cat_Number, ²​Oligo_ID, ³​TotalSeq_Cat</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="filling-missing-information">Filling missing information<a class="anchor" aria-label="anchor" href="#filling-missing-information"></a>
@@ -426,8 +433,22 @@
 <p>Another approach to annotating antibodies is to use the totalseq data. We are not confident about the assignment of antibodies to Ensembl identifiers. However, this may not be a problem if the aim is simply to standardise names between datasets or to a common reference.</p>
 <p>The function <code>searchTotalseq</code> by default matches sequentially to columns catalogue number (Cat_Number), Antigen, then Clone. Matching columns may be configured, but column names in the query data set should match those in the totalseq data set.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cs</span> <span class="op">&lt;-</span> <span class="va">citeseq</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="../reference/searchTotalseq.html">searchTotalseq</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">citeseq</span><span class="op">$</span><span class="va">HGNC_ID</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; FALSE  TRUE </span></span>
+<span><span class="co">#&gt;  2852   101</span></span>
+<span><span class="va">cs</span> <span class="op">&lt;-</span> <span class="va">citeseq</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="../reference/searchTotalseq.html">searchTotalseq</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Joining, by = c("ID", "Antigen", "Cat_Number", "HGNC_ID", "Study", "Clone",</span></span>
+<span><span class="co">#&gt; "Oligo_ID", "TotalSeq_Cat", "Vendor", "Control", "RRID", "Lot",</span></span>
+<span><span class="co">#&gt; "Custom_Antibody", "name", "value", "ENSEMBL_ID", "UNIPROT_ID", "HGNC_SYMBOL",</span></span>
+<span><span class="co">#&gt; "ENTREZ_ID", "BIOTYPE", "symbol_type", "ALT_ID", "SOURCE", "n_matches",</span></span>
+<span><span class="co">#&gt; "n_ids")</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">cs</span><span class="op">$</span><span class="va">HGNC_ID</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; FALSE  TRUE </span></span>
+<span><span class="co">#&gt;  2895    58</span></span></code></pre></div>
 <p>We can also try to annotate antibodies that could not be annotated using the HGNC by using the totalseq table. This could also be done as a first matching step as above. Here, we cannot add any more annotations.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">count_missing</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span><span class="op">)</span><span class="op">{</span></span>
@@ -450,11 +471,11 @@
 <span></span>
 <span><span class="co"># Missing before filling:</span></span>
 <span><span class="va">missing</span></span>
-<span><span class="co">#&gt; [1] 234</span></span>
+<span><span class="co">#&gt; [1] 101</span></span>
 <span></span>
 <span><span class="co"># Still missing after filling with TotalSeq:</span></span>
 <span><span class="va">missing_after_ts</span></span>
-<span><span class="co">#&gt; [1] 148</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 80</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="inspecting-groups-before-filling">Inspecting groups before filling<a class="anchor" aria-label="anchor" href="#inspecting-groups-before-filling"></a>
@@ -481,77 +502,51 @@
 <span>                  <span class="op">!</span> <span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">HGNC_ID</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">AbNames</span><span class="fu">::</span><span class="fu"><a href="../reference/showGroups.html">showGroups</a></span><span class="op">(</span><span class="va">fill_demo</span>, interactive <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Group 1 of 14: 9 rows</span></span>
-<span><span class="co">#&gt;                        ID    Antigen Cat_Number   HGNC_ID            Study</span></span>
-<span><span class="co">#&gt; 1   CD3__Arunachalam_2020        CD3     300475 HGNC:1674 Arunachalam_2020</span></span>
-<span><span class="co">#&gt; 2         CD3__Cadot_2020        CD3     300475 HGNC:1674       Cadot_2020</span></span>
-<span><span class="co">#&gt; 3        CD3__Hao_2021__1        CD3     300475 HGNC:1674         Hao_2021</span></span>
-<span><span class="co">#&gt; 4          CD3__Pont_2020        CD3     300475 HGNC:1674        Pont_2020</span></span>
-<span><span class="co">#&gt; 5     CD3__Witkowski_2020        CD3     300475 HGNC:1674   Witkowski_2020</span></span>
-<span><span class="co">#&gt; 6          CD3__Wu_2021_b        CD3     300475 HGNC:1674        Wu_2021_b</span></span>
-<span><span class="co">#&gt; 7          CD3__Qian_2020        CD3     300475 HGNC:1674        Qian_2020</span></span>
-<span><span class="co">#&gt; 8        CD3__Stuart_2019        CD3     300475      &lt;NA&gt;      Stuart_2019</span></span>
-<span><span class="co">#&gt; 9 CD3 (CD3E)__Nathan_2021 CD3 (CD3E)     300475 HGNC:1674      Nathan_2021</span></span>
-<span><span class="co">#&gt;   Clone Oligo_ID TotalSeq_Cat    Vendor Control RRID     Lot Custom_Antibody</span></span>
-<span><span class="co">#&gt; 1 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
-<span><span class="co">#&gt; 2 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
-<span><span class="co">#&gt; 3 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
-<span><span class="co">#&gt; 4 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
-<span><span class="co">#&gt; 5 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt; B268760              NA</span></span>
-<span><span class="co">#&gt; 6 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
-<span><span class="co">#&gt; 7 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
-<span><span class="co">#&gt; 8 UCHT1     0034         &lt;NA&gt;      &lt;NA&gt;   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
-<span><span class="co">#&gt; 9 UCHT1     0034         &lt;NA&gt;      &lt;NA&gt;   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
-<span><span class="co">#&gt;   HGNC_SYMBOL      ENSEMBL_ID UNIPROT_ID</span></span>
-<span><span class="co">#&gt; 1        CD3E ENSG00000198851       &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 2        CD3E ENSG00000198851       &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 3        CD3E ENSG00000198851       &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 4        CD3E ENSG00000198851       &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 5        CD3E ENSG00000198851       &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 6        CD3E ENSG00000198851       &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 7        CD3E ENSG00000198851       &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 8        &lt;NA&gt;            &lt;NA&gt;       &lt;NA&gt;</span></span>
-<span><span class="co">#&gt; 9        CD3E ENSG00000198851     P07766</span></span></code></pre></div>
+<span><span class="co">#&gt; Group 1 of 21: 3 rows</span></span>
+<span><span class="co">#&gt;                              ID    Antigen Cat_Number   HGNC_ID</span></span>
+<span><span class="co">#&gt; 1 CD45R_B220__PomboAntunes_2021 CD45R_B220     103263 HGNC:9666</span></span>
+<span><span class="co">#&gt; 2 CD45R-B220__PomboAntunes_2021 CD45R-B220     103263      &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 3         CD45R/B220__Qian_2020 CD45R/B220     103263 HGNC:9666</span></span>
+<span><span class="co">#&gt;               Study   Clone Oligo_ID TotalSeq_Cat    Vendor Control       RRID</span></span>
+<span><span class="co">#&gt; 1 PomboAntunes_2021 RA3-6B2     0103            A BioLegend   FALSE AB_2734158</span></span>
+<span><span class="co">#&gt; 2 PomboAntunes_2021 RA3-6B2     0103            A BioLegend   FALSE AB_2734158</span></span>
+<span><span class="co">#&gt; 3         Qian_2020 RA3-6B2     0103            A BioLegend   FALSE       &lt;NA&gt;</span></span>
+<span><span class="co">#&gt;    Lot Custom_Antibody    name value      ENSEMBL_ID UNIPROT_ID HGNC_SYMBOL</span></span>
+<span><span class="co">#&gt; 1 &lt;NA&gt;              NA Antigen CD45R            &lt;NA&gt;       &lt;NA&gt;       PTPRC</span></span>
+<span><span class="co">#&gt; 2 &lt;NA&gt;              NA    &lt;NA&gt;  &lt;NA&gt;            &lt;NA&gt;       &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 3 &lt;NA&gt;              NA Antigen CD45R ENSG00000081237       &lt;NA&gt;       PTPRC</span></span>
+<span><span class="co">#&gt;   ENTREZ_ID BIOTYPE symbol_type          ALT_ID        SOURCE n_matches n_ids</span></span>
+<span><span class="co">#&gt; 1      &lt;NA&gt;    &lt;NA&gt;        &lt;NA&gt; PTPRC/iso:CD45R MANUAL_LOOKUP         1     1</span></span>
+<span><span class="co">#&gt; 2      &lt;NA&gt;    &lt;NA&gt;        &lt;NA&gt;            &lt;NA&gt;          &lt;NA&gt;        NA    NA</span></span>
+<span><span class="co">#&gt; 3      &lt;NA&gt;    &lt;NA&gt;        &lt;NA&gt; PTPRC/iso:CD45R MANUAL_LOOKUP         1     1</span></span></code></pre></div>
 <p>In the above example, we can see that for antibodies with catalogue number “300475”, a match was found if the antibody was named “CD3E” but not if it was named “CD3”. We can fill in the missing information using <code>fillByGroup</code>:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fill_demo</span> <span class="op">&lt;-</span> <span class="fu">AbNames</span><span class="fu">::</span><span class="fu"><a href="../reference/fillByGroup.html">fillByGroup</a></span><span class="op">(</span><span class="va">fill_demo</span>, <span class="st">"Cat_Number"</span>,</span>
 <span>                                  fill <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"HGNC_ID"</span>, <span class="st">"TotalSeq_Cat"</span>, <span class="st">"Vendor"</span>,</span>
-<span>                                           <span class="st">"ENSEMBL_ID"</span>, <span class="st">"UNIPROT_ID"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>                                           <span class="st">"ENSEMBL_ID"</span>, <span class="st">"UNIPROT_ID"</span><span class="op">)</span>,</span>
+<span>                                  multiple <span class="op">=</span> <span class="st">"mode"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">Cat_Number</span><span class="op">)</span> <span class="co"># Re-group as fillByGroup ungroups</span></span>
 <span></span>
 <span><span class="co"># Print out the first group again</span></span>
 <span><span class="fu">AbNames</span><span class="fu">::</span><span class="fu"><a href="../reference/showGroups.html">showGroups</a></span><span class="op">(</span><span class="va">fill_demo</span>, interactive <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Group 1 of 14: 9 rows</span></span>
-<span><span class="co">#&gt;                        ID    Antigen Cat_Number   HGNC_ID            Study</span></span>
-<span><span class="co">#&gt; 1   CD3__Arunachalam_2020        CD3     300475 HGNC:1674 Arunachalam_2020</span></span>
-<span><span class="co">#&gt; 2         CD3__Cadot_2020        CD3     300475 HGNC:1674       Cadot_2020</span></span>
-<span><span class="co">#&gt; 3        CD3__Hao_2021__1        CD3     300475 HGNC:1674         Hao_2021</span></span>
-<span><span class="co">#&gt; 4          CD3__Pont_2020        CD3     300475 HGNC:1674        Pont_2020</span></span>
-<span><span class="co">#&gt; 5     CD3__Witkowski_2020        CD3     300475 HGNC:1674   Witkowski_2020</span></span>
-<span><span class="co">#&gt; 6          CD3__Wu_2021_b        CD3     300475 HGNC:1674        Wu_2021_b</span></span>
-<span><span class="co">#&gt; 7          CD3__Qian_2020        CD3     300475 HGNC:1674        Qian_2020</span></span>
-<span><span class="co">#&gt; 8        CD3__Stuart_2019        CD3     300475 HGNC:1674      Stuart_2019</span></span>
-<span><span class="co">#&gt; 9 CD3 (CD3E)__Nathan_2021 CD3 (CD3E)     300475 HGNC:1674      Nathan_2021</span></span>
-<span><span class="co">#&gt;   Clone Oligo_ID TotalSeq_Cat    Vendor Control RRID     Lot Custom_Antibody</span></span>
-<span><span class="co">#&gt; 1 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
-<span><span class="co">#&gt; 2 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
-<span><span class="co">#&gt; 3 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
-<span><span class="co">#&gt; 4 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
-<span><span class="co">#&gt; 5 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt; B268760              NA</span></span>
-<span><span class="co">#&gt; 6 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
-<span><span class="co">#&gt; 7 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
-<span><span class="co">#&gt; 8 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
-<span><span class="co">#&gt; 9 UCHT1     0034            A BioLegend   FALSE &lt;NA&gt;    &lt;NA&gt;              NA</span></span>
-<span><span class="co">#&gt;   HGNC_SYMBOL      ENSEMBL_ID UNIPROT_ID</span></span>
-<span><span class="co">#&gt; 1        CD3E ENSG00000198851     P07766</span></span>
-<span><span class="co">#&gt; 2        CD3E ENSG00000198851     P07766</span></span>
-<span><span class="co">#&gt; 3        CD3E ENSG00000198851     P07766</span></span>
-<span><span class="co">#&gt; 4        CD3E ENSG00000198851     P07766</span></span>
-<span><span class="co">#&gt; 5        CD3E ENSG00000198851     P07766</span></span>
-<span><span class="co">#&gt; 6        CD3E ENSG00000198851     P07766</span></span>
-<span><span class="co">#&gt; 7        CD3E ENSG00000198851     P07766</span></span>
-<span><span class="co">#&gt; 8        &lt;NA&gt; ENSG00000198851     P07766</span></span>
-<span><span class="co">#&gt; 9        CD3E ENSG00000198851     P07766</span></span></code></pre></div>
+<span><span class="co">#&gt; Group 1 of 21: 3 rows</span></span>
+<span><span class="co">#&gt;                              ID    Antigen Cat_Number   HGNC_ID</span></span>
+<span><span class="co">#&gt; 1 CD45R_B220__PomboAntunes_2021 CD45R_B220     103263 HGNC:9666</span></span>
+<span><span class="co">#&gt; 2 CD45R-B220__PomboAntunes_2021 CD45R-B220     103263 HGNC:9666</span></span>
+<span><span class="co">#&gt; 3         CD45R/B220__Qian_2020 CD45R/B220     103263 HGNC:9666</span></span>
+<span><span class="co">#&gt;               Study   Clone Oligo_ID TotalSeq_Cat    Vendor Control       RRID</span></span>
+<span><span class="co">#&gt; 1 PomboAntunes_2021 RA3-6B2     0103            A BioLegend   FALSE AB_2734158</span></span>
+<span><span class="co">#&gt; 2 PomboAntunes_2021 RA3-6B2     0103            A BioLegend   FALSE AB_2734158</span></span>
+<span><span class="co">#&gt; 3         Qian_2020 RA3-6B2     0103            A BioLegend   FALSE       &lt;NA&gt;</span></span>
+<span><span class="co">#&gt;    Lot Custom_Antibody    name value      ENSEMBL_ID UNIPROT_ID HGNC_SYMBOL</span></span>
+<span><span class="co">#&gt; 1 &lt;NA&gt;              NA Antigen CD45R ENSG00000081237       &lt;NA&gt;       PTPRC</span></span>
+<span><span class="co">#&gt; 2 &lt;NA&gt;              NA    &lt;NA&gt;  &lt;NA&gt; ENSG00000081237       &lt;NA&gt;        &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 3 &lt;NA&gt;              NA Antigen CD45R ENSG00000081237       &lt;NA&gt;       PTPRC</span></span>
+<span><span class="co">#&gt;   ENTREZ_ID BIOTYPE symbol_type          ALT_ID        SOURCE n_matches n_ids</span></span>
+<span><span class="co">#&gt; 1      &lt;NA&gt;    &lt;NA&gt;        &lt;NA&gt; PTPRC/iso:CD45R MANUAL_LOOKUP         1     1</span></span>
+<span><span class="co">#&gt; 2      &lt;NA&gt;    &lt;NA&gt;        &lt;NA&gt;            &lt;NA&gt;          &lt;NA&gt;        NA    NA</span></span>
+<span><span class="co">#&gt; 3      &lt;NA&gt;    &lt;NA&gt;        &lt;NA&gt; PTPRC/iso:CD45R MANUAL_LOOKUP         1     1</span></span></code></pre></div>
+<p><em>In the above call to fillByGroup, we set multiple = “mode” </em></p>
 <p>Now we will fill the gene information in the citeseq data similarly, and check how many antibodies have not been matched.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># We fill by grouping the Catalogue number:</span></span>
@@ -565,73 +560,33 @@
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Before filling:"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Before filling:"</span></span>
 <span><span class="va">original_nmatched</span></span>
-<span><span class="co">#&gt; [1] 148</span></span>
+<span><span class="co">#&gt; [1] 80</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"After filling:"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "After filling:"</span></span>
 <span><span class="va">nmatched_after_fill</span></span>
-<span><span class="co">#&gt; [1] 127</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 37</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
-<h2 id="querying-the-protein-ontology">Querying the protein ontology<a class="anchor" aria-label="anchor" href="#querying-the-protein-ontology"></a>
+<h2 id="notes-about-the-gene-aliases-data-set">Notes about the gene aliases data set<a class="anchor" aria-label="anchor" href="#notes-about-the-gene-aliases-data-set"></a>
 </h2>
-<p>Let’s see which antibodies were not matched in the HGNC.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">citeseq</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">HGNC_ID</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">Antigen</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  [1] "Annexin V"                 "anti-c-Met"               </span></span>
-<span><span class="co">#&gt;  [3] "Anti-PE"                   "anti-Tau Phospho (Thr181)"</span></span>
-<span><span class="co">#&gt;  [5] "B220 (CD45R)"              "CD11a.CD18"               </span></span>
-<span><span class="co">#&gt;  [7] "CD11a/CD18 (LFA-1)"        "CD158"                    </span></span>
-<span><span class="co">#&gt;  [9] "CD158 (KIR2DL1/S1/S3/S5)"  "CD16"                     </span></span>
-<span><span class="co">#&gt; [11] "CD235"                     "CD25"                     </span></span>
-<span><span class="co">#&gt; [13] "CD3"                       "CD3.2"                    </span></span>
-<span><span class="co">#&gt; [15] "CD32"                      "CD45RA"                   </span></span>
-<span><span class="co">#&gt; [17] "CD45RO"                    "CD66"                     </span></span>
-<span><span class="co">#&gt; [19] "CD77"                      "CD98"                     </span></span>
-<span><span class="co">#&gt; [21] "CLA"                       "Folate Receptor β (FR-β)" </span></span>
-<span><span class="co">#&gt; [23] "GP130"                     "HLA-A2"                   </span></span>
-<span><span class="co">#&gt; [25] "HLA-DR"                    "HLADR"                    </span></span>
-<span><span class="co">#&gt; [27] "Ig light chain lambda"     "Ig light chain λ"         </span></span>
-<span><span class="co">#&gt; [29] "IgG"                       "IgG (Fc)"                 </span></span>
-<span><span class="co">#&gt; [31] "IgG Fc"                    "IgG.Fc"                   </span></span>
-<span><span class="co">#&gt; [33] "integrin β7"               "KLRG1 (MAFA)"             </span></span>
-<span><span class="co">#&gt; [35] "MHCII (HLA-DR)"            "Phospho (Thr181)"         </span></span>
-<span><span class="co">#&gt; [37] "Podocalyxin"               "TCR Vbeta13.1"            </span></span>
-<span><span class="co">#&gt; [39] "TCR Vα7.2"                 "TCR Vβ13.1"</span></span>
-<span></span>
-<span><span class="va">missing</span> <span class="op">&lt;-</span> <span class="va">citeseq</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">HGNC_ID</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">ID</span>, <span class="va">Antigen</span><span class="op">)</span></span></code></pre></div>
+<p>The gene aliases data set is based on the annotation from the Human Genome Naming Consortium (HGNC). Annotation databases such as Ensembl and Entrez perform mapping between gene models independently, using different criteria. This means that they do not always agree on mappings between identifiers. In the gene aliases data set the HGNC mappings are given, and were used when joining data from other sources. AbNames is focused on matching names more than identifiers, so we considered that the official naming organisation should be our reference. This also means that using an Ensembl, Entrez or Uniprot ID to search for gene aliases may not work.</p>
+<p>We found that the HGNC mappings between HGNC and Ensembl gene IDs almost always agreed. The HGNC uses SwissProt Uniprot IDs. When joining data from other sources, we tried to use two points of agreement, e.g. agreement between one type ID and the official symbol, or agreement between two types of ID but disagreement about the official symbol.</p>
+<p>The code used for creating all of the data sets is available in data-raw. At the moment, we do not have a main file for regenerating the data sets - this is on our to do list!</p>
 <div class="section level3">
 <h3 id="to-do">TO DO<a class="anchor" aria-label="anchor" href="#to-do"></a>
 </h3>
-<p><em>An example of (interactively) deciding what to do if groups are inconsistent. </em>Standardise names in a singlecellexperiment <em>Check new annotations against previous </em>Isotype controls <em>Add checks on filling if the values are not unique </em>Add control column to isotype controls to prevent false match to mouse IgG2a <em>Add ignore option to split merge? </em> CD25 (good example, multiple genes), CD270, CD279 matched in HGNC? # CD279 PD-1 - example where only some are matched # Fix Hao Clone CD25 # Search for similar genes in master table # Generate camel case regexp? # Split HGNC alias_name, prev_name - keep only if contains “antigen” or “CD”? # Unintuitive to use quoted for splitUnnest # Uniprot ids - possible to split to create complex uniprot and modification # uniprot? # Redocument data sets # HAO CD45 should have catalogue numbers! # union join back gene ID / get info by antigen # Include clones when standardising names? # Put RRID into CITEseq # Export and demonstrate group_by_any? e.g.  # citeseq &lt;- citeseq %&gt;% group_by_any(c(“Antigen”, “Cat_Number”) # showGroups(citeseq, 2, interactive = FALSE) # ungroup(citeseq) # Tau Phospho and Thr181 have same cat number # b2-microglobin without dash # Add tag for non-human tagging antibodies</p>
+<p><em>An example of (interactively) deciding what to do if groups are inconsistent. </em>Function to check new annotations against previous <em>Isotype controls + Add control column to isotype controls to prevent false match to mouse IgG2a </em> CD25 (good example, multiple genes), CD270, CD279 matched in HGNC? * CD279 PD-1 - example where only some are matched * Fix Hao Clone CD25 - Is it custom? No Oligo or Cat_Number for this one * Generate camel case regexp? * Unintuitive to use quoted for splitUnnest? * Redocument data sets * HAO CD45 should have catalogue numbers! * union join back gene ID / get info by antigen * Put RRID into CITEseq * Export and demonstrate group_by_any? e.g.  citeseq &lt;- citeseq %&gt;% group_by_any(c(“Antigen”, “Cat_Number”) showGroups(citeseq, 2, interactive = FALSE) ungroup(citeseq) * Add tag for non-human tagging antibodies * Problems: + HGNC_SYMBOL WRONG FOR CD158b (KIR2DL2/L3, NKAT2)? (NKAT2 = only one gene) + Triana RRID same for CD235a and CD235a - match via combination of RRID and Antigen + Triana group 5… - matching because of NA? * Update BIOMART entrez ids to match entrez / HGNC?? * Check that UNIPROT IDs are valid (not all from CSPA are up to date) * Change name of data gene_aliases to just aliases * Rename “value” to “alias” in aliases table * Final check for ambiguous aliases after adding proteins * HGNC: TRAV10 = TCRAV24S1, NCBI:TRAV24 = TCRAV24S1 * Be careful of case when removing ambiguous aliases - Met SLTM / MET * Hao CD25 - same HGNC ID reported twice HGNC:6008|HGNC:6008 and CD45RA * KLG / MAFA * Keep source in ID result table? * Is TCRg clone B1 = TCRg/d? * across query columns - na_if equal to antigen and not is antigen * Add to vignette, how to check results in matchToCITEseq * translit characters in query table * find replacement dataset for diamonds in test * make a pipeline for regenerating gene_aliases * From gene_aliases, remove entries where everything is identical except symbol_type - prefer alias to alias name, previous_symbol to previous_name etc - cellmarker %&gt;% unique() * cellmarker Alkaline phosphatase maps to 2 IDs * symbol_type is NA * biomart gives different entrez ids? * CD1b has two different HGNC_IDs * SIGLEC5 * To do: what is the point of “name” in query table? * why two rows for CD124|IL4RA in alias_results - aggregate source * export left_join_any * make a wrapper for group_by_any which ignores clone duplicates * when study includes same antigen multiple times, give an underscore # suffix? * Convenience function - find alternative names for an antibody * To do: indicate cocktail membership * Should the ALT_ID be the symbol not the ID to allow easier matching? * Add checks in makeQueryTable, e.g. for brackets?</p>
 </div>
-</div>
-<div class="section level2">
-<h2 id="how-can-we-match-antibodies">How can we match antibodies:<a class="anchor" aria-label="anchor" href="#how-can-we-match-antibodies"></a>
-</h2>
-</div>
-<div class="section level2">
-<h2 id="by-an-exact-match-in-a-query-table">By an exact match in a query table<a class="anchor" aria-label="anchor" href="#by-an-exact-match-in-a-query-table"></a>
-</h2>
-</div>
-<div class="section level2">
-<h2 id="by-an-approximate-match-to-the-citeseq-data">By an approximate match to the citeseq data<a class="anchor" aria-label="anchor" href="#by-an-approximate-match-to-the-citeseq-data"></a>
-</h2>
 </div>
 <div class="section level2">
 <h2 id="session-info">Session Info<a class="anchor" aria-label="anchor" href="#session-info"></a>
 </h2>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; R version 4.2.1 (2022-06-23)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-pc-linux-gnu (64-bit)</span></span>
-<span><span class="co">#&gt; Running under: Ubuntu 20.04.4 LTS</span></span>
+<span><span class="co">#&gt; Running under: Ubuntu 20.04.5 LTS</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Matrix products: default</span></span>
 <span><span class="co">#&gt; BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.9.0</span></span>
@@ -647,25 +602,25 @@
 <span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt; [1] dplyr_1.0.9      AbNames_0.1.0    BiocStyle_2.24.0</span></span>
+<span><span class="co">#&gt; [1] dplyr_1.0.10     AbNames_0.2.0    BiocStyle_2.24.0</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span><span class="co">#&gt;  [1] bslib_0.4.0         compiler_4.2.1      pillar_1.8.0       </span></span>
+<span><span class="co">#&gt;  [1] bslib_0.4.0         compiler_4.2.1      pillar_1.8.1       </span></span>
 <span><span class="co">#&gt;  [4] BiocManager_1.30.18 jquerylib_0.1.4     tools_4.2.1        </span></span>
-<span><span class="co">#&gt;  [7] digest_0.6.29       jsonlite_1.8.0      evaluate_0.15      </span></span>
-<span><span class="co">#&gt; [10] memoise_2.0.1       lifecycle_1.0.1     tibble_3.1.8       </span></span>
-<span><span class="co">#&gt; [13] pkgconfig_2.0.3     rlang_1.0.4         DBI_1.1.3          </span></span>
-<span><span class="co">#&gt; [16] cli_3.3.0           yaml_2.3.5          pkgdown_2.0.6      </span></span>
-<span><span class="co">#&gt; [19] xfun_0.31           fastmap_1.1.0       stringr_1.4.0      </span></span>
-<span><span class="co">#&gt; [22] knitr_1.39          desc_1.4.1          generics_0.1.3     </span></span>
+<span><span class="co">#&gt;  [7] digest_0.6.29       jsonlite_1.8.0      evaluate_0.16      </span></span>
+<span><span class="co">#&gt; [10] memoise_2.0.1       lifecycle_1.0.2     tibble_3.1.8       </span></span>
+<span><span class="co">#&gt; [13] pkgconfig_2.0.3     rlang_1.0.5         DBI_1.1.3          </span></span>
+<span><span class="co">#&gt; [16] cli_3.4.0           yaml_2.3.5          pkgdown_2.0.6      </span></span>
+<span><span class="co">#&gt; [19] xfun_0.33           fastmap_1.1.0       stringr_1.4.1      </span></span>
+<span><span class="co">#&gt; [22] knitr_1.40          desc_1.4.2          generics_0.1.3     </span></span>
 <span><span class="co">#&gt; [25] fs_1.5.2            sass_0.4.2          vctrs_0.4.1        </span></span>
 <span><span class="co">#&gt; [28] systemfonts_1.0.4   tidyselect_1.1.2    rprojroot_2.0.3    </span></span>
 <span><span class="co">#&gt; [31] glue_1.6.2          R6_2.5.1            textshaping_0.3.6  </span></span>
-<span><span class="co">#&gt; [34] fansi_1.0.3         rmarkdown_2.14      bookdown_0.27      </span></span>
-<span><span class="co">#&gt; [37] tidyr_1.2.0         purrr_0.3.4         magrittr_2.0.3     </span></span>
+<span><span class="co">#&gt; [34] fansi_1.0.3         rmarkdown_2.16      bookdown_0.29      </span></span>
+<span><span class="co">#&gt; [37] tidyr_1.2.1         purrr_0.3.4         magrittr_2.0.3     </span></span>
 <span><span class="co">#&gt; [40] ellipsis_0.3.2      htmltools_0.5.3     assertthat_0.2.1   </span></span>
 <span><span class="co">#&gt; [43] ragg_1.2.2          utf8_1.2.2          stringi_1.7.8      </span></span>
-<span><span class="co">#&gt; [46] cachem_1.0.6        crayon_1.5.1</span></span></code></pre></div>
+<span><span class="co">#&gt; [46] cachem_1.0.6</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>

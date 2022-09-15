@@ -67,6 +67,9 @@
     <loc>https://helenlindsay.github.io/AbNames/reference/fillByGroup.html</loc>
   </url>
   <url>
+    <loc>https://helenlindsay.github.io/AbNames/reference/filter_by_union.html</loc>
+  </url>
+  <url>
     <loc>https://helenlindsay.github.io/AbNames/reference/formatIg.html</loc>
   </url>
   <url>
@@ -97,6 +100,9 @@
     <loc>https://helenlindsay.github.io/AbNames/reference/makeQueryTable.html</loc>
   </url>
   <url>
+    <loc>https://helenlindsay.github.io/AbNames/reference/matchToCiteseq.html</loc>
+  </url>
+  <url>
     <loc>https://helenlindsay.github.io/AbNames/reference/nPerGroup.html</loc>
   </url>
   <url>
@@ -115,6 +121,9 @@
     <loc>https://helenlindsay.github.io/AbNames/reference/separateSubunits.html</loc>
   </url>
   <url>
+    <loc>https://helenlindsay.github.io/AbNames/reference/sharedSubstr.html</loc>
+  </url>
+  <url>
     <loc>https://helenlindsay.github.io/AbNames/reference/showGroups.html</loc>
   </url>
   <url>
@@ -125,9 +134,6 @@
   </url>
   <url>
     <loc>https://helenlindsay.github.io/AbNames/reference/totalseq.html</loc>
-  </url>
-  <url>
-    <loc>https://helenlindsay.github.io/AbNames/reference/union_join.html</loc>
   </url>
   <url>
     <loc>https://helenlindsay.github.io/AbNames/reference/upperSquish.html</loc>
