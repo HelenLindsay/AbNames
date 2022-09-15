@@ -1,5 +1,7 @@
 # To do: CD98, cellmarker only lists one gene, totalseq 2
-
+# CELLMARKER CD98 should aggregate of SLC3A2 and SLC7A5
+# CD11b - cellmarker had two locations?
+library(tidyverse)
 
 data(gene_aliases)
 gene_aliases <- as_tibble(gene_aliases) %>%
@@ -44,6 +46,7 @@ gsubCellmarker <- function(x){
 # Cellmarker is incorrect for CD77 / A4GALT
 # A4GALT synthesises CD77, CD77 is not a protein
 
+#cellmarker_exclude <- tibble::tribble(~Antigen, ~"CD77")
 cellmarker_exclude <- c("CD77")
 
 cellmarker_fname <- "~/Analyses/CITEseq_curation/data/CellMarker_human.txt"

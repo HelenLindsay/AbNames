@@ -106,23 +106,44 @@ defaultQuery <- function(ab = "Antigen"){
 #'Adds an ID column to a data frame
 #'
 #'Pastes a group of columns together to form an ID column.  If pasted values do
-#'not uniquely identify rows, adds a number to the end.
+#'not uniquely identify rows, adds a number to the end.  If ID column already
+#'exists, this function will check if the ID uniquely identifies rows and will
+#'do nothing if this is the case.  If the ID column exists and does not uniquely
+#'identify rows, it will be regenerated and overwritten.
 #'@param df A data.frame or tibble
 #'@param id_cols (character(n)) Names of columns to paste to form ID column
 #'@param new_col (character(1), default: "ID") Name of new ID column
 #'@param warn (TRUE/FALSE, default: TRUE) If TRUE, warn if IDs are not unique
 #'@param sep (Default: __) Delimiter to use for pasting columns to form ID
+#'@param overwrite Should new_col be regenerated if it already exists in df?
+#'(logical(1), default: TRUE)
 #'@return df with an extra ID column
 #'
 #'@importFrom dplyr mutate group_by all_of
 #'@importFrom dplyr n syms row_number
 #'@export
 addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",
-                  warn = TRUE, sep = "__"){
+                  warn = TRUE, sep = "__", overwrite = TRUE){
 
-    # Check id_cols exist in df and new_col does not
+    # Check id_cols exist in df
     if (! all(id_cols %in% colnames(df))){ stop("All id_cols must be in df") }
-    .stopIfColExists(df, new_col)
+
+    # If new_col exists in df, check if it is an valid ID column
+    # (assuming that one row should have one ID)
+    if (new_col %in% colnames(df)){
+        # If ID column already exists, check that it uniquely identifies rows
+        if (! any(is.na(df[[new_col]])) &
+            length(unique(df[[new_col]])) == nrow(df)){
+            message(sprintf("ID column %s already uniquely identifies rows",
+                            new_col))
+            return(df)
+        }
+        if (! isTRUE(overwrite)){
+            # If ID column already exists, it's not complete and we
+            # shouldn't overwrite it, stop.
+            .stopIfColExists(df, new_col)
+        }
+    }
 
     df <- df %>%
         dplyr::mutate(!!new_col :=
@@ -134,7 +155,7 @@ addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",
                                      paste(!!sym(new_col), .data$i, sep = sep)))
 
     if (isTRUE(warn) & max(df[, "n"]) > 1){
-        warning("ID columns do not uniquely identify rows, row numbers added.")
+        message("ID columns do not uniquely identify rows, row numbers added.")
     }
 
     df <- df %>% dplyr::select(-.data$n, -.data$i)

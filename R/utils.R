@@ -11,7 +11,8 @@
         cols_exist <- toString(intersect(new_col, colnames(df)))
         msg1 <- sprintf("Column(s) %s already exists in data.frame.\n",
                         cols_exist)
-        msg2 <- "Please supply a different value for new_col"
+        new_col = deparse(substitute(new_col))
+        msg2 <- sprintf("Please supply a different value for %s", new_col)
         stop(msg1, msg2)
     }
 }

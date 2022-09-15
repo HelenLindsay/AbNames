@@ -446,75 +446,82 @@ nmatched_after_fill
 
 ```
 
+# Notes about the gene aliases data set
+
+The gene aliases data set is based on the annotation from the Human Genome
+Naming Consortium (HGNC).  Annotation databases such as Ensembl and Entrez
+perform mapping between gene models independently, using different criteria.
+This means that they do not always agree on mappings between identifiers.  In
+the gene aliases data set the HGNC mappings are given, and were used when
+joining data from other sources.  AbNames is focused on matching names more than identifiers, so we considered that the official naming organisation should be
+our reference.  This also means that using an Ensembl, Entrez or Uniprot ID
+to search for gene aliases may not work. 
+
+We found that the HGNC mappings between HGNC and Ensembl gene IDs almost always agreed. The HGNC uses SwissProt Uniprot IDs.  When joining data from other
+sources, we tried to use two points of agreement, e.g. agreement between one
+type ID and the official symbol, or agreement between two types of ID but disagreement about the official symbol.
+
+The code used for creating all of the data sets is available in data-raw.  At
+the moment, we do not have a main file for regenerating the data sets - this is on our to do list!
 
 ## TO DO
 
 *An example of (interactively) deciding what to do if groups are inconsistent.
-*Check new annotations against previous
+*Function to check new annotations against previous
 *Isotype controls
-*Add control column to isotype controls to prevent false match to mouse IgG2a
-*Add ignore option to split merge?
++ Add control column to isotype controls to prevent false match to mouse IgG2a
 * CD25 (good example, multiple genes), CD270, CD279 matched in HGNC?
-# CD279 PD-1 - example where only some are matched
-# Fix Hao Clone CD25 - Is it custom?  No Oligo or Cat_Number for this one 
-# Generate camel case regexp?
-# Unintuitive to use quoted for splitUnnest
-# uniprot?
-# Redocument data sets
-# HAO CD45 should have catalogue numbers!
-# union join back gene ID / get info by antigen
-# Put RRID into CITEseq
-# Export and demonstrate group_by_any? e.g. 
-# citeseq <- citeseq %>% group_by_any(c("Antigen", "Cat_Number") 
-# showGroups(citeseq, 2, interactive = FALSE)
-# ungroup(citeseq)
-# Add tag for non-human tagging antibodies
-# Problems: 
-# HGNC_SYMBOL WRONG FOR CD158b (KIR2DL2/L3, NKAT2)?  (NKAT2 = only one gene)
-# Triana RRID same for CD235a and CD235a - match via combination of RRID
-# and Antigen
-# Triana group 5... - matching because of NA?
-# CD3.1 should not have HGNC symbol PECAM1
-# Update BIOMART entrez ids to match entrez / HGNC??
-# Check that UNIPROT IDs are valid (not all from CSPA are up to date)
-# Change name of data gene_aliases to just aliases
-# Rename "value" to "alias" in aliases table
-# Problem - adding protein IDs has added ambiguous antigens, e.g. CD98
-# match to lower on both tables?
-# HGNC: TRAV10 = TCRAV24S1, NCBI:TRAV24 = TCRAV24S1
-# Be careful of case when removing ambiguous aliases - Met SLTM / MET
-# How can we match antibodies:
-# By an exact match in a query table
-# By an approximate match to the citeseq data
-# Hao CD25 - same HGNC ID reported twice HGNC:6008|HGNC:6008 and CD45RA
-# Tasks - getting a correct identifier
-# Matching groups (don't necessarily need to correct the identifier mapping in this case)
-# KLG / MAFA
-# Keep source in ID result table?
-# Is TCRg clone B1 = TCRg/d?
-# across query columns - na_if equal to antigen and not is antigen
-# Check results in matchToCITEseq
-# keep ambiguous names in a separate column?
-# translit characters in query table
-# find replacement dataset for diamonds in test
-# make a pipeline for regenerating gene_aliases
-# From gene_aliases, remove entries where everything is identical except
-# symbol_type - prefer alias to alias name, previous_symbol to previous_name
-# etc - cellmarker %>% unique()
-# cellmarker Alkaline phosphatase maps to 2 IDs
-# symbol_type is NA
-# biomart gives different entrez ids?
-# CD1b has two different HGNC_IDs
-# SIGLEC5 
-# To do: what is the point of "name" in query table?
-# why two rows for CD124|IL4RA in alias_results - aggregate source
-# export left_join_any
-# make a wrapper for group_by_any which ignores clone duplicates
-# when study includes same antigen multiple times, give an underscore # suffix?
-# Convenience function - find alternative names for an antibody
-# To do: indicate cocktail membership
-# Should the ALT_ID be the symbol not the ID to allow easier matching?
-# Add checks in makeQueryTable, e.g. for brackets?
+* CD279 PD-1 - example where only some are matched
+* Fix Hao Clone CD25 - Is it custom?  No Oligo or Cat_Number for this one 
+* Generate camel case regexp?
+* Unintuitive to use quoted for splitUnnest?
+* Redocument data sets
+* HAO CD45 should have catalogue numbers!
+* union join back gene ID / get info by antigen
+* Put RRID into CITEseq
+* Export and demonstrate group_by_any? e.g. 
+ citeseq <- citeseq %>% group_by_any(c("Antigen", "Cat_Number") 
+ showGroups(citeseq, 2, interactive = FALSE)
+ ungroup(citeseq)
+* Add tag for non-human tagging antibodies
+* Problems: 
++ HGNC_SYMBOL WRONG FOR CD158b (KIR2DL2/L3, NKAT2)?  (NKAT2 = only one gene)
++ Triana RRID same for CD235a and CD235a - match via combination of RRID
+ and Antigen
++ Triana group 5... - matching because of NA?
+* Update BIOMART entrez ids to match entrez / HGNC??
+* Check that UNIPROT IDs are valid (not all from CSPA are up to date)
+* Change name of data gene_aliases to just aliases
+* Rename "value" to "alias" in aliases table
+* Final check for ambiguous aliases after adding proteins
+* HGNC: TRAV10 = TCRAV24S1, NCBI:TRAV24 = TCRAV24S1
+* Be careful of case when removing ambiguous aliases - Met SLTM / MET
+* Hao CD25 - same HGNC ID reported twice HGNC:6008|HGNC:6008 and CD45RA
+* KLG / MAFA
+* Keep source in ID result table?
+* Is TCRg clone B1 = TCRg/d?
+* across query columns - na_if equal to antigen and not is antigen
+* Add to vignette, how to check results in matchToCITEseq
+* translit characters in query table
+* find replacement dataset for diamonds in test
+* make a pipeline for regenerating gene_aliases
+* From gene_aliases, remove entries where everything is identical except
+ symbol_type - prefer alias to alias name, previous_symbol to previous_name
+ etc - cellmarker %>% unique()
+* cellmarker Alkaline phosphatase maps to 2 IDs
+* symbol_type is NA
+* biomart gives different entrez ids?
+* CD1b has two different HGNC_IDs
+* SIGLEC5 
+* To do: what is the point of "name" in query table?
+* why two rows for CD124|IL4RA in alias_results - aggregate source
+* export left_join_any
+* make a wrapper for group_by_any which ignores clone duplicates
+* when study includes same antigen multiple times, give an underscore # suffix?
+* Convenience function - find alternative names for an antibody
+* To do: indicate cocktail membership
+* Should the ALT_ID be the symbol not the ID to allow easier matching?
+* Add checks in makeQueryTable, e.g. for brackets?
 
 
 # Session Info
