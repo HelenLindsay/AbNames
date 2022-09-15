@@ -140,8 +140,8 @@ correct.  We may wish to examine the matching entries in the `citeseq` data set.
 One way to do this is to load the `citeseq` data set and check the matching entries using the function ``.
 
 ```{r, message = FALSE}
-# We load the tidyverse to simplify data.frame manipulations.
-library(tidyverse)
+# We load dplyr to simplify data.frame manipulations.
+library(dplyr)
 
 # Load citeseq data set
 data(citeseq)
