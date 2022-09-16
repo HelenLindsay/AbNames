@@ -1,13 +1,11 @@
 # Tests for filter_by_union -----
 
-data(diamonds, package = "ggplot2")
-diamonds <- diamonds[1:20,] %>%
-    dplyr::mutate(across(c("cut", "color", "clarity"), as.character))
-
-exp_res1 <- diamonds %>% dplyr::filter(color == "I" | cut == "Fair")
-
-
 test_that("filter_by_union selects the correct rows", {
+    diamonds <- ggplot2::diamonds[1:20,] %>%
+        dplyr::mutate(across(c("cut", "color", "clarity"), as.character))
+
+    exp_res1 <- diamonds %>% dplyr::filter(color == "I" | cut == "Fair")
+
     res1 <- filter_by_union(diamonds, data.frame(cut = "Fair", color = "I"))
     expect_equal(res1, exp_res1)
 
@@ -38,17 +36,25 @@ test_that("filter_by_union selects the correct rows", {
 
 
 test_that("filter_by_union correctly handles names in 'by' argument", {
+    diamonds <- ggplot2::diamonds[1:20,] %>%
+        dplyr::mutate(across(c("cut", "color", "clarity"), as.character))
+
+    exp_res1 <- diamonds %>% dplyr::filter(color == "I" | cut == "Fair")
+
+
     res1 <- filter_by_union(diamonds, data.frame(Cut = "Fair", color = "I"),
                        by = c(cut = "Cut", "color"))
     expect_equal(res1, exp_res1)
 
     # Error if names of 'by' not in df
-    expect_error(filter_by_union(diamonds, data.frame(Cut = "Fair", color = "I"),
-                            by = c(fish = "Cut", "color")))
+    expect_error(filter_by_union(diamonds,
+                                 data.frame(Cut = "Fair", color = "I"),
+                                 by = c(fish = "Cut", "color")))
 
     # Error if values of 'by' not in df
-    expect_error(filter_by_union(diamonds, data.frame(Cut = "Fair", color = "I"),
-                            by = c(cut = "Cut", "fish")))
+    expect_error(filter_by_union(diamonds,
+                                 data.frame(Cut = "Fair", color = "I"),
+                                 by = c(cut = "Cut", "fish")))
 })
 
 

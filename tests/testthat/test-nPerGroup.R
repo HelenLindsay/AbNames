@@ -1,10 +1,10 @@
-df <- data.frame(A = rep(1:3, each = 2),
-                 B = rep(4:6, 2),
-                 C = c(7,7,10,8,10,10),
-                 D = rep(11:12, c(4,2)),
-                 nB = c(11:16))
-
 test_that(".addNPerGroup works with multiple columns", {
+    df <- data.frame(A = rep(1:3, each = 2),
+                     B = rep(4:6, 2),
+                     C = c(7,7,10,8,10,10),
+                     D = rep(11:12, c(4,2)),
+                     nB = c(11:16))
+
     # One grouping column, two columns for n_distinct
     exp1 <- cbind(df[, c("A","B","C","D")], data.frame(nB = 2,
                                  nC = rep(c(1,2,1), each = 2)))
@@ -27,6 +27,12 @@ test_that(".addNPerGroup works with multiple columns", {
 
 
 test_that("nPerGroup works correctly with incomplete cases", {
+    df <- data.frame(A = rep(1:3, each = 2),
+                     B = rep(4:6, 2),
+                     C = c(7,7,10,8,10,10),
+                     D = rep(11:12, c(4,2)),
+                     nB = c(11:16))
+
     df[2, 1] <- NA
     df[3, 2] <- NA
     expect_error(nPerGroup(df, c("A","C"), c("B", "D")),
