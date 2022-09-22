@@ -522,7 +522,7 @@ the moment, we do not have a main file for regenerating the data sets - this is 
 * To do: indicate cocktail membership
 * Should the ALT_ID be the symbol not the ID to allow easier matching?
 * Add checks in makeQueryTable, e.g. for brackets?
-
+* Barcode_sequence missing
 
 # Session Info
 
