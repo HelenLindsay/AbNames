@@ -22,10 +22,18 @@ citeseq <- AbNames::addID(citeseq)
 citeseq_q <- citeseq %>% dplyr::select(ID, Antigen)
 query_df <- AbNames::makeQueryTable(citeseq_q, ab = "Antigen")
 
-alias_results <- searchAliases(query_df)
+# To allow re-running, remove ID columns before re-annotating -----
 
 id_cols <- c("ALT_ID", "HGNC_ID", "HGNC_SYMBOL", "ENSEMBL_ID",
              "UNIPROT_ID", "ENTREZ_ID", "SOURCE")
+
+citeseq <- citeseq %>%
+    dplyr::select(-any_of(id_cols))
+
+
+# Annotate using the gene aliases table ----
+
+alias_results <- searchAliases(query_df)
 
 # Remove matches to several genes, select just columns of interest
 
