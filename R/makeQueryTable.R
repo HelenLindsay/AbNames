@@ -16,10 +16,16 @@
 #'@param fun Optional custom function for formatting antigen names.  Must take
 #' an argument "ab" giving the column name (as above) as its only argument.
 #' Other arguments can be prefilled e.g. with purrr::partial.
+#'@param verbose (logical, default: TRUE) If TRUE, prints a message when
+#'starting
 #'@importFrom tidyr pivot_longer
 #'@export
 makeQueryTable <- function(df, ab = "Antigen", id = "ID",
-                           control_col = NA, fun = NA){
+                           control_col = NA, fun = NA, verbose = TRUE){
+
+    if (isTRUE(verbose)){
+        message("Making query table\n")
+    }
 
     if (! all(c(ab, id) %in% colnames(df))){
         stop(sprintf("%s and %s must be columns in df", ab, id))
@@ -204,7 +210,7 @@ addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",
 #'@param replacement (character(1)) Replacement value, default "" (i.e. remove)
 #'@param new_col (character(1), default NA Name of the column to add to df.
 #'If NA, column ab is modified
-gsubAb <- function(df, ab = "Antigen", pattern = "[Aa]nti-([Hh]uman?)([ _]?)",
+gsubAb <- function(df, ab = "Antigen", pattern = "[Aa]nti-([Hh]uman)?([ _]?)",
                    replacement = "", new_col = NA){
     if (is.na(new_col)) new_col <- ab
     df <- dplyr::mutate(df, !!new_col := gsub(pattern, replacement, !!sym(ab)))

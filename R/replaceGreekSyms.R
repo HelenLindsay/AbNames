@@ -19,9 +19,9 @@ replaceGreekSyms <- function(x,
                         replace = c("sym2letter", "sym2word", "word2letter")){
     # Select replacement vector
     replace <- match.arg(replace)
-    replace_to_vec = list("sym2letter" = GREEKSYM_TO_LETTER,
-                       "sym2word" = GREEKSYM_TO_NAME,
-                       "word2letter" = GREEKNAME_TO_LETTER)
+    replace_to_vec = list("sym2letter" = GREEKSYM_TO_LETTER(),
+                       "sym2word" = GREEKSYM_TO_NAME(),
+                       "word2letter" = GREEKNAME_TO_LETTER())
     replace_vec <- replace_to_vec[[replace]]
 
     return(stringr::str_replace_all(x, replace_vec, names(replace_vec)))

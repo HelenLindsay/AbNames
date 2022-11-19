@@ -71,9 +71,6 @@ sharedSubstr <- function(qr_df, x = "value", id = "ID", new_col = "AB_group"){
 
 
 
-
-
-
 # #'@importFrom dplyr cur_group_id
 #sharedSubstrDf <- function(df, id = "ID", x = "value"){
 #    occ_df <- dplyr::group_by(df, !!sym(x)) %>%
@@ -110,9 +107,7 @@ sharedSubstr <- function(qr_df, x = "value", id = "ID", new_col = "AB_group"){
 # - not filled for Stuart, no TotalSeq_Cat or vendor?
 
 # Careful with CD3.2 - Mimitou, not equal to CD32!
-# CD45RA/ CD45RO HGNC:9666
-# HLA-DR / HLA-DRA HGNC:4947
-#  good example!
+# HLA-DR / HLA-DRA HGNC:4947 good example!
 
 
 

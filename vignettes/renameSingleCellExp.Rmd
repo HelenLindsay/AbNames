@@ -15,7 +15,8 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-This short vignette shows how to standardize the names of the antibody-derived tags in a CITE-seq experiment in SingleCellExperiment format.
+This short vignette shows how to standardize the names of the
+antibody-derived tags in a CITE-seq experiment in SingleCellExperiment format.
 
 # Example 1: Kotliarov PBMC
 
@@ -35,13 +36,20 @@ head(rownames(kotliarov))
 
 ## Create a data frame to allow matching to the CITEseq data set
 
-To directly match to the CITEseq data set, some formatting of the antigen names may be required.  Here we remove the "_PROT" suffix.  An alternative is to first map antigen names to the gene_aliases data set and then match antigens and identifiers to the CITEseq data set. However, it is still a good idea to remove prefixes and suffixes to avoid false matches.  For example, "PROT" is an alias of the gene SLC6A7 and would match if not removed.
+To directly match to the `citeseq` data set, some formatting of the antigen
+names may be required.  Here we remove the "_PROT" suffix.  An alternative
+is to first map antigen names to the gene_aliases data set and use both
+antigens and identifiers to match to the `citeseq` data set. However, it is
+still a good idea to remove prefixes and suffixes to avoid false matches.
+For example, "PROT" is an alias of the gene SLC6A7 and would match if not
+removed.
 
 You can include information such as catalogue number and antibody clone
-to assist matching if it is available.  When matching to the CITEseq data
+to assist matching if it is available.  When matching to the `citseq` data
 set, the names of the columns to use for matching must equal those in the
-CITEseq data set.  For example, below we match using only the antigen name,
-using the column "Antigen".  By default, columns "Clone", "Antigen", and "Cat_Number" (catalogue number) are used for matching if available. 
+`citeseq` data set.  For example, below we match using only the antigen name,
+using the column "Antigen".  By default, columns "Clone", "Antigen", and
+"Cat_Number" (catalogue number) are used for matching if available. 
 
 
 ```{r}
