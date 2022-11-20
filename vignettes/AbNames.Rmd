@@ -533,8 +533,9 @@ the moment, we do not have a main file for regenerating the data sets - this is 
 * To do: indicate cocktail membership
 * Should the ALT_ID be the symbol not the ID to allow easier matching?
 * Add checks in makeQueryTable, e.g. for brackets?
-* Barcode_sequence missing
+* Fix errors, remove "ignore" for filling clone etc
 * Decide whether antibodies should be listed separately for each subexperiment
+* In SingleCellExperiment vignette, isotype control problem no longer happens, why?
 
 # Session Info
 

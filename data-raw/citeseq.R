@@ -19,6 +19,7 @@ citeseq <- citeseq %>%
 
 citeseq <- AbNames::addID(citeseq)
 citeseq_q <- citeseq %>% dplyr::select(ID, Antigen, Isotype_Control)
+# Note - this does not search for control antibodies
 query_df <- AbNames::makeQueryTable(citeseq_q,
                                     ab = "Antigen",
                                     control_col = "Isotype_Control")
@@ -91,7 +92,7 @@ citeseq_custom <- citeseq %>%
 # TO DO: CHECK FOR ERRORS NAD REMOVE "IGNORE"
 citeseq <- citeseq %>%
     dplyr::filter(! grepl("custom", Cat_Number) &
-                      (is.na(Custom_Antibody) | isFALSE(Custom_Antibody))) %>%
+                      (is.na(Custom_Antibody) | ! Custom_Antibody)) %>%
     fillByGroup(group = "Cat_Number",
                 fill = c("Clone", "Oligo_ID", "TotalSeq_Cat"),
                 multiple = "ignore") %>%
@@ -109,14 +110,14 @@ citeseq <- dplyr::bind_rows(citeseq, citeseq_custom) %>%
 
 exp_nrow == nrow(citeseq)
 
+n_na <- citeseq %>%
+    dplyr::summarise(across(c("Cat_Number", "Clone", "Oligo_ID"),
+                            ~sum(is.na(.x))))
+
 
 # Hao_2021 and Liu_2021 have entries for some but not all Cat_Numbers
 # It appears info can be added for Liu, but Hao entries are custom
 # (But do not ever have other group members)
-
-
-
-
 
 
 # Standardising names for controls

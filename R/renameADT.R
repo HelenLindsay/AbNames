@@ -32,6 +32,7 @@ setMethod("renameADT", as(structure(.Data = c("SingleCellExperiment",
         # May need to replace the row data too
         # sce may have rowPairs, but doesn't appear to inc names
         # toDo: add original names to the rowData
+        # check rownames of rowdata
 
         stopifnot(requireNamespace("SummarizedExperiment"),
                   requireNamespace("SingleCellExperiment"))
@@ -40,8 +41,13 @@ setMethod("renameADT", as(structure(.Data = c("SingleCellExperiment",
             # If it's an altExperiment, rename all altExp rownames
             rp_func = altExp
             old_nms <- rownames(SingleCellExperiment::altExp(obj, assay))
+            # If there are missing entries, use the old names
             new_nms <- dplyr::coalesce(names[old_nms], old_nms)
             rownames(SingleCellExperiment::altExp(obj, assay)) <- new_nms
+            SingleCellExperiment::rowData(
+                SingleCellExperiment::altExp(obj, assay)
+            ) <- cbind(rowData)
+
         } else {
             #nms <- .getRownames(obj, assay)
 

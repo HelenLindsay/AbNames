@@ -13,7 +13,8 @@ searchTotalseq(x, cols = NULL)
 specified, defaults to catalogue number, antigen and clone.}
 }
 \description{
-Search for exact matches between antigen names in df and totalseq cocktails
-or between catalogue numbers. Relies on column names matching totalseq
-This function works by repeated left_joins and will add rows ID columns.
+Search for exact matches between antigen names or catalogue numbers in
+data.frame x and totalseq cocktails data set.  Relies on column names in
+matching column names in totalseq.
+This function works by repeated left_joins and can add rows.
 }

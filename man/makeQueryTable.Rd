@@ -4,7 +4,14 @@
 \alias{makeQueryTable}
 \title{Separate Antibody/Antigen names into component parts}
 \usage{
-makeQueryTable(df, ab = "Antigen", id = "ID", control_col = NA, fun = NA)
+makeQueryTable(
+  df,
+  ab = "Antigen",
+  id = "ID",
+  control_col = NA,
+  fun = NA,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{df}{A data.frame or tibble.}
@@ -22,6 +29,9 @@ react against human genes.}
 \item{fun}{Optional custom function for formatting antigen names.  Must take
 an argument "ab" giving the column name (as above) as its only argument.
 Other arguments can be prefilled e.g. with purrr::partial.}
+
+\item{verbose}{(logical, default: TRUE) If TRUE, prints a message when
+starting}
 }
 \description{
 Given a data.frame containing Antigen/Antibody names, reformat
