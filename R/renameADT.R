@@ -147,15 +147,6 @@ setMethod("renameADT", as(structure(.Data = c("MultiAssayExperiment",
 # })
 
 
-# Helper functions -----
-.getRownames <- function(obj, assay, ...){
-    if (! assay %in% names(SummarizedExperiment::assays(obj))){
-        stop(sprintf("Assay %s not found", assay))
-    }
-    return(SummarizedExperiment::assays(obj)[[assay]])
-}
-
-
 # matchToCiteseq -----
 # Probably want to standardise name via aliases table.....
 # At the moment relies on column names matching
@@ -169,8 +160,8 @@ setMethod("renameADT", as(structure(.Data = c("MultiAssayExperiment",
 #' Standardise names using the citeseq data set
 #'
 #'@description Groups antibody names and selects the most frequent name.  By
-#'default, the citeseq dataset is grouped by Antigen, Clone, Cat_Number
-#' (catalog number) and ALT_ID.
+#'default, the citeseq dataset is grouped by Antigen, Clone,
+#'Cat_Number (catalog number) and ALT_ID.
 #'@param x A data.frame or tibble containing a column "Antigen" to match to the
 #' citeseq data set
 #'@param cols (character(n), default NULL) Optional additional columns to use
@@ -206,7 +197,7 @@ matchToCiteseq <- function(x, cols = NULL, verbose = TRUE, ...){
 
     } else {
         # If columns are not specified, check which of the default columns
-        # in getCommon name are present in x
+        # in getCommonName are present in x
         default_cols <- c("Antigen", "Cat_Number", "Clone", "ALT_ID")
         msg_cols <- toString(intersect(colnames(x), default_cols))
     }

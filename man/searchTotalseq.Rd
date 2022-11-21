@@ -16,5 +16,6 @@ specified, defaults to catalogue number, antigen and clone.}
 Search for exact matches between antigen names or catalogue numbers in
 data.frame x and totalseq cocktails data set.  Relies on column names in
 matching column names in totalseq.
-This function works by repeated left_joins and can add rows.
+This function works by repeated left_joins and can add rows.  Only rows
+that do not already have identifiers are joined with the totalseq data.
 }

@@ -20,6 +20,6 @@ used by default.  Antibodies are grouped by a match in any of the ID columns.}
 }
 \description{
 Groups antibody names and selects the most frequent name.  By
-default, the citeseq dataset is grouped by Antigen, Clone, Cat_Number
-(catalog number) and ALT_ID.
+default, the citeseq dataset is grouped by Antigen, Clone,
+Cat_Number (catalog number) and ALT_ID.
 }

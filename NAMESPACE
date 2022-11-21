@@ -2,6 +2,7 @@
 
 export("%>%")
 export(addID)
+export(annotateAb)
 export(dashNotDot)
 export(defaultQuery)
 export(fillByGroup)

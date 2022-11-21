@@ -1,22 +1,49 @@
-# Annotate antigens with identifiers
-#
-# This is a wrapper for the default matching pipeline using functions
-# makeQueryTable and searchAliases.
-#
-annotateAb <- function(x, control_col = NULL){
-    x <- AbNames::addID(x)
+#' Annotate antigens with identifiers
+#'
+#' This is a wrapper for the default annotation pipeline using the functions
+#' makeQueryTable and searchAliases.  It works by first transforming antigen
+#' names using a series of regular expressions, then looking for exact matches
+#' of these in the gene_aliases table, and finally removing entries where
+#' multiple genes were matched.
+#'
+#' If using this function, we recommend you check the results as the default
+#' matching functions may not suit every data set. In particular, check the
+#' results for HLA, TCR or Ig antigens.
+#'@param x A data.frame or tibble.  Must include a column named "Antigen"
+#'containing the antigen names
+#'@param id_cols (character(n), default NA) Name(s) of columns use to identify
+#'each row in x.
+#'@param control_col (character(1), default NA) Name of a logical column in x
+#'indicating whether an antigen is an isotype control.  Isotype controls will
+#'not be matched.
+#'@author Helen Lindsay
+#'@return x, with additional columns
+#'@export
+annotateAb <- function(x, id_cols = NA, control_col = NA){
+    if (is.na(id_cols)){ id_cols <- c("Antigen", "Study") }
+    id_cols <- intersect(id_cols, colnames(x))
 
-    # Remove control columns, as we are only searching human proteins
-    controls <- dplyr::filter(x, Control)
-    x <- dplyr::filter(x, ! Control)
+    x <- AbNames::addID(x, id_cols = id_cols)
 
-    # Select just the columns that are needed for querying:
-    citeseq_q <- x %>% dplyr::select(ID, Antigen)
+    if (! "Antigen" %in% colnames(x)){
+        stop("x must contain a column named 'Antigen'")
+    }
 
-    # Apply the default transformation sequence and make a query table in long format
-    query_df <- AbNames::makeQueryTable(x, ab = "Antigen")
+    query_t <- x %>% dplyr::select(all_of(
+        na.omit(c("ID", "Antigen", control_col))))
 
+    query_t <- AbNames::makeQueryTable(query_t,
+                                       ab = "Antigen",
+                                       control_col = control_col)
+    if (! is.na(control_col)){
+        query_t <- query_t %>%
+            dplyr::select(-dplyr::all_of(control_col))
+    }
 
+    id_cols <- c("ALT_ID", "HGNC_ID", "HGNC_SYMBOL", "ENSEMBL_ID",
+                 "UNIPROT_ID", "ENTREZ_ID", "SOURCE")
+
+    alias_results <- searchAliases(query_t)
 
     alias_results <- alias_results %>%
         dplyr::group_by(ID) %>%
@@ -29,31 +56,21 @@ annotateAb <- function(x, control_col = NULL){
         dplyr::select(ID, name, value, HGNC_ID)
 
     alias_results %>%
-        dplyr::select(matches("ID|HGNC"), name) %>% # Select ID and HGNC columns
+        dplyr::select(matches("ID|HGNC|SOURCE"), name) %>% # Select ID cols
         unique() %>% # Collapse results with same ID from different queries
 
         # Collapse multi-subunit entries, convert "NA" to NA
-        dplyr::summarise(dplyr::across(all_of(id_cols), ~toString(unique(.x)))) %>%
+        dplyr::summarise(dplyr::across(all_of(id_cols),
+                                       ~toString(unique(.x)))) %>%
         dplyr::mutate(dplyr::across(all_of(id_cols), ~na_if(.x, "NA")))
-
-    nrow(alias_results)
 
     x <- x %>%
         dplyr::left_join(alias_results, by = "ID") %>%
         unique()
 
-    ts <- totalseq %>%
-        dplyr::select(any_of(colnames(citeseq)))
+    x <- searchTotalseq(x) %>%
+        ungroup()
 
-    missing <- count_missing(citeseq)
-
-    # Fill in IDs where Antigen, Oligo, Clone and TotalSeq category match
-    x <- x %>%
-        dplyr::rows_patch(ts,
-                          by = c("Antigen", "Oligo_ID", "Clone", "TotalSeq_Cat"),
-                          unmatched = "ignore")
-
-
-    x <- x %>%
-        dplyr::mutate(across(any_of("HGNC_ID", "ENSEMBL_ID",)))
+   return(x)
 }
+
