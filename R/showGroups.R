@@ -59,10 +59,11 @@ showGroups <- function(df, i = 1, n = 1, max_rows = 50, interactive = TRUE){
 #' @param df A data.frame or tibble
 #' @param flt An (unquoted) expression for using with dplyr::filter
 #' @importFrom rlang enquo
-.printGroupMatch <-function(df, flt){
+.printGroupMatch <- function(df, flt){
     multi_df <- df %>% dplyr::filter(!!rlang::enquo(flt))
     first_group <- .getGroups(multi_df)
-    fg <- paste(capture.output(print(first_group)), collapse = "\n")
+    fg <- paste(capture.output(print(data.frame(first_group))),
+                collapse = "\n")
     return(fg)
 }
 
@@ -104,7 +105,6 @@ print_n <- function(df, n = 20){
 }
 
 
-
 # getGroups ----
 #' Return the first n groups of a grouped data.frame
 #'
@@ -130,9 +130,16 @@ print_n <- function(df, n = 20){
 
 
 # Find an antibody in a data.frame and return all aliases
+#
+# Filter a data frame by an expression (as expression or string) and
+# select all rows matching the value in the filtered column.
+# Similar to getAliases but filter function can use any column.
 # e.g. abAliases(df, "value == 'CD3'")
-
-abAliases <- function(ex, by = "HGNC_ID"){
+#
+# (Find an antibody in the gene_aliases data set and return all aliases)
+#
+#'e.g. abAliases(df, "value == 'CD3'")
+abAliases <- function(df, ex, by = "HGNC_ID"){
     # Switch depending on whether ex is a string or an expression
     enex <- rlang::enexpr(ex)
 

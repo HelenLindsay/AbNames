@@ -29,26 +29,46 @@ setMethod("renameADT", as(structure(.Data = c("SingleCellExperiment",
 
         # For a SingleCellExperiment, the ADT may either be the main assay
         # or an altExp.
-        # May need to replace the row data too
+
         # sce may have rowPairs, but doesn't appear to inc names
-        # toDo: add original names to the rowData
+        # check rownames of rowdata
 
         stopifnot(requireNamespace("SummarizedExperiment"),
                   requireNamespace("SingleCellExperiment"))
 
-        if (assay %in% SingleCellExperiment::altExpNames(obj)){
-            # If it's an altExperiment, rename all altExp rownames
-            rp_func = altExp
-            old_nms <- rownames(SingleCellExperiment::altExp(obj, assay))
-            new_nms <- dplyr::coalesce(names[old_nms], old_nms)
-            rownames(SingleCellExperiment::altExp(obj, assay)) <- new_nms
-        } else {
-            #nms <- .getRownames(obj, assay)
+        main_assay_name <- names(SummarizedExperiment::assays(obj))
+        is_alt <- assay %in% SingleCellExperiment::altExpNames(obj)
 
-            # Use coalesce in case there are missing values
-            new_nms <- dplyr::coalesce(names[rownames(obj)], rownames(obj))
-            rownames(obj) <- new_nms
+        if (is_alt){
+            # Swap ADT assay to be the main assay
+            obj <- swapAltExp(obj, assay, saved = main_assay_name)
         }
+
+        # Make sure new names vector has names
+        if (is.null(names(names))){
+            names(names) <- rownames(obj)
+        }
+
+        if (! all(names(names) %in% rownames(obj))){
+            stop("If names is a named vector, all names ",
+                 "must be rownames of required assay in obj")
+        }
+
+        # Update names - use coalesce in case there are missing values
+        old_nms <- rownames(obj)
+        new_nms <- dplyr::coalesce(names[rownames(obj)], old_nms)
+        rownames(obj) <- new_nms
+
+        # Put old names into row data
+        SummarizedExperiment::rowData(obj) <-
+            cbind(SummarizedExperiment::rowData(obj),
+                  S4Vectors::DataFrame(Original_Names = old_nms))
+
+        if (is_alt){
+            # Swap ADT back to being an altExp
+            obj <- swapAltExp(obj, main_assay_name, saved = assay)
+        }
+
         return(obj)
 })
 
@@ -127,15 +147,6 @@ setMethod("renameADT", as(structure(.Data = c("MultiAssayExperiment",
 # })
 
 
-# Helper functions -----
-.getRownames <- function(obj, assay, ...){
-    if (! assay %in% names(SummarizedExperiment::assays(obj))){
-        stop(sprintf("Assay %s not found", assay))
-    }
-    return(SummarizedExperiment::assays(obj)[[assay]])
-}
-
-
 # matchToCiteseq -----
 # Probably want to standardise name via aliases table.....
 # At the moment relies on column names matching
@@ -149,8 +160,8 @@ setMethod("renameADT", as(structure(.Data = c("MultiAssayExperiment",
 #' Standardise names using the citeseq data set
 #'
 #'@description Groups antibody names and selects the most frequent name.  By
-#'default, the citeseq dataset is grouped by Antigen, Clone, Cat_Number
-#' (catalog number) and ALT_ID.
+#'default, the citeseq dataset is grouped by Antigen, Clone,
+#'Cat_Number (catalog number) and ALT_ID.
 #'@param x A data.frame or tibble containing a column "Antigen" to match to the
 #' citeseq data set
 #'@param cols (character(n), default NULL) Optional additional columns to use
@@ -186,7 +197,7 @@ matchToCiteseq <- function(x, cols = NULL, verbose = TRUE, ...){
 
     } else {
         # If columns are not specified, check which of the default columns
-        # in getCommon name are present in x
+        # in getCommonName are present in x
         default_cols <- c("Antigen", "Cat_Number", "Clone", "ALT_ID")
         msg_cols <- toString(intersect(colnames(x), default_cols))
     }

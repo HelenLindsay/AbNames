@@ -7,10 +7,8 @@
 gsubAb(
   df,
   ab = "Antigen",
-  pattern = "[Aa]nti-",
+  pattern = "[Aa]nti-([Hh]uman)?([ _]?)",
   replacement = "",
-  exclude = NA,
-  restrict = NA,
   new_col = NA
 )
 }
@@ -24,14 +22,11 @@ prefixes from}
 
 \item{replacement}{(character(1)) Replacement value, default "" (i.e. remove)}
 
-\item{exclude}{(Default: NA) - DOES NOTHING YET}
-
-\item{restrict}{(Default: NA) - DOES NOTHING YET}
-
 \item{new_col}{(character(1), default NA Name of the column to add to df.
 If NA, column ab is modified}
 }
 \description{
 Remove a pattern from a column, either modifying in place or creating a new
-column.  The default pattern removes the prefix "anti-" or "Anti-".
+column.  The default pattern removes the prefix "anti-" or "Anti-", optionally
+followed by Human or human, then optionally a space or underscore
 }

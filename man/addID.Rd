@@ -9,7 +9,8 @@ addID(
   id_cols = c("Antigen", "Study"),
   new_col = "ID",
   warn = TRUE,
-  sep = "__"
+  sep = "__",
+  overwrite = TRUE
 )
 }
 \arguments{
@@ -22,6 +23,9 @@ addID(
 \item{warn}{(TRUE/FALSE, default: TRUE) If TRUE, warn if IDs are not unique}
 
 \item{sep}{(Default: __) Delimiter to use for pasting columns to form ID}
+
+\item{overwrite}{Should new_col be regenerated if it already exists in df?
+(logical(1), default: TRUE)}
 }
 \value{
 df with an extra ID column
@@ -31,5 +35,8 @@ Adds an ID column to a data frame
 }
 \details{
 Pastes a group of columns together to form an ID column.  If pasted values do
-not uniquely identify rows, adds a number to the end.
+not uniquely identify rows, adds a number to the end.  If ID column already
+exists, this function will check if the ID uniquely identifies rows and will
+do nothing if this is the case.  If the ID column exists and does not uniquely
+identify rows, it will be regenerated and overwritten.
 }
