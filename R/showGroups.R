@@ -131,7 +131,8 @@ print_n <- function(df, n = 20){
 
 # Find an antibody in a data.frame and return all aliases
 # e.g. abAliases(df, "value == 'CD3'")
-abAliases <- function(df, ex, by = "HGNC_ID"){
+
+abAliases <- function(ex, by = "HGNC_ID"){
     # Switch depending on whether ex is a string or an expression
     enex <- rlang::enexpr(ex)
 
