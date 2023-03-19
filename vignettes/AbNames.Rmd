@@ -55,8 +55,10 @@ have been useful for matching to antibody names.  Non-ambiguous gene aliases
 from Ensembl (fetched via Bioconductor package biomaRt) and NCBI 
 (fetched via the NCBI ftp site and the Bioconductor package org.Hs.eg.db), and
 non-ambiguous protein names from the Cell-Surface Protein Atlas
-(CSPA, Cell-Surface Protein Atlas) and Cellmarker protein database (http://xteam.xbio.top/CellMarker/) have been added.  Mappings between HGNC,
-Ensembl and NCBI (Entrez) IDs are mostly based on HGNC, with some corrections of obsolete Ensembl IDs using the Ensembl data.  
+(CSPA, Cell-Surface Protein Atlas) and Cellmarker protein database
+(http://xteam.xbio.top/CellMarker/) have been added.  Mappings between HGNC,
+Ensembl and NCBI (Entrez) IDs are mostly based on HGNC, with some corrections
+of obsolete Ensembl IDs using the Ensembl data.  
 
 The `gene_aliases` data set is in long format (one alias per row).
 
