@@ -129,9 +129,12 @@ print_n <- function(df, n = 20){
 }
 
 
+# Find an antibody in a data.frame and return all aliases
+#
 # Filter a data frame by an expression (as expression or string) and
 # select all rows matching the value in the filtered column.
-# Similar to getAliases but filter function can use any column
+# Similar to getAliases but filter function can use any column.
+# e.g. abAliases(df, "value == 'CD3'")
 #
 # (Find an antibody in the gene_aliases data set and return all aliases)
 #

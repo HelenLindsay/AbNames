@@ -131,12 +131,9 @@ citeseq <- as.data.frame(citeseq)
 usethis::use_data(citeseq, overwrite = TRUE, compress = "bzip2")
 
 
-# TCR alpha/beta - not matched correctly?
 # HGNC:12102 = TRAV1-2 = TCR Va7.2?
 # TRAV24, TRAJ18 = TCRVa24-Ja18
-# HLA2 != HLA-A
 # HLA-DR = HLA-DRA?
-# HLA.A.B.C != HGNC:914
 
 # For antigens like TCR alpha/beta, KIR2DL1/S1/S3/S5, want to split like subunit
 # CD66a_c_e
