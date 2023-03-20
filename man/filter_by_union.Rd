@@ -26,3 +26,6 @@ This is a wrapper around dplyr::filter with if_any for the case where the
 value should be in a reference set, with the option to choose whether to use
 another data frame or a subset of rows as the reference.
 }
+\author{
+Helen Lindsay
+}

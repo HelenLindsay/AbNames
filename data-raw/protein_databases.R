@@ -181,7 +181,7 @@ gene_aliases <- gene_aliases %>%
 # Because it's a pseudogene! EGFEM1P
 
 # Demonstration of row shift error in UNIPROT_IDs
-#missing <- anti_join(cellmarker %>% dplyr::mutate(row_n = row_number()),
+#missing <- anti_join(cellmarker %>% dplyr::mutate(row_n = dplyr::row_number()),
 #                     gene_aliases, by = c("ENTREZ_ID", "UNIPROT_ID"))
 #x <- missing$row_n - seq_along(missing$row_n)
 #rle(x)$lengths

@@ -4,6 +4,7 @@
 #'
 #'@param df A data.frame or tibble
 #'@param new_col character(n) Name of a column(s) to add to df
+#'@keywords internal
 .stopIfColExists <- function(df, new_col){
     # Check if new_col(s) already exists in df, stop if so
 
@@ -24,6 +25,7 @@
 #'@param df A data.frame or tibble
 #'@param n (default 1) How many temporary column names are needed?
 #'@param nm (character(1), default "TEMP") Prefix for temporary column names
+#'@keywords internal
 .tempColName <- function(df, n = 1, nm = "TEMP"){
     cn <- colnames(df)
     i <- 1
@@ -78,6 +80,7 @@
 #'
 #'@param pattern A pattern to use with sprintf
 #'@param ... Extra arguments for sprintf
+#'@keywords internal
 .printf <- function(pattern, ...){
     dots <- list(...)
     res <- sprintf(pattern, ...)
@@ -114,6 +117,7 @@
 #' @param ... Extra arguments for f
 #' @importFrom purrr partial
 #' @importFrom magrittr freduce
+#' @keywords internal
 .freducePartial <- function(df, f, cls, ...){
     dots <- list(...)
 

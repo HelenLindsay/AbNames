@@ -14,3 +14,4 @@
 \description{
 Warn if a column already exists in a data.frame
 }
+\keyword{internal}

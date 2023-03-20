@@ -17,3 +17,6 @@ punctuation, e.g. "IFN-g" would become "IFNG" but "IFN-g R alpha-chain" would
 have new value NA.  Punctuation is not removed if it separates groups of
 numbers, e.g. "CD3.1"
 }
+\author{
+Helen Lindsay
+}

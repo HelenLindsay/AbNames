@@ -14,7 +14,7 @@ test_that("makeQueryTable correctly handles brackets and commas", {
 
     qdf <- makeQueryTable(query_df)
     should_include <- c("CD274", "B7-H1", "PD-L1")
-    expect_equal(intersect(qdf$value, should_include), should_include)
+    expect_true(all(should_include %in% qdf$value))
 })
 
 

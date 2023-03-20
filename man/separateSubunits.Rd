@@ -33,3 +33,6 @@ Subunits should be converted from Greek symbols before applying this function.
 
 At present user-supplied regex patterns are not supported
 }
+\author{
+Helen Lindsay
+}

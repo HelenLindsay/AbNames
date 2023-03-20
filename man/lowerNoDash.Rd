@@ -13,3 +13,6 @@ lowerNoDash(ab)
 Convert a character vector to lowercase and replace - with spaces.
 Values are NA if the new value is identical to the original value.
 }
+\author{
+Helen Lindsay
+}

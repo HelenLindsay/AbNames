@@ -30,3 +30,6 @@ Remove a pattern from a column, either modifying in place or creating a new
 column.  The default pattern removes the prefix "anti-" or "Anti-", optionally
 followed by Human or human, then optionally a space or underscore
 }
+\author{
+Helen Lindsay
+}

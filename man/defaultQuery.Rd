@@ -13,3 +13,6 @@ containing Antigen/Antibody names}
 \description{
 Default list of functions for making an antibody query table
 }
+\author{
+Helen Lindsay
+}

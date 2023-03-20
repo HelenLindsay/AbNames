@@ -12,6 +12,7 @@
 #'@param interactive (default: TRUE) Should the function wait for a
 #'command prompt to show the next group?
 #'@importFrom dplyr group_rows
+#'@author Helen Lindsay
 #'@export
 showGroups <- function(df, i = 1, n = 1, max_rows = 50, interactive = TRUE){
     if (! "grouped_df" %in% class(df)){
@@ -59,6 +60,7 @@ showGroups <- function(df, i = 1, n = 1, max_rows = 50, interactive = TRUE){
 #' @param df A data.frame or tibble
 #' @param flt An (unquoted) expression for using with dplyr::filter
 #' @importFrom rlang enquo
+#' @keywords internal
 .printGroupMatch <- function(df, flt){
     multi_df <- df %>% dplyr::filter(!!rlang::enquo(flt))
     first_group <- .getGroups(multi_df)
@@ -69,8 +71,11 @@ showGroups <- function(df, i = 1, n = 1, max_rows = 50, interactive = TRUE){
 
 
 # print_n ----
-#
-# print a data.frame n rows at a time
+#' Print a data.frame n rows at a time
+#'
+#'@param df data.frame to print
+#'@param n number of rows to print, default 20
+#'@keywords internal
 print_n <- function(df, n = 20){
     gp_info <- "Rows %s - %s (%s rows total)\n"
     msg <- "Enter\nn to print the next group, or\nq to quit"
@@ -101,7 +106,6 @@ print_n <- function(df, n = 20){
             message("no more groups to show")
         }
     }
-
 }
 
 
@@ -115,7 +119,9 @@ print_n <- function(df, n = 20){
 #'@param i (integer(1), default: 1) The index of the first group to return
 #'@param n (integer(1), default: 1) How many groups should be returned?
 #'@param row_idxs (Optional, default: NULL) Indices of rows
+#'@author Helen Lindsay
 #'@importFrom dplyr group_rows
+#'@keywords internal
 .getGroups <- function(df, i = 1, n = 1, row_idxs = NULL){
     if (is.null(row_idxs)){ row_idxs <- df %>% dplyr::group_rows() }
 
@@ -129,16 +135,19 @@ print_n <- function(df, n = 20){
 }
 
 
-# Find an antibody in a data.frame and return all aliases
-#
-# Filter a data frame by an expression (as expression or string) and
-# select all rows matching the value in the filtered column.
-# Similar to getAliases but filter function can use any column.
-# e.g. abAliases(df, "value == 'CD3'")
-#
-# (Find an antibody in the gene_aliases data set and return all aliases)
-#
-#'e.g. abAliases(df, "value == 'CD3'")
+# abAliases ----
+#' Find an antibody in a data.frame and return all aliases
+#'
+#' Filter a data frame by an expression (as expression or character) and
+#' select all rows matching the value in the filtered column.
+#' More general version of getAliases, as the filter function can use any
+#' column e.g. abAliases(df, "value == 'CD3'").
+#'@param df  A data.frame or tibble to filter
+#'@param ex An filtering expression, as either a character or an expression
+#'@param by Name of the column to use for selecting matching entries
+#'(Default: "HGNC_ID")
+#'@author Helen Lindsay
+#'@keywords internal
 abAliases <- function(df, ex, by = "HGNC_ID"){
     # Switch depending on whether ex is a string or an expression
     enex <- rlang::enexpr(ex)
