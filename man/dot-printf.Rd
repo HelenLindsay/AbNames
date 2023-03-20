@@ -14,3 +14,4 @@
 \description{
 Wrapper for sprintf, doesn't convert NA to character
 }
+\keyword{internal}

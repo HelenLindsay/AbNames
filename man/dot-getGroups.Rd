@@ -19,3 +19,7 @@
 Useful for debugging, e.g. when trying to fill by but groups contain
 multiple values.  Group order is determined by dplyr::group_rows
 }
+\author{
+Helen Lindsay
+}
+\keyword{internal}

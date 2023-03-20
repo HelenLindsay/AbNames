@@ -16,3 +16,4 @@
 \description{
 Returns a name that does not already exist in columns of a data.frame
 }
+\keyword{internal}

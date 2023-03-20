@@ -83,7 +83,7 @@ preprocessNames <- function(x, anti = TRUE, split_frac = 0.8){
     # (This will not detect entries that have been split, but it becomes
     # complicated to figure out whether the entry is an antibody or clone)
     result <- result %>%
-        dplyr::group_by(.data$temp_val) %>%
+        dplyr::group_by(dplyr::all_of("temp_val")) %>%
         dplyr::mutate(n_exp = sum(.data$dups) == dplyr::n() & dplyr::n() > 1,
                       num_exp =
                           ifelse(is.na(.data$temp_num), NA,

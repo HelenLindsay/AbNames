@@ -2,10 +2,25 @@
 % Please edit documentation in R/showGroups.R
 \name{abAliases}
 \alias{abAliases}
-\title{e.g. abAliases(df, "value == 'CD3'")}
+\title{Find an antibody in a data.frame and return all aliases}
 \usage{
 abAliases(df, ex, by = "HGNC_ID")
 }
-\description{
-e.g. abAliases(df, "value == 'CD3'")
+\arguments{
+\item{df}{A data.frame or tibble to filter}
+
+\item{ex}{An filtering expression, as either a character or an expression}
+
+\item{by}{Name of the column to use for selecting matching entries
+(Default: "HGNC_ID")}
 }
+\description{
+Filter a data frame by an expression (as expression or character) and
+select all rows matching the value in the filtered column.
+More general version of getAliases, as the filter function can use any
+column e.g. abAliases(df, "value == 'CD3'").
+}
+\author{
+Helen Lindsay
+}
+\keyword{internal}

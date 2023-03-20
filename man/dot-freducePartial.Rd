@@ -21,3 +21,4 @@ that ellipsis arguments contain (only) one vector entry and that function f
 should be applied sequentially to each of these entries.  Does not work with
 unquoted column names
 }
+\keyword{internal}

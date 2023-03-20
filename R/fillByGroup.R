@@ -132,7 +132,7 @@ groupMode <- function(df, cl, gp, new_cl = NA, min_n = NA,
             dplyr::mutate(!!x :=
                           sum(.data[[n]] == max(.data[[n]])) == max(.data[[n]]),
                       !!tmp := ifelse(.data[[x]] == TRUE, .data[[tmp]], NA)) %>%
-        dplyr::select(-.data[[x]])
+        dplyr::select(-dplyr::any_of(x))
     }
 
     if (isFALSE(overwrite)){
@@ -147,7 +147,7 @@ groupMode <- function(df, cl, gp, new_cl = NA, min_n = NA,
     }
 
     df <- df %>%
-        dplyr::select(-.data[[tmp]], -.data[[n]]) %>%
+        dplyr::select(-dplyr::any_of(c(tmp, n))) %>%
         dplyr::ungroup()
     return(df)
 

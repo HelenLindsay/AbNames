@@ -4,14 +4,20 @@ Title: Standardize Antibody Names
 Version: 0.3.0
 Authors@R:
     person("Helen", "Lindsay", email = "helen.lindsay@chuv.ch", 
-    role = c("aut", "cre"))
-Description: Provides functions for matching antibody names, e.g. from an 
+    role = c("aut", "cre"), comment = c(ORCID = "0000-0001-8614-1661"))
+Description: Provides functions for matching human antibody names, e.g. from an 
     antibody vendor website, to gene names using information from the Human
     Genome Naming Consortium (HGNC), NCBI, Ensembl, and the protein ontology.
+    Also provides a data set of antibodies used in publically available
+    CITE-seq experiments, and methods for standardising names using this
+    reference.
 biocViews:
-    AnnotationData,
-    Homo_sapiens
-License: AGPL (>= 3)
+    SingleCell,
+    Transcriptomics,
+    ImmunoOncology,
+    Homo_sapiens,
+    Software
+License: GPL (>= 3)
 Encoding: UTF-8
 Imports:
     dplyr,
@@ -36,12 +42,12 @@ Suggests:
     SingleCellExperiment,
     stringi,
     SummarizedExperiment,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    tibble
 Config/testthat/edition: 3
-RoxygenNote: 7.2.2
+RoxygenNote: 7.2.3
 Depends: 
-    R (>= 4.1.0)
+    R (>= 4.2.0)
 VignetteBuilder: knitr
-LazyData: true
 URL: https://github.com/HelenLindsay/AbNames
 BugReports: https://github.com/HelenLindsay/AbNames/issues

@@ -24,6 +24,7 @@
 #'antibody names
 #'@param new_col (default: subunit) Name of new column containing guesses for
 #'single subunit names
+#'@author Helen Lindsay
 #'@importFrom dplyr case_when coalesce
 #'@export
 separateSubunits <- function(df, ab = "Antigen", new_col = "subunit"){
@@ -66,6 +67,7 @@ separateSubunits <- function(df, ab = "Antigen", new_col = "subunit"){
 #'@param t2 second temporary column name
 #'@importFrom rlang :=
 #'@importFrom dplyr all_of
+#'@keywords internal
 .separateSubunits <- function(df, ab, new_col, pattern, join_pattern, t1, t2){
     #  If there are any duplicated characters, it's probably not a subunit
     no_dup <- function(x){
@@ -110,6 +112,7 @@ separateSubunits <- function(df, ab = "Antigen", new_col = "subunit"){
 # per row
 #'@importFrom dplyr anti_join
 #'@importFrom rlang .data
+#'@keywords internal
 .checkSubunitMatches <- function(df, query_df){
     nms <- c("subunit", "TCR_long")
 
@@ -124,7 +127,7 @@ separateSubunits <- function(df, ab = "Antigen", new_col = "subunit"){
         dplyr::summarise(nmatched = dplyr::n()) %>%
         dplyr::full_join(nsubunits, by = c("ID", "name")) %>%
         dplyr::filter(! .data$nmatched == .data$nexpected) %>%
-        dplyr::select(-.data$nmatched, -.data$nexpected)
+        dplyr::select(-dplyr::any_of(c("nmatched", "nexpected")))
 
     result <- df %>%
         dplyr::anti_join(incomplete, by = c("ID", "name"))
