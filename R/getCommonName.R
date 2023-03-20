@@ -1,6 +1,6 @@
 # getCommonName ----
 
-# default matching columns are Antigen, Cat_Number, Clone, HGNC_SYMBOL)
+# default matching columns are Antigen, Cat_Number, Clone, HGNC_SYMBOL
 # cols = columns for grouping
 # ab = column for standardising
 # fill_col = column to add

@@ -11,6 +11,7 @@
 #'@param x data.frame, containing at minimum columns named "Antigen"
 #'@param cols list of columns to match in TotalSeq.  If not
 #'specified, defaults to catalogue number, antigen and clone.
+#'@author Helen Lindsay
 #'@export
 searchTotalseq <- function(x, cols = NULL){
     # Which columns should be used for matching?
