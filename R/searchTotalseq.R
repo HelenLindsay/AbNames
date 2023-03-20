@@ -5,8 +5,10 @@
 #' Search for exact matches between antigen names or catalogue numbers in
 #' data.frame x and totalseq cocktails data set.  Relies on column names in
 #' matching column names in totalseq.
+#'
 #' This function works by repeated left_joins and can add rows.  Only rows
-#' that do not already have identifiers are joined with the totalseq data.
+#' that do not already have identifiers are joined with the TotalSeq data.  This
+#' function does not check if existing identifiers match TotalSeq identifiers.
 #'
 #'@param x data.frame, containing at minimum columns named "Antigen"
 #'@param cols list of columns to match in TotalSeq.  If not
@@ -39,5 +41,10 @@ searchTotalseq <- function(x, cols = NULL){
         dplyr::select(dplyr::all_of(c("Antigen", unlist(cols), id_cols)))
 
     result <- left_join_any(x, ts, cols)
+
+    # If Antigen is missing but Cat_Number or Clone is matched, patch Antigen
+    ts <- ts %>%
+        filter_by_union(result)
+
     return(dplyr::bind_rows(y, result))
 }

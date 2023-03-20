@@ -24,9 +24,9 @@ test_that("searchTotalseq matches by multiple columns", {
 
 
 test_that("searchTotalseq doesn't overwrite existing identifier", {
-    dat <- data.frame(Cat_Num = c("306623", NA, "331609"),
-                      Antigen = c(NA, "CD27", "CD276"),
+    dat <- data.frame(Cat_Number = c("306623", NA, "331609"),
+                      Antigen = c(NA, "CD27", NA),
                       ENSEMBL_ID = c(NA, NA, "ENSG00000103855"))
 
-    # But maybe it should warn?
+    res <- searchTotalseq(dat)
 })
