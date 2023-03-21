@@ -59,7 +59,10 @@ filter_by_union <- function(df, df2 = NULL, rows = NULL, by = NULL){
                 toString(setdiff(by, colnames(df))))
     }
 
-    keep_rows <- rowSums(sapply(by, function(x) df[[x]] %in% qdf[[x]])) >= 1
+    keep_rows <- rowSums(sapply(by, function(x){
+        df[[x]] %in% qdf[[x]] & ! is.na(df[[x]])
+    })) >= 1
+
     return(df[keep_rows,, drop = FALSE])
 
     ## Extra brackets needed, see https://github.com/tidyverse/dplyr/issues/6194
@@ -67,7 +70,6 @@ filter_by_union <- function(df, df2 = NULL, rows = NULL, by = NULL){
     #    dplyr::filter((dplyr::if_any(.cols = by,
     #                                 .fns = ~.x %in%
     #                                     na.omit(qdf[[dplyr::cur_column()]]))))
-
 }
 
 

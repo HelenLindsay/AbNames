@@ -45,7 +45,6 @@ showGroups <- function(df, i = 1, n = 1, max_rows = 50, interactive = TRUE){
 
         if (! choice %in% c("n", "q")) readline(msg2)
         if (choice == "q") stop_interactive <- TRUE
-
     }
 }
 
@@ -75,38 +74,42 @@ showGroups <- function(df, i = 1, n = 1, max_rows = 50, interactive = TRUE){
 #'
 #'@param df data.frame to print
 #'@param n number of rows to print, default 20
-#'@keywords internal
 print_n <- function(df, n = 20){
     gp_info <- "Rows %s - %s (%s rows total)\n"
     msg <- "Enter\nn to print the next group, or\nq to quit"
 
-    brks <- seq_len(nrow(df))[seq_len(nrow(df)) %% n == 0]
+    m = nrow(df)
+    brks <- .break_into_n(m, n)
 
-    # If last break equals number of rows, remove
-    if (utils::tail(brks, 1) == nrow(df)){
-        brks <- utils::head(brks, -1)
-    }
-    starts <- c(1, brks + 1)
-    ends <- c(brks, nrow(df))
-
-    # If last start equals number of rows, remove
-    if (utils::tail(starts, 1) == nrow(df)){
-        starts <- utils::head(starts, -1)
-        ends <-  utils::head(ends, -1)
-    }
-
-    for (i in seq_along(starts)){
+    for (i in seq_along(brks$starts)){
         print(i)
-        cat(sprintf(gp_info, starts[i], ends[i], nrow(df)))
-        print(df[starts[i]:ends[i],])
+        cat(sprintf(gp_info, brks$starts[i], brks$ends[i],  m))
+        print(df[brks$starts[i]:brks$ends[i], , drop = FALSE])
         choice <- readline(msg)
         if (! choice %in% c("n", "q")) readline(msg)
-        if (choice == "q" ) break()
-        if (i == length(starts)){
+        if (choice == "q") break()
+        if (i == length(brks$starts)){
             message("no more groups to show")
         }
     }
 }
+
+
+# .break_into_n ----
+# Get start and end indices for splitting m (rows) into pieces of size n.
+.break_into_n <- function(m, n){
+    n <- min(n, m)
+    brks <- seq_len(m)[seq_len(m) %% n == 0]
+
+    # If last break equals number of rows, remove (it will be added below)
+    if (utils::tail(brks, 1) ==  m){ brks <- utils::head(brks, -1) }
+
+    starts <- c(1, brks + 1)
+    ends <- c(brks,  m)
+
+    return(list(starts = starts, ends = ends))
+}
+
 
 
 # getGroups ----
@@ -131,36 +134,5 @@ print_n <- function(df, n = 20){
     }
 
     row_idxs <- unlist(row_idxs[i:min((i + n - 1), length(row_idxs))])
-    return(df[row_idxs, ])
-}
-
-
-# abAliases ----
-#' Find an antibody in a data.frame and return all aliases
-#'
-#' Filter a data frame by an expression (as expression or character) and
-#' select all rows matching the value in the filtered column.
-#' More general version of getAliases, as the filter function can use any
-#' column e.g. abAliases(df, "value == 'CD3'").
-#'@param df  A data.frame or tibble to filter
-#'@param ex An filtering expression, as either a character or an expression
-#'@param by Name of the column to use for selecting matching entries
-#'(Default: "HGNC_ID")
-#'@author Helen Lindsay
-#'@keywords internal
-abAliases <- function(df, ex, by = "HGNC_ID"){
-    # Switch depending on whether ex is a string or an expression
-    enex <- rlang::enexpr(ex)
-
-    if (rlang::is_string(enex)){
-        ex <- rlang::parse_expr(ex) # Parse string into expression
-    } else {
-        ex <- enex
-    }
-
-    res <- filter_by_union(df, df %>%
-                          dplyr::filter(!! ex) %>%
-                          dplyr::select( {{ by }} ) )
-
-    return(res)
+    return(df[row_idxs, , drop = FALSE])
 }

@@ -28,3 +28,33 @@ getAliases <- function(ab, by = c("ALT_ID", "HGNC_ID")){
         dplyr::filter(!!by %in% ab_res)
     return(res)
 }
+
+
+# abAliases ----
+#' Find an antibody in a data.frame and return all aliases
+#'
+#' Filter a data frame by an expression (as expression or character) and
+#' select all rows matching the value in the filtered column.
+#' More general version of getAliases, as the filter function can use any
+#' column e.g. abAliases(df, "value == 'CD3'").
+#'@param df  A data.frame or tibble to filter
+#'@param ex An filtering expression, as either a character or an expression
+#'@param by Name of the column to use for selecting matching entries
+#'(Default: "HGNC_ID")
+#'@author Helen Lindsay
+abAliases <- function(df, ex, by = "HGNC_ID"){
+    # Switch depending on whether ex is a string or an expression
+    enex <- rlang::enexpr(ex)
+
+    if (rlang::is_string(enex)){
+        ex <- rlang::parse_expr(ex) # Parse string into expression
+    } else {
+        ex <- enex
+    }
+
+    res <- filter_by_union(df, df %>%
+                               dplyr::filter(!! ex) %>%
+                               dplyr::select( {{ by }} ) )
+
+    return(res)
+}
