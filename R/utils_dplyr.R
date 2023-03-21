@@ -54,22 +54,11 @@ filter_by_union <- function(df, df2 = NULL, rows = NULL, by = NULL){
         by <- names(by)
     }
 
-    if (! all(by %in% colnames(df))){
-        warning("Not all columns in 'by' appear in df:",
-                toString(setdiff(by, colnames(df))))
-    }
-
-    keep_rows <- rowSums(sapply(by, function(x){
+    keep_rows <- rowSums(vapply(by, function(x){
         df[[x]] %in% qdf[[x]] & ! is.na(df[[x]])
-    })) >= 1
+    }, logical(nrow(df)))) >= 1
 
     return(df[keep_rows,, drop = FALSE])
-
-    ## Extra brackets needed, see https://github.com/tidyverse/dplyr/issues/6194
-    #df %>%
-    #    dplyr::filter((dplyr::if_any(.cols = by,
-    #                                 .fns = ~.x %in%
-    #                                     na.omit(qdf[[dplyr::cur_column()]]))))
 }
 
 

@@ -41,7 +41,6 @@ test_that("filter_by_union correctly handles names in 'by' argument", {
 
     exp_res1 <- diamonds %>% dplyr::filter(color == "I" | cut == "Fair")
 
-
     res1 <- filter_by_union(diamonds, data.frame(Cut = "Fair", color = "I"),
                        by = c(cut = "Cut", "color"))
     expect_equal(res1, exp_res1)

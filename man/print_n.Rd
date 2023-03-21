@@ -14,4 +14,3 @@ print_n(df, n = 20)
 \description{
 Print a data.frame n rows at a time
 }
-\keyword{internal}

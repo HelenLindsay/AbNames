@@ -33,7 +33,7 @@ searchTotalseq <- function(x, cols = NULL){
     y <- x %>%
             dplyr::filter(if_any(dplyr::any_of(id_cols), ~ ! is.na(.x)))
 
-    if (! any(id_cols %in% colnames(x))) { y <- head(x, 0) }
+    if (! any(id_cols %in% colnames(x))) { y <- utils::head(x, 0) }
 
     x <- dplyr::anti_join(x, y, by = colnames(x)) %>%
         dplyr::select(-dplyr::any_of(id_cols))

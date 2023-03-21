@@ -2,20 +2,31 @@
 % Please edit documentation in R/searchTotalseq.R
 \name{searchTotalseq}
 \alias{searchTotalseq}
-\title{Annotate gene IDs using totalseq data set}
+\title{Annotate antibodies with gene IDs using totalseq data}
 \usage{
 searchTotalseq(x, cols = NULL)
 }
 \arguments{
 \item{x}{data.frame, containing at minimum columns named "Antigen"}
 
-\item{cols}{list of columns to match in TotalSeq.  If not
+\item{cols}{list of columns to match in totalseq data.  If not
 specified, defaults to catalogue number, antigen and clone.}
 }
 \description{
-Search for exact matches between antigen names or catalogue numbers in
-data.frame x and totalseq cocktails data set.  Relies on column names in
-matching column names in totalseq.
+Search for exact matches between antigen names, clones, or catalogue numbers
+in data.frame x and totalseq cocktails data set.  Relies on column names in
+matching column names in totalseq (Antigen, Cat_Number and/or Clone).  In our
+experience, the antibody clone almost always uniquely identifies an antibody,
+but there is at least one exception so we recommend caution and manual
+checking if matching by only Clone.
+}
+\details{
 This function works by repeated left_joins and can add rows.  Only rows
-that do not already have identifiers are joined with the totalseq data.
+that do not already have identifiers are joined with the totalseq data.  This
+function does not check if existing identifiers match totalseq identifiers.
+If antigens are matched by Cat_Number or Clone and Antigen is NA, Antigen
+will be filled.
+}
+\author{
+Helen Lindsay
 }
