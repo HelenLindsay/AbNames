@@ -535,6 +535,8 @@ the moment, we do not have a main file for regenerating the data sets - this is 
 * Check CD11a.CD18 Wu_2021, HGNC_SYMBOL not updated
 * CD112 Nectin 2 is unannotated
 * Is it actaully necessary to have an ID column?
+* working with other species - we haven't done this, but the functions are 
+included in the package
 
 NOTE: I haven't written a convenience function for merging back into the original table yet.
 TODO:

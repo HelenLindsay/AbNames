@@ -13,6 +13,8 @@
 #'@param by One of ALT_ID or HGNC_ID
 #'@return A table of aliases, or nothing if no aliases are found
 #'@author Helen Lindsay
+#'@example
+#'getAliases("CD45RA")
 #'@export
 getAliases <- function(ab, by = c("ALT_ID", "HGNC_ID")){
     utils::data("gene_aliases", envir = environment())
@@ -36,7 +38,7 @@ getAliases <- function(ab, by = c("ALT_ID", "HGNC_ID")){
 #' Filter a data frame by an expression (as expression or character) and
 #' select all rows matching the value in the filtered column.
 #' More general version of getAliases, as the filter function can use any
-#' column e.g. abAliases(df, "value == 'CD3'").
+#' column and any data.frame can be used e.g. abAliases(df, "value == 'CD3'").
 #'@param df  A data.frame or tibble to filter
 #'@param ex An filtering expression, as either a character or an expression
 #'@param by Name of the column to use for selecting matching entries
