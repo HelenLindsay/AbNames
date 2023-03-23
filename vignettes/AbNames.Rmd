@@ -34,7 +34,7 @@ Antibodies are often named according to the antigen they target, which may not
 be the same as the name of the protein (complex) the antigen is part of.
 Antibodies may target multi-subunit protein complexes, and this can be reflected
 in the name, e.g. an antibody against the T-cell receptor alpha and beta
-subunits might be named TCRab. Antibody names may also include the name of the
+subunits might be named TCRab. Reported antibody names may also include the name of the
 clone the antibody is derived from or the names of fluorophores or DNA-oligos
 the antibody is conjugated with.  For these reasons, it can be difficult to
 exactly match antibody names with gene or protein names.  As cell surface
@@ -158,7 +158,13 @@ citeseq <- AbNames::addID(citeseq)
 controls <- dplyr::filter(citeseq, Isotype_Control)
 citeseq <- dplyr::filter(citeseq, ! Isotype_Control)
 
-# Select just the columns that are needed for querying:
+# TO DO: THE CSV FILE SHOULDN'T HAVE THE SYMBOLS
+#id_cols <- c("HGNC_ID", "HGNC_SYMBOL", "ENSEMBL_ID", "UNIPROT_ID")
+
+
+# Select just the columns that are needed for querying - 
+# An ID column, which here is the antigen and study as there are multiple
+# studies:
 citeseq_q <- citeseq %>% dplyr::select(ID, Antigen)
 
 # Apply the default transformation sequence and make a query table in long format
@@ -177,7 +183,7 @@ strings.
 
 # Querying a dataset
 
-Our pipeline is to query the HGNC and then use the other datasets and
+Our pipeline is to query the HGNC and then use other datasets and
 the antibody vendor information to find matches for the unmatched antibodies.
 
 By default, we require that matches must be found for all subunits of a
@@ -200,7 +206,7 @@ alias_results %>%
     dplyr::sample_n(10)
 ```
 
-The results table above contains (just) the matches between the query table and the HGNC table.  In the example above, we see in the "name" column the formatting function(s) that generated the string(s) in the "value" column that were matched, and in the "symbol_type" column which column of the HGNC data was matched.  If there are multiple matches for a given ID, the official symbol ("HGNC_SYMBOL") is preferred over aliases or previous symbols.
+The results table above contains (just) the matches between the query table and the gene aliases table.  In the example above, we see in the "name" column the formatting function that generated the string(s) in the "value" column that were matched, and in the "symbol_type" column which column of the HGNC data was matched.  If there are multiple matches for a given ID, the official symbol ("HGNC_SYMBOL") is preferred over aliases or previous symbols.
 
 We may wish to review the matches before merging the results into the original table.
 For example, we can check for matches to different genes where the name was not guessed to be a multi-subunit protein.
@@ -218,7 +224,7 @@ multi_gene <- alias_results %>%
 
 # Look at the first group in multi_gene.
 # Set interactive = TRUE (the default) for interactive exploration
-showGroups(multi_gene, 1, interactive = FALSE)
+showGroups(multi_gene, interactive = FALSE)
 
 # This is an example where the antibody is against a heterodimeric protein.
 # We can confirm this by looking up the vendor catalogue number:
@@ -535,6 +541,8 @@ the moment, we do not have a main file for regenerating the data sets - this is 
 * Check CD11a.CD18 Wu_2021, HGNC_SYMBOL not updated
 * CD112 Nectin 2 is unannotated
 * Is it actaully necessary to have an ID column?
+* CD11a.CD18__Wu_2021 matches CD1111 and CD11D
+*showGroups should print ALT_ID as well as HGNC_ID
 * working with other species - we haven't done this, but the functions are 
 included in the package
 * CD158b should be removed from data??
