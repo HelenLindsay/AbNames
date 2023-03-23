@@ -25,3 +25,4 @@
 Separates a column at a provided pattern, separates the second second into
 individual letters and joins segments with a provided joining pattern
 }
+\keyword{internal}

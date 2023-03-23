@@ -15,6 +15,7 @@
 #'@param df2 Optional, a second data frame
 #'@param rows Row indices for subsetting, either df2 if present or df
 #'@param by = columns to select from df2
+#'@author Helen Lindsay
 #'@export
 filter_by_union <- function(df, df2 = NULL, rows = NULL, by = NULL){
     if (! is.null(df2) & ! is.null(rows)){
@@ -53,16 +54,11 @@ filter_by_union <- function(df, df2 = NULL, rows = NULL, by = NULL){
         by <- names(by)
     }
 
-    if (! all(by %in% colnames(df))){
-        warning("Not all columns in 'by' appear in df:",
-                toString(setdiff(by, colnames(df))))
-    }
+    keep_rows <- rowSums(vapply(by, function(x){
+        df[[x]] %in% qdf[[x]] & ! is.na(df[[x]])
+    }, logical(nrow(df)))) >= 1
 
-    # Extra brackets needed, see https://github.com/tidyverse/dplyr/issues/6194
-    df %>%
-        dplyr::filter((dplyr::if_any(.cols = by,
-                                     .fns = ~.x %in%
-                                         na.omit(qdf[[dplyr::cur_column()]]))))
+    return(df[keep_rows,, drop = FALSE])
 }
 
 
@@ -139,6 +135,7 @@ group_by_any <- function(df, groups, new_col = "group", ignore = NULL,
 # Do we expect columns to be NA if they do not match?  Not necessarily,
 # Antigen may differ
 # As is, only one column is given the chance to match
+#'@author Helen Lindsay
 #'@importFrom dplyr if_all
 #'@importFrom dplyr everything
 left_join_any <- function(x, y, cols, shared = c("patch", "update")){
@@ -176,7 +173,8 @@ left_join_any <- function(x, y, cols, shared = c("patch", "update")){
             unique()
 
         new_res <- x %>%
-            dplyr::inner_join(y_subs, by = col_set, na_matches = "never")
+            dplyr::inner_join(y_subs, by = col_set,
+                              na_matches = "never", multiple = "all")
 
        # If columns are shared, either update or patch values in x from y
         if (length(patch_cn) > 0){

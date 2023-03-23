@@ -22,3 +22,6 @@ command prompt to show the next group?}
 Print first group of a grouped data.frame, then prompt user to either print
 the next group or quit.   Group order is determined by dplyr::group_rows.
 }
+\author{
+Helen Lindsay
+}

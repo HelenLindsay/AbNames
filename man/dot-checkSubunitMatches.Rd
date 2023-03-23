@@ -22,3 +22,4 @@ subunit names.  Column names are hard-coded and expected to match the default
 pipeline.  Returns a table containing gene name matches with spurious matches
 removed.
 }
+\keyword{internal}

@@ -19,6 +19,7 @@
 #'@param verbose (logical, default: TRUE) If TRUE, prints a message when
 #'starting
 #'@importFrom tidyr pivot_longer
+#'@author Helen Lindsay
 #'@export
 makeQueryTable <- function(df, ab = "Antigen", id = "ID",
                            control_col = NA, fun = NA, verbose = TRUE){
@@ -76,6 +77,7 @@ qryToLong <- function(df, query_cols){
 #'
 #'@param ab (character(1), default "Antigen") Name of the column in df
 #' containing Antigen/Antibody names
+#'@author Helen Lindsay
 #'@export
 defaultQuery <- function(ab = "Antigen"){
 
@@ -126,7 +128,8 @@ defaultQuery <- function(ab = "Antigen"){
 #'@return df with an extra ID column
 #'
 #'@importFrom dplyr mutate group_by all_of
-#'@importFrom dplyr n syms row_number
+#'@importFrom dplyr n syms
+#'@author Helen Lindsay
 #'@export
 addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",
                   warn = TRUE, sep = "__", overwrite = TRUE){
@@ -156,15 +159,15 @@ addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",
                           do.call(paste, c(!!syms(id_cols), sep = sep))) %>%
         dplyr::group_by(!!sym(new_col)) %>%
         dplyr::mutate(n = n(),
-                      i = row_number(),
+                      i = dplyr::row_number(),
                       !!new_col := ifelse(n == 1, !!sym(new_col),
                                      paste(!!sym(new_col), .data$i, sep = sep)))
 
     if (isTRUE(warn) & max(df[, "n"]) > 1){
-        message("ID columns do not uniquely identify rows, row numbers added.")
+        warning("ID columns do not uniquely identify rows, row numbers added.")
     }
 
-    df <- df %>% dplyr::select(-.data$n, -.data$i)
+    df <- df %>% dplyr::select(-dplyr::any_of(c("n", "i")))
 
     return(df)
 }
@@ -210,6 +213,7 @@ addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",
 #'@param replacement (character(1)) Replacement value, default "" (i.e. remove)
 #'@param new_col (character(1), default NA Name of the column to add to df.
 #'If NA, column ab is modified
+#'@author Helen Lindsay
 gsubAb <- function(df, ab = "Antigen", pattern = "[Aa]nti-([Hh]uman)?([ _]?)",
                    replacement = "", new_col = NA){
     if (is.na(new_col)) new_col <- ab
@@ -231,6 +235,7 @@ gsubAb <- function(df, ab = "Antigen", pattern = "[Aa]nti-([Hh]uman)?([ _]?)",
 #' numbers, e.g. "CD3.1"
 #'
 #'@param ab (character(n)) A vector of strings to transform
+#'@author Helen Lindsay
 #'@export
 upperSquish <- function(ab){
     p1 <- "(^[A-z]+[0-9]?)[-\\. ]?([A-z]+)$" # e.g. CD3-A
@@ -249,6 +254,7 @@ upperSquish <- function(ab){
 #' Values are NA if the new value is identical to the original value.
 #'
 #'@param ab (character(n)) A vector of strings to transform
+#'@author Helen Lindsay
 #'@export
 lowerNoDash <- function(ab){
     result <- gsub("-", " ", tolower(ab))
@@ -264,6 +270,7 @@ lowerNoDash <- function(ab){
 #' Values are NA if the new value is identical to the original value.
 #'
 #'@param ab (character(n)) A vector of strings to transform
+#'@author Helen Lindsay
 #'@export
 dashNotDot <- function(ab){
     return(.gsubNA("\\.", "-", toupper(ab)))

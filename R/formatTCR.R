@@ -19,12 +19,11 @@ formatTCR <- function(df, tcr = "TCR", new_col = "TCR_long"){
     .stopIfColExists(df, new_col)
 
     # Operate on the column to avoid worrying about temporary column names
-    tcr_t <- formatTCRv(df[[tcr]], new_col) %>%
-        unique() %>%
-        dplyr::rename(!!tcr := .data$TCR)
+    tcr_t <- unique(formatTCRv(df[[tcr]], new_col))
+    colnames(tcr_t) <- c(tcr, new_col)
 
     # Merge result into original data.frame
-    return(suppressMessages(dplyr::full_join(df, tcr_t)))
+    return(dplyr::full_join(df, tcr_t, by = tcr, multiple = "all"))
 
 }
 
@@ -38,6 +37,7 @@ formatTCR <- function(df, tcr = "TCR", new_col = "TCR_long"){
 #'
 #'@param tcr A vector of T cell receptor antibody names
 #'@param new_col The name of the new column containing the TCR description
+#'@importFrom dplyr all_of any_of
 formatTCRv <- function(tcr, new_col = "TCR_long"){
 
     # Substitute Greek letters for Greek words for cases:
@@ -68,7 +68,7 @@ formatTCRv <- function(tcr, new_col = "TCR_long"){
                       !!new_col := gsub(" NA$", "",
                           paste("T cell receptor", .data$abgd,
                                 .data$vj, .data$nm))) %>%
-        dplyr::select(.data$TCR, !!sym(new_col))
+        dplyr::select(dplyr::all_of(c("TCR", new_col)))
 
     return(res)
 }

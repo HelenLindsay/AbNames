@@ -40,3 +40,6 @@ exists, this function will check if the ID uniquely identifies rows and will
 do nothing if this is the case.  If the ID column exists and does not uniquely
 identify rows, it will be regenerated and overwritten.
 }
+\author{
+Helen Lindsay
+}

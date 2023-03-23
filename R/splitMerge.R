@@ -25,7 +25,6 @@
 #'@export
 splitMerge <- function(df, ex, f, verbose = TRUE, ...){
 
-
     # Switch depending on whether ex is a string or an expression
     enex <- rlang::enexpr(ex)
 

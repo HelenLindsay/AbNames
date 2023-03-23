@@ -15,3 +15,4 @@
 Get the first group of a grouped data.frame matching a condition and format
 output for printing an error message.
 }
+\keyword{internal}

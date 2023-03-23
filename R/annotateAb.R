@@ -32,8 +32,7 @@ annotateAb <- function(x, id_cols = NA, control_col = NA){
     query_t <- x %>% dplyr::select(all_of(
         na.omit(c("ID", "Antigen", control_col))))
 
-    query_t <- AbNames::makeQueryTable(query_t,
-                                       ab = "Antigen",
+    query_t <- AbNames::makeQueryTable(query_t, ab = "Antigen",
                                        control_col = control_col)
     if (! is.na(control_col)){
         query_t <- query_t %>%
@@ -69,7 +68,7 @@ annotateAb <- function(x, id_cols = NA, control_col = NA){
         unique()
 
     x <- searchTotalseq(x) %>%
-        ungroup()
+        dplyr::ungroup()
 
    return(x)
 }

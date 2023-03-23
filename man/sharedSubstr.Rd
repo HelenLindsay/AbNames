@@ -4,10 +4,10 @@
 \alias{sharedSubstr}
 \title{Group based on shared substrings}
 \usage{
-sharedSubstr(qr_df, x = "value", id = "ID", new_col = "AB_group")
+sharedSubstr(df, x = "value", id = "ID", new_col = "AB_group")
 }
 \arguments{
-\item{qr_df}{A query data.frame, e.g. created by makeQueryTable}
+\item{df}{A query data.frame, e.g. created by makeQueryTable}
 
 \item{x}{Name of column to check for shared substrings
 (character(1), default: "value")}
@@ -15,11 +15,19 @@ sharedSubstr(qr_df, x = "value", id = "ID", new_col = "AB_group")
 \item{id}{Name of ID column uniquely identifying rows
 (character(1), default: "ID")}
 
-\item{new_col}{Name of column to be added to qr_df
+\item{new_col}{Name of column to be added to df
 (character(1), default: "AB_group")}
 }
 \description{
 Takes a vector of words and a corresponding vector of group ids
 and returns a numeric vector indicating groupings where members of a
 group share a word with at least one other member of the group.
+}
+\details{
+The intention is that if an antibody has alternative names and is sometimes
+called by both, e.g. CD274 (B7-H1), we would like to group all entries
+matching CD274 with all entries matching B7-H1.
+
+Although this function can be useful for matching antibody names, in our
+experience manual checking of the results is required.
 }

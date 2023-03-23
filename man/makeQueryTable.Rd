@@ -37,3 +37,6 @@ starting}
 Given a data.frame containing Antigen/Antibody names, reformat
 the names into possible gene names and return the data.frame in long format.
 }
+\author{
+Helen Lindsay
+}

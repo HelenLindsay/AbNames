@@ -55,8 +55,10 @@ have been useful for matching to antibody names.  Non-ambiguous gene aliases
 from Ensembl (fetched via Bioconductor package biomaRt) and NCBI 
 (fetched via the NCBI ftp site and the Bioconductor package org.Hs.eg.db), and
 non-ambiguous protein names from the Cell-Surface Protein Atlas
-(CSPA, Cell-Surface Protein Atlas) and Cellmarker protein database (http://xteam.xbio.top/CellMarker/) have been added.  Mappings between HGNC,
-Ensembl and NCBI (Entrez) IDs are mostly based on HGNC, with some corrections of obsolete Ensembl IDs using the Ensembl data.  
+(CSPA, Cell-Surface Protein Atlas) and Cellmarker protein database
+(http://xteam.xbio.top/CellMarker/) have been added.  Mappings between HGNC,
+Ensembl and NCBI (Entrez) IDs are mostly based on HGNC, with some corrections
+of obsolete Ensembl IDs using the Ensembl data.  
 
 The `gene_aliases` data set is in long format (one alias per row).
 
@@ -178,80 +180,6 @@ The example above shows that each antibody name has been reformatted in several
 ways.  When querying a data set, we search for an exact match to any of these
 strings.
 
-## Custom query table
-
-AbNames provides a few template functions that can be used to construct a
-pipeline for creating a query table. The default query table uses the function
-`defaultQuery` to create a list of partial functions which are then applied
-recursively to the data.frame using `magrittr::freduce`.  To use this strategy,
-all functions must accept the data.frame as the only required argument.  Other
-arguments should be filled in when creating the partial functions.
-
-The default function list can used as a starting point to add extra formatting
-functions, remove or modify certain steps.  The individual formatting functions
-are introduced below (SO FAR ONLY THE T-CELL RECEPTORS)
-
-```{r}
-# Get the default sequence of formatting functions 
-default_funs <- AbNames::defaultQuery()
-
-# Print the first two formatting functions as an example
-default_funs[1:2]
-```
-
-
-### T-cell receptors
-
-We found that querying the HGNC gene description was the easiest way to match
-the names of antibodies against the T-cell receptor to their gene IDs.  (An
-alternative method is to search for the gene symbol.)
-
-We will start with a data.frame of antibodies against the T-cell receptor from
-the CITE-seq data set. We have already done some formatting of these names, e.g. 
-for "TCR Va24-Ja18 (iNKT cell)" we have removed the section in brackets. We wish
-to create a query data.frame where each subunit of the TCR complex appears on a
-separate line. 
-
-Note: this function may cause false matches if the numbering of the gene name
-does not match that of the antibody. 
-
-```{r}
-tcr <- data.frame(Antigen =
-                      c("TCR alpha/beta", "TCRab", "TCR gamma/delta", "TCRgd",
-                        "TCR g/d", "TCR Vgamma9", "TCR Vg9", "TCR Vd2",
-                        "TCR Vdelta2", "TCR Vα24-Jα18", "TCRVa24.Ja18", 
-                        "TCR Valpha24-Jalpha18", "TCR Vα7.2", "TCR Va7.2",
-                        "TCRa7.2", "TCRVa7.2", "TCR Vbeta13.1", "TCR γ/δ", 
-                        "TCR Vβ13.1", "TCR Vγ9", "TCR Vδ2", "TCR α/β",
-                        "TCRb", "TCRg"))
-
-
-# First, we convert the Greek symbols to letters.  
-# Note that as we are using replaceGreekSyms in a dplyr pipeline, we don't 
-# put quotes around the column name, i.e. Antigen not "Antigen".
-
-tcr <- tcr %>%
-    dplyr::mutate(query = 
-                    AbNames::replaceGreekSyms(Antigen, replace = "sym2letter"))
- 
-# Print out a few rows to see the result
-tcr %>% 
-    dplyr::filter(Antigen %in% c("TCR Vβ13.1", "TCR Vδ2", "TCR α/β"))
-
-```
-
-Now we use the function `formatTCR` to format the antibody names for querying
-the gene description field of the HGNC data set.
-
-```{r}
-tcr_f <- AbNames::formatTCR(tcr, tcr = "query")
-
-# Print out the first few rows
-tcr_f %>%
-    head() 
-
-```
-
 
 # Querying a dataset
 
@@ -278,7 +206,7 @@ alias_results %>%
     dplyr::sample_n(10)
 ```
 
-The results table above contains (just) the matches between the query table and the gene aliases table.  In the example above, we see in the "name" column the formatting function that generated the string in the "value" column that was matched, and in the "symbol_type" column which column of the HGNC data was matched.  If there are multiple matches for a given ID, the official symbol ("HGNC_SYMBOL") is preferred over aliases or previous symbols.
+The results table above contains (just) the matches between the query table and the gene aliases table.  In the example above, we see in the "name" column the formatting function that generated the string(s) in the "value" column that were matched, and in the "symbol_type" column which column of the HGNC data was matched.  If there are multiple matches for a given ID, the official symbol ("HGNC_SYMBOL") is preferred over aliases or previous symbols.
 
 We may wish to review the matches before merging the results into the original table.
 For example, we can check for matches to different genes where the name was not guessed to be a multi-subunit protein.
@@ -292,7 +220,7 @@ alias_results <- alias_results %>%
 # because the antibody is against a multi-gene protein 
 multi_gene <- alias_results %>%
     dplyr::filter(n_ids > 1, ! all(name %in% c("TCR_long", "subunit"))) %>%
-    dplyr::select(ID, name, value, HGNC_ID)
+    dplyr::select(ID, name, value, HGNC_ID, ALT_ID)
 
 # Look at the first group in multi_gene.
 # Set interactive = TRUE (the default) for interactive exploration
@@ -306,26 +234,17 @@ citeseq %>%
 
 ```
 
-
-NOTE: I haven't written a convenience function for merging back into the original table yet.
-TODO:
-* Remove redundant results because of Antigen/greek_letter e.g. "KLRG1 (MAFA)-Qian_2020" 
-
-Examples to discuss?
-
-*"KIR2DL5" matches two genes HGNC:16345 HGNC:16346
-*"DR3 (TRAMP)__Liu_2021" - tramp alias is ambiguous
-
 For now I will remove all genes with multiple matches before merging the results into the citeseq data.
 
 ```{r}
 nrow(alias_results)
 
-id_cols <- c("HGNC_ID", "HGNC_SYMBOL", "ENSEMBL_ID", "UNIPROT_ID")
+id_cols <- c("HGNC_ID", "HGNC_SYMBOL", "ENSEMBL_ID", "UNIPROT_ID", "ALT_ID")
 
 # Remove matches to several genes, select just columns of interest
 
-alias_results %>%
+alias_results <- alias_results %>%
+    dplyr::group_by(ID) %>%
     dplyr::select(matches("ID|HGNC"), name) %>% # Select ID and HGNC columns
     unique() %>% # Collapse results with same ID from different queries
     
@@ -335,7 +254,11 @@ alias_results %>%
 
 nrow(alias_results)
 
+# We will remove the existing ID columns from the citeseq data set
+# before joining in the query results
+
 citeseq <- citeseq %>%
+    dplyr::select(-any_of(id_cols)) %>% # Saved citeseq data already includes IDs
     dplyr::left_join(alias_results, by = "ID") %>%
     dplyr::relocate(ID, Antigen, Cat_Number, HGNC_ID) %>%
     unique()
@@ -355,19 +278,18 @@ set.
 
 ```{r}
 
-table(is.na(citeseq$HGNC_ID))
+table(is.na(citeseq$ALT_ID))
 cs <- citeseq %>%
     searchTotalseq()
-table(is.na(cs$HGNC_ID))
+table(is.na(cs$ALT_ID))
 ```
 
-
 We can also try to annotate antibodies that could not be annotated using the
-HGNC by using the totalseq table.  This could also be done as a first matching step as above.  Here, we cannot add any more annotations. 
+HGNC by using the TotalSeq table.  This could also be done as a first matching step.  
 
 ```{r}
 count_missing <- function(df){
-    dplyr::filter(df, is.na(HGNC_ID)) %>% nrow()
+    dplyr::filter(df, is.na(ALT_ID)) %>% nrow()
 }
 
 data(totalseq)
@@ -462,6 +384,82 @@ nmatched_after_fill
 
 ```
 
+
+## Custom query table
+
+AbNames provides a few template functions that can be used to construct a
+pipeline for creating a query table. The default query table uses the function
+`defaultQuery` to create a list of partial functions which are then applied
+recursively to the data.frame using `magrittr::freduce`.  To use this strategy,
+all functions must accept the data.frame as the only required argument.  Other
+arguments should be filled in when creating the partial functions.
+
+The default function list can used as a starting point to add extra formatting
+functions, remove or modify certain steps.  The individual formatting functions
+are introduced below (SO FAR ONLY THE T-CELL RECEPTORS)
+
+```{r}
+# Get the default sequence of formatting functions 
+default_funs <- AbNames::defaultQuery()
+
+# Print the first two formatting functions as an example
+default_funs[1:2]
+```
+
+
+### T-cell receptors
+
+We found that querying the HGNC gene description was the easiest way to match
+the names of antibodies against the T-cell receptor to their gene IDs.  (An
+alternative method is to search for the gene symbol.)
+
+We will start with a data.frame of antibodies against the T-cell receptor from
+the CITE-seq data set. We have already done some formatting of these names, e.g. 
+for "TCR Va24-Ja18 (iNKT cell)" we have removed the section in brackets. We wish
+to create a query data.frame where each subunit of the TCR complex appears on a
+separate line. 
+
+Note: this function may cause false matches if the numbering of the gene name
+does not match that of the antibody. 
+
+```{r}
+tcr <- data.frame(Antigen =
+                      c("TCR alpha/beta", "TCRab", "TCR gamma/delta", "TCRgd",
+                        "TCR g/d", "TCR Vgamma9", "TCR Vg9", "TCR Vd2",
+                        "TCR Vdelta2", "TCR Vα24-Jα18", "TCRVa24.Ja18", 
+                        "TCR Valpha24-Jalpha18", "TCR Vα7.2", "TCR Va7.2",
+                        "TCRa7.2", "TCRVa7.2", "TCR Vbeta13.1", "TCR γ/δ", 
+                        "TCR Vβ13.1", "TCR Vγ9", "TCR Vδ2", "TCR α/β",
+                        "TCRb", "TCRg"))
+
+
+# First, we convert the Greek symbols to letters.  
+# Note that as we are using replaceGreekSyms in a dplyr pipeline, we don't 
+# put quotes around the column name, i.e. Antigen not "Antigen".
+
+tcr <- tcr %>%
+    dplyr::mutate(query = 
+                    AbNames::replaceGreekSyms(Antigen, replace = "sym2letter"))
+ 
+# Print out a few rows to see the result
+tcr %>% 
+    dplyr::filter(Antigen %in% c("TCR Vβ13.1", "TCR Vδ2", "TCR α/β"))
+
+```
+
+Now we use the function `formatTCR` to format the antibody names for querying
+the gene description field of the HGNC data set.
+
+```{r}
+tcr_f <- AbNames::formatTCR(tcr, tcr = "query")
+
+# Print out the first few rows
+tcr_f %>%
+    head() 
+
+```
+
+
 # Notes about the gene aliases data set
 
 The gene aliases data set is based on the annotation from the Human Genome
@@ -545,7 +543,18 @@ the moment, we do not have a main file for regenerating the data sets - this is 
 * Is it actaully necessary to have an ID column?
 * CD11a.CD18__Wu_2021 matches CD1111 and CD11D
 *showGroups should print ALT_ID as well as HGNC_ID
+* working with other species - we haven't done this, but the functions are 
+included in the package
 
+NOTE: I haven't written a convenience function for merging back into the original table yet.
+TODO:
+* QUERY FOR CD11/CD18 in protein ontology
+* Remove redundant results because of Antigen/greek_letter e.g. "KLRG1 (MAFA)-Qian_2020" 
+
+Examples to discuss?
+
+*"KIR2DL5" matches two genes HGNC:16345 HGNC:16346
+*"DR3 (TRAMP)__Liu_2021" - tramp alias is ambiguous
 
 # Session Info
 
