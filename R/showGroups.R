@@ -78,7 +78,7 @@ print_n <- function(df, n = 20){
     gp_info <- "Rows %s - %s (%s rows total)\n"
     msg <- "Enter\nn to print the next group, or\nq to quit"
 
-    m = nrow(df)
+    m <- nrow(df)
     brks <- .break_into_n(m, n)
 
     for (i in seq_along(brks$starts)){

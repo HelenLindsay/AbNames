@@ -89,7 +89,7 @@ defaultQuery <- function(ab = "Antigen"){
     nc <- "Antigen_split"
     split_merge_str <- sprintf('grepl("TCR", %s)', nc)
 
-    qry = list(purrr::partial(gsubAb, ab = !!ab), # Remove A/antis
+    qry <- list(purrr::partial(gsubAb, ab = !!ab), # Remove A/antis
                purrr::partial(gsubAb, ab = !!ab, pattern = "\\s[Rr]ecombinant"),
                purrr::partial(splitUnnest, ab = !!ab, new_col = !!nc),# Brackets
                # Commas, | or _
@@ -180,7 +180,7 @@ addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",
 #    #.stopIfColExists(df, new_col)
 #
 #    df <- mutate(df, {{ new_col }} := do.call(paste,
-#                                             c(across({{id_cols}}), sep = "-")))
+#                                         c(across({{id_cols}}), sep = "-")))
 #
 #    if (isTRUE(warn)){
 #        # Check that the ID column uniquely identifies rows

@@ -19,7 +19,7 @@ replaceGreekSyms <- function(x,
                         replace = c("sym2letter", "sym2word", "word2letter")){
     # Select replacement vector
     replace <- match.arg(replace)
-    replace_to_vec = list("sym2letter" = GREEKSYM_TO_LETTER(),
+    replace_to_vec <- list("sym2letter" = GREEKSYM_TO_LETTER(),
                        "sym2word" = GREEKSYM_TO_NAME(),
                        "word2letter" = GREEKNAME_TO_LETTER())
     replace_vec <- replace_to_vec[[replace]]
@@ -36,8 +36,8 @@ replaceGreekSyms <- function(x,
 # unchanged
 # Dups: are duplicate entries allowed?
 greekToLetter <- function(x, dups = TRUE){
-    y = replaceGreekSyms(x, "sym2letter")
-    y = replaceGreekSyms(y, "word2letter")
+    y <- replaceGreekSyms(x, "sym2letter")
+    y <- replaceGreekSyms(y, "word2letter")
     if (isTRUE(dups)){ return(y) }
     return(.noDups(y, x))
 }

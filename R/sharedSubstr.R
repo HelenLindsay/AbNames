@@ -100,17 +100,3 @@ sharedSubstr <- function(df, x = "value", id = "ID", new_col = "AB_group"){
 #    (i in seq_len(n_words)){
 #        m[i, ]
 #    }
-
-# Why no match for CD158f (KIR2DL5)__Su_2020 CD158f?
-    # because KIR2DL5 matches A and B
-# CD16?? = FCGR3A (but also FCGR3B??), cat number 302061
-    # correction comes from totalseq
-# Check for PD-1 / HGNC = PDCD1 - some filled by symbol?
-# CHECK CD3, some are CD3D, some CD3E - 300475 filled to CD3D??
-# - not filled for Stuart, no TotalSeq_Cat or vendor?
-
-# Careful with CD3.2 - Mimitou, not equal to CD32!
-# HLA-DR / HLA-DRA HGNC:4947 good example!
-
-
-
