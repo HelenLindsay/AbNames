@@ -44,7 +44,10 @@ searchTotalseq <- function(x, cols = NULL){
 
     # If Antigen is missing but Cat_Number or Clone is matched, patch Antigen
     ts <- ts %>%
-        filter_by_union(result)
+        filter_by_union(result %>% dplyr::select(-any_of("Antigen"))) %>%
+        dplyr::select(-any_of(c("Cat_Number", "Clone"))) %>%
+        unique()
+    result <- dplyr::rows_patch(result, ts, unmatched = "ignore")
 
     return(dplyr::bind_rows(y, result))
 }
