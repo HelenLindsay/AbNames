@@ -1,12 +1,23 @@
 # getCommonName ----
-
-# default matching columns are Antigen, Cat_Number, Clone, HGNC_SYMBOL
-# cols = columns for grouping
-# ab = column for standardising
-# fill_col = column to add
-# n_matched = name of column to add with number of matching results
-# ... pass keep = TRUE for keeping grouping columns for debugging
-# Be careful of exceptions, e.g. Cat_Number == "custom made"
+#'Find most common antibody name
+#'
+#'Find most common name by matching any/all of Antigen name, clone, gene
+#'identifiers
+#'
+#'Be careful of exceptions, e.g. Cat_Number == "custom made"
+#'
+#' @param x data.frame for finding common name
+#' @param cols Columns for grouping, default: NULL means that the columns
+#'Antigen, Cat_Number, Clone, HGNC_SYMBOL are used
+#' @param ab Column containing antibody names for standardising,
+#'default "Antigen"
+#' @param fill_col = column to add
+#' @param n_matched = name of column to add with number of matching results
+#' @param ignore
+#' @param ... pass keep = TRUE for keeping grouping columns for debugging
+#' @param verbose
+#' @author Helen Lindsay
+#' @keywords internal
 getCommonName <- function(x, cols = NULL, ab = "Antigen",
                           fill_col = "Antigen_std", n_matched = "n_matched",
                           ignore = list(Cat_Number = "[Cc]ustom"),

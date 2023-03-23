@@ -29,7 +29,10 @@ searchAliases <- function(query_df, multisubunit = c("TCR_long", "subunit")){
 
     official_nms <- c("HGNC_SYMBOL", "HGNC_NAME")
 
-    utils::data("gene_aliases", envir = environment())
+    # Load gene_aliases data set
+    data_env <- new.env(parent = emptyenv())
+    utils::data("gene_aliases", envir = data_env, package = "AbNames")
+    gene_aliases <- data_env[["gene_aliases"]]
 
     res <- dplyr::left_join(query_df, gene_aliases) %>%
         dplyr::filter(! is.na(.data$ALT_ID)) %>%
@@ -57,7 +60,7 @@ searchAliases <- function(query_df, multisubunit = c("TCR_long", "subunit")){
         dplyr::filter(.data$has_official & .data$symbol_type
                       %in% official_nms |
                           ! .data$has_official) %>%
-        dplyr::select(-has_official, -nsym_types, -has_manual) %>%
+        dplyr::select(-any_of(c("has_official", "nsym_types", "has_manual"))) %>%
 
         # If there are matches to both symbol and name, keep symbol only
         dplyr::filter(is.na(.data$symbol_type) |
@@ -71,8 +74,8 @@ searchAliases <- function(query_df, multisubunit = c("TCR_long", "subunit")){
                                  .x, paste(unique(.x), collapse = "|")))) %>%
         unique() %>%
 
-        dplyr::group_by(ID) %>%
-        dplyr::mutate(n_matches = length(unique(value))) %>%
+        dplyr::group_by(.data$ID) %>%
+        dplyr::mutate(n_matches = length(unique(.data$value))) %>%
         dplyr::ungroup()
 
     return(res)

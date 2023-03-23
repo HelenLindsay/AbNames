@@ -25,6 +25,9 @@ are not considered aliases.  For example CD45RA will not be an alias of
 CD45RO.  Matching by HGNC_ID means that aliases corresponding to isoforms or
 modifications of the same gene will all be returned.
 }
+\examples{
+getAliases("CD45RA")
+}
 \author{
 Helen Lindsay
 }

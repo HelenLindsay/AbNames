@@ -38,7 +38,10 @@ searchTotalseq <- function(x, cols = NULL){
     x <- dplyr::anti_join(x, y, by = colnames(x)) %>%
         dplyr::select(-dplyr::any_of(id_cols))
 
-    utils::data("totalseq", envir = environment())
+    # Load totalseq data set
+    data_env <- new.env(parent = emptyenv())
+    utils::data("totalseq", envir = data_env, package = "AbNames")
+    totalseq <- data_env[["totalseq"]]
 
     # Select the gene information from totalseq
     ts <- totalseq %>%

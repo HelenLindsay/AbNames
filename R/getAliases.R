@@ -13,14 +13,17 @@
 #'@param by One of ALT_ID or HGNC_ID
 #'@return A table of aliases, or nothing if no aliases are found
 #'@author Helen Lindsay
-#'@example
+#'@examples
 #'getAliases("CD45RA")
 #'@export
 getAliases <- function(ab, by = c("ALT_ID", "HGNC_ID")){
-    utils::data("gene_aliases", envir = environment())
+    data_env <- new.env(parent = emptyenv())
+    utils::data("gene_aliases", envir = data_env, package = "AbNames")
+    gene_aliases <- data_env[["gene_aliases"]]
+
     by <- rlang::sym(match.arg(by))
     ab_res <- gene_aliases %>%
-        dplyr::filter(value == ab)
+        dplyr::filter(.data$value == ab)
     if (nrow(ab_res) == 0){
         message(sprintf("%s not found in aliases table", ab))
         return()

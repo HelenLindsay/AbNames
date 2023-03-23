@@ -1,22 +1,37 @@
+# renameADT generic ----
+#'
+#'Replace ADT names in an object containing ADT expression
+#'
+#'@description
+#'Given an object containing antibody derived tag (ADT) expression measurements,
+#'such as a [SingleCellExperiment::SingleCellExperiment()] or
+#'[MultiAssayExperiment::MultiAssayExperiment()] and a vector of new names,
+#'replace the names of the ADTs and store the original names as metadata.
+#'
+#' Used for e.g. standardising protein names across studies.  See
+#' `getCommonName()` for generating standardised names by matching to the
+#' citeseq data set. Names have to be provided because we recommend manually
+#' checking standard names.
+#'@param obj An object containing ADT expression measurements
+#'@param names A character vector of new names, equal to the number of ADTs
+#'in obj
+#'@param ... Not currently used
+#'@returns An object of the same class as obj, with ADT measurements renamed
+#'@author Helen Lindsay
 #'@importFrom methods setGeneric
 #'@export
+#'@rdname renameADT-methods
 setGeneric("renameADT", signature = c("obj", "names"),
            function(obj, names, ...) {
     standardGeneric("renameADT")
 })
 
 
-# renameADT for signature vector ------
-setMethod("renameADT", signature(obj = "character", names = "character"),
-    function(obj, names){
-
-})
-
-
-
 # renameADT for signature SingleCellExperiment ------
+#'@param assay Name of the assay to be renamed (Default: "counts")
 #'@importFrom methods setMethod signature
 #'@export
+#'@rdname renameADT-methods
 setMethod("renameADT", as(structure(.Data = c("SingleCellExperiment",
                                               "character"),
                                     names = c("obj", "names"),
@@ -41,7 +56,8 @@ setMethod("renameADT", as(structure(.Data = c("SingleCellExperiment",
 
         if (is_alt){
             # Swap ADT assay to be the main assay
-            obj <- swapAltExp(obj, assay, saved = main_assay_name)
+            obj <- SingleCellExperiment::swapAltExp(obj, assay,
+                                                    saved = main_assay_name)
         }
 
         # Make sure new names vector has names
@@ -66,7 +82,8 @@ setMethod("renameADT", as(structure(.Data = c("SingleCellExperiment",
 
         if (is_alt){
             # Swap ADT back to being an altExp
-            obj <- swapAltExp(obj, main_assay_name, saved = assay)
+            obj <- SingleCellExperiment::swapAltExp(obj, main_assay_name,
+                                                    saved = assay)
         }
 
         return(obj)
@@ -76,12 +93,13 @@ setMethod("renameADT", as(structure(.Data = c("SingleCellExperiment",
 # renameADT for signature MultiAssayExperiment ------
 # https://stackoverflow.com/questions/57380044/
 # how-to-document-s4-methods-that-rely-on-classes-from-external-packages
+#'@rdname renameADT-methods
 setMethod("renameADT", as(structure(.Data = c("MultiAssayExperiment",
                                               "character"),
                                      names = c("obj", "names"),
                                      package = c("MultiAssayExperiment", "")),
                           "signature"),
-    function(obj, names, ...) {
+    function(obj, names, assay = "counts", ...) {
         stopifnot(requireNamespace("SummarizedExperiment"),
                   requireNamespace("MultiAssayExperiment"))
         nms <- rownames(SingleCellExperiment::experiments(obj)[[assay]])
@@ -177,7 +195,10 @@ matchToCiteseq <- function(x, cols = NULL, verbose = TRUE, ...){
 
     cn_x <- colnames(x)
 
-    utils::data("citeseq", envir = environment())
+    # Load citeseq data set
+    data_env <- new.env(parent = emptyenv())
+    utils::data("citeseq", envir = data_env, package = "AbNames")
+    citeseq <- data_env[["citeseq"]]
 
     # Set up names of columns for matching
     keep_cols <- intersect(cols, colnames(citeseq))
