@@ -23,8 +23,8 @@ fillByGroup <- function(df, group, fill, method = c("only_na", "all"),
                         multiple = c("stop", "mode", "ignore")){
     .stopIfColExists(df, sprintf("n%s", fill))
 
-    multiple = match.arg(multiple)
-    overwrite = match.arg(method) == "all"
+    multiple <- match.arg(multiple)
+    overwrite <- match.arg(method) == "all"
     original_nrows <- nrow(df)
 
     df <- AbNames::splitMerge(df, complete.cases(!!!syms(group)),
@@ -130,8 +130,8 @@ groupMode <- function(df, cl, gp, new_cl = NA, min_n = NA,
         x <- .tempColName(df, 1, "x")
         df <- df %>%
             dplyr::mutate(!!x :=
-                          sum(.data[[n]] == max(.data[[n]])) == max(.data[[n]]),
-                      !!tmp := ifelse(.data[[x]] == TRUE, .data[[tmp]], NA)) %>%
+                    sum(.data[[n]] == max(.data[[n]])) == max(.data[[n]]),
+                    !!tmp := ifelse(.data[[x]] == TRUE, .data[[tmp]], NA)) %>%
         dplyr::select(-dplyr::any_of(x))
     }
 
@@ -139,7 +139,7 @@ groupMode <- function(df, cl, gp, new_cl = NA, min_n = NA,
         # Fill with the majority value if current value is NA
         df <- df %>%
             dplyr::mutate(!!new_cl :=
-                          dplyr::coalesce(.data[[cl]], .data[[tmp]]))
+                              dplyr::coalesce(.data[[cl]], .data[[tmp]]))
     } else {
         # Set new_cl to the actual mode
         df <- df %>%

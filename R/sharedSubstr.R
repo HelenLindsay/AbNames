@@ -1,3 +1,37 @@
+# sharedSubstr ----
+#
+#' Group based on shared substrings
+#'
+#' Takes a vector of words and a corresponding vector of group ids
+#' and returns a numeric vector indicating groupings where members of a
+#' group share a word with at least one other member of the group.
+#'
+#' The intention is that if an antibody has alternative names and is sometimes
+#' called by both, e.g. CD274 (B7-H1), we would like to group all entries
+#' matching CD274 with all entries matching B7-H1.
+#'
+#' Although this function can be useful for matching antibody names, in our
+#' experience manual checking of the results is required.
+#'
+#'@param df A query data.frame, e.g. created by makeQueryTable
+#'@param x Name of column to check for shared substrings
+#'(character(1), default: "value")
+#'@param id Name of ID column uniquely identifying rows
+#'(character(1), default: "ID")
+#'@param new_col Name of column to be added to df
+#'(character(1), default: "AB_group")
+#'@importFrom dplyr arrange
+#'@export
+sharedSubstr <- function(df, x = "value", id = "ID", new_col = "AB_group"){
+    if (! all(c(x, id) %in% colnames(df))) {
+        stop("x and id must be columns in df")
+    }
+    df <- dplyr::arrange(df, !!sym(id)) %>%
+        dplyr::mutate(!!new_col := .sharedSubstr(df[[x]], df[[id]]))
+    return(df)
+}
+
+
 # .sharedSubstr ----
 #
 #' Group based on shared substrings
@@ -40,37 +74,6 @@
 }
 
 
-# sharedSubstr ----
-#
-#' Group based on shared substrings
-#'
-#' Takes a vector of words and a corresponding vector of group ids
-#' and returns a numeric vector indicating groupings where members of a
-#' group share a word with at least one other member of the group.
-#'
-#'@param qr_df A query data.frame, e.g. created by makeQueryTable
-#'@param x Name of column to check for shared substrings
-#'(character(1), default: "value")
-#'@param id Name of ID column uniquely identifying rows
-#'(character(1), default: "ID")
-#'@param new_col Name of column to be added to qr_df
-#'(character(1), default: "AB_group")
-#'@importFrom dplyr arrange all_of
-#'@export
-sharedSubstr <- function(qr_df, x = "value", id = "ID", new_col = "AB_group"){
-    qr_df <- dplyr::arrange(qr_df, !!sym(id))
-
-    qr_df <- qr_df %>%
-        dplyr::mutate(!!new_col := .sharedSubstr(qr_df[[x]], qr_df[[id]]))
-
-    qr_df <-  dplyr::select(qr_df, all_of(c(id, new_col))) %>%
-        unique()
-
-    return(qr_df)
-}
-
-
-
 # #'@importFrom dplyr cur_group_id
 #sharedSubstrDf <- function(df, id = "ID", x = "value"){
 #    occ_df <- dplyr::group_by(df, !!sym(x)) %>%
@@ -97,17 +100,3 @@ sharedSubstr <- function(qr_df, x = "value", id = "ID", new_col = "AB_group"){
 #    (i in seq_len(n_words)){
 #        m[i, ]
 #    }
-
-# Why no match for CD158f (KIR2DL5)__Su_2020 CD158f?
-    # because KIR2DL5 matches A and B
-# CD16?? = FCGR3A (but also FCGR3B??), cat number 302061
-    # correction comes from totalseq
-# Check for PD-1 / HGNC = PDCD1 - some filled by symbol?
-# CHECK CD3, some are CD3D, some CD3E - 300475 filled to CD3D??
-# - not filled for Stuart, no TotalSeq_Cat or vendor?
-
-# Careful with CD3.2 - Mimitou, not equal to CD32!
-# HLA-DR / HLA-DRA HGNC:4947 good example!
-
-
-

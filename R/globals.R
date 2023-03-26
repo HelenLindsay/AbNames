@@ -44,7 +44,4 @@ ISOTYPE_CONTROLS <- function(){
                       Clone = c("MOPC-173", "RTK2758", "G0114F7",
                                 "HTK888", "MOPC-21", "MPC-11",
                                 "RTK2071", "RTK4174", "RTK4530")))
-
 }
-
-

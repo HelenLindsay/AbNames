@@ -54,20 +54,11 @@ filter_by_union <- function(df, df2 = NULL, rows = NULL, by = NULL){
         by <- names(by)
     }
 
-    if (! all(by %in% colnames(df))){
-        warning("Not all columns in 'by' appear in df:",
-                toString(setdiff(by, colnames(df))))
-    }
+    keep_rows <- rowSums(vapply(by, function(x){
+        df[[x]] %in% qdf[[x]] & ! is.na(df[[x]])
+    }, logical(nrow(df)))) >= 1
 
-    keep_rows <- rowSums(sapply(by, function(x) df[[x]] %in% qdf[[x]])) >= 1
     return(df[keep_rows,, drop = FALSE])
-
-    ## Extra brackets needed, see https://github.com/tidyverse/dplyr/issues/6194
-    #df %>%
-    #    dplyr::filter((dplyr::if_any(.cols = by,
-    #                                 .fns = ~.x %in%
-    #                                     na.omit(qdf[[dplyr::cur_column()]]))))
-
 }
 
 
@@ -80,7 +71,8 @@ filter_by_union <- function(df, df2 = NULL, rows = NULL, by = NULL){
 #
 # df - data.frame
 # groups - character vector of grouping columns
-# ignore e.g. Cat_Number == "custom_made".  Regex?
+# ignore e.g. Cat_Number == "custom_made".  Names should be column names
+# in df, if they are not they are ignored. Regex?
 #'@importFrom stats na.omit
 group_by_any <- function(df, groups, new_col = "group", ignore = NULL,
                          verbose = FALSE){
@@ -103,13 +95,8 @@ group_by_any <- function(df, groups, new_col = "group", ignore = NULL,
     idx <- do.call(dplyr::bind_cols, structure(idx, names = groups))
     idx[is.na(df[, groups])] <- NA
 
-    if (! is.null(ignore)){
-        for (nm in names(ignore)){
-            vals <- ignore[[nm]]
-            vals <- do.call(paste, list(vals, collapse = "|"))
-            idx[grepl(vals, df[[nm]]), nm] <- NA
-        }
-    }
+    # Remove groupings that should be ignored
+    idx <- .ignore_groups(df, ignore, idx)
 
     new_idxs <- idx[[ groups[1] ]]
     curr_idxs <- idx[[ groups[1] ]]
@@ -130,6 +117,20 @@ group_by_any <- function(df, groups, new_col = "group", ignore = NULL,
     df %>% dplyr::group_by(!!sym(new_col))
 }
 
+
+# .ignore_groups ----
+# Remove indices that should be ignored.  If names in "ignore" don't match
+# columns of df, they are ignored
+.ignore_groups <- function(df, ignore, idx){
+    if (is.null(idx)) return(idx)
+
+    for (nm in intersect(names(ignore), colnames(df))){
+        vals <- ignore[[nm]]
+        vals <- do.call(paste, list(vals, collapse = "|"))
+        idx[grepl(vals, df[[nm]]), nm] <- NA
+    }
+    return(idx)
+}
 
 # left_join_any ----
 # Join by matches in any set of columns

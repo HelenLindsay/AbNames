@@ -25,7 +25,6 @@
 #'@export
 splitMerge <- function(df, ex, f, verbose = TRUE, ...){
 
-
     # Switch depending on whether ex is a string or an expression
     enex <- rlang::enexpr(ex)
 
@@ -36,7 +35,7 @@ splitMerge <- function(df, ex, f, verbose = TRUE, ...){
     }
 
     tmp <- .tempColName(df)
-    original_nrow = nrow(df)
+    original_nrow <- nrow(df)
     df <- dplyr::mutate(df, !!tmp := !! ex)
 
      # Remove negative cases
