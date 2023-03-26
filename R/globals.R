@@ -30,7 +30,7 @@ CLONE_DUPS <- function(){
     df <- data.frame(Clone = c("3D12", "3D12", "3D12", "3D12", "3D12"),
                      Antibody = c("HLA-E", "HLA-E", "HLA-E", "HLA-E",
                                   "CCR7 (CD197)"),
-                     Vendor = vendors[1, 1, 1, 1, 2],
+                     Vendor = vendors[c(1, 1, 1, 1, 2)],
                      TotalSeq_Cat = c("A", "B", "C", "D", NA),
                      Cat_Number = c("342617", "342621", "342619", "342623",
                                     "940014"))
