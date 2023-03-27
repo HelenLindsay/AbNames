@@ -34,7 +34,6 @@ test_that("filter_by_union selects the correct rows", {
     expect_equal(res5, res6)
 })
 
-
 test_that("filter_by_union correctly handles names in 'by' argument", {
     diamonds <- ggplot2::diamonds[1:20,] %>%
         dplyr::mutate(across(c("cut", "color", "clarity"), as.character))
@@ -56,15 +55,21 @@ test_that("filter_by_union correctly handles names in 'by' argument", {
                                  by = c(cut = "Cut", "fish")))
 })
 
-
 # Tests for group_by_any ----
 
-test_that("group_by_any works", {
+test_that("group_by_any groups correctly", {
     df <- data.frame(A = c("a", "b", "c", "c", "d", "e"),
                      B = c("f", "g", "g", "h", "i", "j"),
                      C = c("k", "k", "l", "m", "n", "o"))
-    group_by_any(df, c("A","B","C"))
+    # Group rows 1:2 by k, rows 2:3 by g and rows 3:4 by c
+    expect_equal(group_by_any(df, c("A","B","C"))$group,
+                 c(rep(1,4), 4:5))
+
+    # Group rows 1:2 by k and rows 3:4 by c
+    expect_equal(group_by_any(df, c("A", "C"))$group,
+                 c(rep(c(1,3), each = 2), 4:5))
 })
+
 
 # Tests for left_join_any ----
 
@@ -99,3 +104,5 @@ test_that("left_join_any updates correctly", {
     # Test with updating
 
 })
+
+

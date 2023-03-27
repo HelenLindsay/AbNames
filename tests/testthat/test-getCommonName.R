@@ -5,13 +5,11 @@ test_that("getCommonName input checks work", {
     expect_error(getCommonName(data.frame(Antigen = 1), cols = "banana"))
 })
 
-
 test_that("getCommonName verbose works", {
     expect_message(getCommonName(data.frame(Antigen = "CD4",
                                             Clone = "CLONE_NM")),
                    "Grouping data using columns")
 })
-
 
 test_that("getCommonName and group_by_any correctly handle ignore arg", {
     # These match by clone but should be grouped into three groups because
@@ -27,4 +25,15 @@ test_that("getCommonName and group_by_any correctly handle ignore arg", {
 
     res <- getCommonName(df)
     expect_equal(length(unique(res$group)), 3)
+
+    # custom antibodies including one pair that matches by Antigen
+    # and one pair that matches by Clone
+    custom_abs <- data.frame(Antigen = c("CD27", "CD28", "CD38", "CD56",
+                                         "CD57", "ICOS", "CD27", "CD38(EXTRA)"),
+                             Cat_Number = rep("custom made", 8),
+                             Clone = c("REA499", "CD28.2", "REA572", "REA196",
+                                       "QA17A04", "C398.4A", "NONSENSE",
+                                       "REA572"))
+    res <- getCommonName(custom_abs)
+    expect_equal(length(unique(res$group)), 6)
 })

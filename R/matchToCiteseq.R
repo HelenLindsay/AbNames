@@ -59,10 +59,6 @@ matchToCiteseq <- function(x, cols = NULL, verbose = TRUE, ...){
     x <- getCommonName(x, cols = keep_cols, ab = "Antigen",
                        fill_col = "Antigen_std", keep = TRUE, ...)
 
-    # TO DO: CHECK THAT ANY MULTI MATCHES WERE IN ORIGINAL TABLE
-    res <- .checkCiteseq(x, gp = "Cat_Number", id = "HGNC_ID")
-    res <- .checkCiteseq(x, gp = "Clone", id = "HGNC_ID")
-
     # Remove ID column, select original columns
     x <- x %>% dplyr::filter(!!sym(id) == "KEEPME") %>%
         dplyr::select(all_of(c("Antigen_std", cn_x, "n_matched")))
@@ -87,14 +83,3 @@ matchToCiteseq <- function(x, cols = NULL, verbose = TRUE, ...){
 }
 
 
-# .checkCiteseq ----
-.checkCiteseq <- function(x, gp = "Cat_Number", id = "HGNC_ID"){
-    multi_ids <- x %>%
-        dplyr::group_by(!!sym(gp)) %>%
-        dplyr::filter(dplyr::n_distinct(!!sym(id), na.rm = TRUE) > 1)
-    if (nrow(multi_ids) > 0){
-        warn_msg <- "At least one %s was mapped to multiple %s"
-        warning(sprintf(warn_msg, gp, id))
-    }
-    invisible(multi_ids)
-}

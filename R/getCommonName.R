@@ -30,8 +30,7 @@ getCommonName <- function(x, cols = NULL, ab = "Antigen",
     .check_getCommonName(colnames(x), ab, fill_col, n_matched, cols)
 
     if (isTRUE(ignore)){
-        ignore <- list(Cat_Number = "[Cc]ustom",
-                       Clone = CLONE_DUPS()$Clone)
+        ignore <- list(Cat_Number = "[Cc]ustom", Clone = CLONE_DUPS()$Clone)
     }
 
     if (is.null(cols)) {
@@ -43,13 +42,13 @@ getCommonName <- function(x, cols = NULL, ab = "Antigen",
     # (brackets are usually alternative names)
     x <- dplyr::mutate(x, !! fill_col := gsub(" ?\\(.*", "", !!sym(ab)))
 
-    # Group by any e.g. catalogue number or exact match to antigen
-    tmp_grp <- .tempColName(x, nm = "group")
+    tmp_grp <- .tempColName(x, nm = "group") # Don't overwrite existing "group"
 
     if (isTRUE(verbose)){
         message(sprintf("Grouping data using columns:\n%s", toString(cols)))
     }
 
+    # Group by any e.g. catalogue number or exact match to antigen
     x <- group_by_any(x, groups = cols, new_col = tmp_grp, ignore = ignore) %>%
         dplyr::mutate(!!n_matched := dplyr::n())
 
@@ -76,26 +75,4 @@ getCommonName <- function(x, cols = NULL, ab = "Antigen",
         stop("Parameter 'cols' must be a vector of column names in x,",
              "which will be used for matching Antigen names")
     }
-}
-
-
-# fillByAny ----
-fillByAny <- function(x, cols, fill, ignore = NULL, multiple = "mode",
-                      method = "all", ...){
-    dots <- list(...)
-
-    tmp_grp <- .tempColName(x, nm = "group")
-    x <- group_by_any(x, groups = cols, new_col = tmp_grp, ignore = ignore)
-
-    # Fill with most common value
-    x <- fillByGroup(x, group = tmp_grp, method = method,
-                     multiple = multiple, fill = fill)
-
-    if (isTRUE(dots$keep)){
-        return(x)
-    }
-
-    # Remove temporary column
-    return(dplyr::select(x, -tmp_grp))
-
 }
