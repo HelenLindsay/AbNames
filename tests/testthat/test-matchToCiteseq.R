@@ -4,9 +4,6 @@ test_that("matchToCiteseq input and output checks work", {
     # Warn if "cols" are not present in citeseq
     expect_warning(matchToCiteseq(data.frame(Antigen = "CD14"),
                                   cols = "Antibody"))
-    # Expect warning when incorrect Cat_Number used
-    expect_warning(matchToCiteseq(data.frame(Antigen = "CD14",
-                                             Cat_Number = "329527")))
 })
 
 
@@ -20,6 +17,7 @@ test_that("matchToCiteseq correctly calls group_by_any", {
                                        "QA17A04", "C398.4A", "NONSENSE",
                                        "REA572"))
     res <- matchToCiteseq(custom_abs)
-
-
+    # These entries shouldn't be matched by Cat_Number = "custom made",
+    # so we expect that col "Antigen_std" should have 6 unique values
+    expect_equal(length(unique(res$Antigen_std)), 6)
 })

@@ -37,7 +37,7 @@ setMethod("renameADT", as(structure(.Data = c("SingleCellExperiment",
                                     names = c("obj", "names"),
                                     package = c("SingleCellExperiment", "")),
                           "signature"),
-    function(obj, names, assay = "counts", ...) {
+    function(obj, names, assay = "ADT", ...) {
         # to do - add old names to row data
 
         # names = named vector of new names, names are current names

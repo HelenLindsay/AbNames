@@ -98,11 +98,14 @@ test_that("left_join_any updates correctly", {
     res <- left_join_any(df_x, df_y, cols = c("A","B")) %>% arrange(ID)
     expect_equal(res, exp)
 
+    # Test with updating instead of patching
+    res <- left_join_any(df_x, df_y, cols = c("A","B"), shared = "update") %>%
+        arrange(ID)
+
     # To do:
     # Test without patching (no non-joining columns in common)
     # Test with patching
-    # Test with updating
-
+    # Test with grouped columns
 })
 
 

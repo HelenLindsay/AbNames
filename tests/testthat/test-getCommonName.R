@@ -37,3 +37,20 @@ test_that("getCommonName and group_by_any correctly handle ignore arg", {
     res <- getCommonName(custom_abs)
     expect_equal(length(unique(res$group)), 6)
 })
+
+
+test_that("getCommonName does not group by NA", {
+    df <- data.frame(Antigen = c(rep(c("B220 (CD45R)", "B7-H4"), each = 2),
+                                 "C-kit (CD117)", "C-KIT"),
+                     Cat_Number = rep(NA_character_, 6),
+                     HGNC_ID = rep(c("HGNC:9666", "HGNC:28873", "HGNC:6342"),
+                                   each = 2))
+
+    # Without using HGNC_ID, there should be 4 groups
+    res <- getCommonName(df, cols = c("Antigen", "Cat_Number"))
+    expect_equal(length(unique(res$group)), 4)
+
+    # If HGNC_ID is also used, there should now be 3 groups
+    res <- getCommonName(df, cols = colnames(df))
+    expect_equal(length(unique(res$group)), 3)
+})

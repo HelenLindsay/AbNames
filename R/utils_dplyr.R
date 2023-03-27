@@ -174,7 +174,7 @@ left_join_any <- function(x, y, cols, shared = c("patch", "update")){
 
     res <- vector("list", length = length(cols))
 
-    # Inner join separately with each col sets
+    # Inner join separately with each col set
     for (i in seq_along(cols)){
         col_set <- cols[[i]]
 
@@ -184,7 +184,8 @@ left_join_any <- function(x, y, cols, shared = c("patch", "update")){
 
         new_res <- x %>%
             dplyr::inner_join(y_subs, by = col_set,
-                              na_matches = "never", multiple = "all")
+                              na_matches = "never", multiple = "all",
+                              relationship = "many-to-many")
 
        # If columns are shared, either update or patch values in x from y
         if (length(patch_cn) > 0){

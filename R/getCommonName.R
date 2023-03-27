@@ -8,7 +8,8 @@
 #'
 #' @param x data.frame for finding common name
 #' @param cols Columns for grouping, default: NULL means that the columns
-#'Antigen, Cat_Number, Clone, HGNC_SYMBOL are used
+#' Antigen, Cat_Number, Clone, ALT_ID are used.  Note that gene identifiers
+#' are not used by default as some antibodies target particular isoforms.
 #' @param ab Column containing antibody names for standardising,
 #'default "Antigen"
 #' @param fill_col column to add

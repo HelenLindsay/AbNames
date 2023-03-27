@@ -35,3 +35,24 @@ test_that(".stopIfColExists is vectorised", {
                  regexp = "Column(s) A, B already|Please.*")
     expect_equal(.stopIfColExists(df, c("E")), NULL)
 })
+
+
+# Tests for .toString -----
+test_that(".toString doesn't covert NA", {
+    input_str <- c(LETTERS[1:3], NA, LETTERS[4:6])
+    x <- toString(input_str)
+    y <- .toString(input_str)
+    expect_equal(y, gsub(", NA", "", x))
+})
+
+test_that(".toString checks for uniqueness", {
+    input_str <- c(LETTERS[3:1], LETTERS[1:3])
+    expect_equal(.toString(input_str), toString(LETTERS[3:1]))
+})
+
+
+# Tests for .dups ----
+test_that(".dups works as expected", {
+    input_str <- c("A", "B", "C", "C", "D", "B")
+    expect_equal(.dups(input_str), c(FALSE, rep(TRUE, 3), FALSE, TRUE))
+})

@@ -568,15 +568,13 @@ CHECK CD3, some are CD3D, some CD3E - 300475 filled to CD3D??
  - not filled for Stuart, no TotalSeq_Cat or vendor?
 Careful with CD3.2 - Mimitou, not equal to CD32!
 HLA-DR / HLA-DRA HGNC:4947 good example!
-To do: use CLONE_DUPS
 
 HLA_ABC__PomboAntunes_2021 maps to wrong symbol
 
 * Check regenerated citeseq data (group by HGNC_ID, check for multiple Cat Num)
 * check Cat_Number for CD257 (BAFF, BLYS) / 317213
 * Check are NeuN__Chung_2021 and Fos__Chung_2021 being grouped - wrong cat number!
-* check that "custom made" is not a group
-* check that NA is not grouped
+* detail showGroups / .getGroups?
 
 # Session Info
 
