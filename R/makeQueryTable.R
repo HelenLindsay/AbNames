@@ -21,6 +21,18 @@
 #'@importFrom tidyr pivot_longer
 #'@author Helen Lindsay
 #'@export
+#'@returns
+#'A tibble with columns containing the original ID, "name", the name of the
+#'formatting method that was applied, and "value", the result of applying the
+#'formatting method to the original antigen. The value "Antigen" in the name
+#'column contains the original antigen value, with some minor formatting such
+#'as converting Greek symbols to Latin characters.
+#'@examples
+#'df <- data.frame(Antigen = c("KLRG1 (MAFA)", "KLRG1", "CD3 (CD3E)",
+#'                             "HLA.A.B.C", "HLA-A/B/C", "NKAT2",
+#'                             "CD66a.c.e", "CD66a_c_e", "CD11a/CD18 (LFA-1)"),
+#'                 ID = LETTERS[1:9])
+#'makeQueryTable(df)
 makeQueryTable <- function(df, ab = "Antigen", id = "ID",
                            control_col = NA, fun = NA, verbose = TRUE){
 
@@ -79,6 +91,10 @@ qryToLong <- function(df, query_cols){
 #' containing Antigen/Antibody names
 #'@author Helen Lindsay
 #'@export
+#'@returns A list of partial formatting functions, where the name the antibody
+#'column and all arguments except the data.frame are pre-filled.
+#'@examples
+#'function_list <- defaultQuery()
 defaultQuery <- function(ab = "Antigen"){
 
     # Default transformation sequence for making query table ----
@@ -131,6 +147,14 @@ defaultQuery <- function(ab = "Antigen"){
 #'@importFrom dplyr n syms
 #'@author Helen Lindsay
 #'@export
+#'@returns df with an additional ID column, by default named "ID", which
+#'uniquely identifies each row.  The ID column is created by pasting together
+#'the columns named in id_cols, and adding numbers if this is insufficient
+#'to uniquely identify rows.
+#'@examples
+#'df <- data.frame(Study = c("A", "B", "B"),
+#'                 Antigen = c("CD4","CD8","CD8"))
+#'addID(df)
 addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",
                   warn = TRUE, sep = "__", overwrite = TRUE){
 
@@ -173,31 +197,6 @@ addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",
 }
 
 
-# dplyr version ----
-#addID2 <- function(df, id_cols = c(Antigen, Study), new_col = ID,
-#                  warn = TRUE){
-#
-#    #.stopIfColExists(df, new_col)
-#
-#    df <- mutate(df, {{ new_col }} := do.call(paste,
-#                                         c(across({{id_cols}}), sep = "-")))
-#
-#    if (isTRUE(warn)){
-#        # Check that the ID column uniquely identifies rows
-#        max_group_n <- group_by(df, {{ new_col }}) %>%
-#            mutate(n = n()) %>%
-#            pull(n) %>%
-#            max()
-#
-#        if (max_group_n > 1){
-#            warning("There are duplicate values in ID column")
-#        }
-#    }
-#
-#    return(df)
-#}
-
-
 # gsubAb ----
 #'
 #'Convenience function to remove a pattern from a column in a data.frame
@@ -236,6 +235,11 @@ gsubAb <- function(df, ab = "Antigen", pattern = "[Aa]nti-([Hh]uman)?([ _]?)",
 #'
 #'@param ab (character(n)) A vector of strings to transform
 #'@author Helen Lindsay
+#'@return The character vector ab, converted to uppercase and with some patterns
+#'of punctuation removed.  NAs are returned in positions where entries of ab
+#'are unchanged by formatting.
+#'@examples
+#'upperSquish(c("CD3-A", "IL-2Rb", "CD4"))
 #'@export
 upperSquish <- function(ab){
     p1 <- "(^[A-z]+[0-9]?)[-\\. ]?([A-z]+)$" # e.g. CD3-A
@@ -256,6 +260,10 @@ upperSquish <- function(ab){
 #'@param ab (character(n)) A vector of strings to transform
 #'@author Helen Lindsay
 #'@export
+#'@returns The character vector ab, converted to lowercase.  NAs are returned
+#'in positions where entries of ab are unchanged by formatting.
+#'@examples
+#'lowerNoDash("Nectin-2")
 lowerNoDash <- function(ab){
     result <- gsub("-", " ", tolower(ab))
     return(.noDups(result, ab))

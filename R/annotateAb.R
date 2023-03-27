@@ -17,11 +17,12 @@
 #'indicating whether an antigen is an isotype control.  Isotype controls will
 #'not be matched.
 #'@author Helen Lindsay
-#'@return x, with additional identifier columns including the database in
+#'@returns x, with additional identifier columns including the database in
 #'which the matching entry was found.
 #'@export
 #'@examples
-#'# This example shows searching
+#'# This example shows searching for alternative ways of writing the
+#'# same antigen.
 #'df <- data.frame(Antigen = c("CD279", "CD279 (PD-1)", "CD279_PD1",
 #'"CD279(PD-1)", "PD-1 (CD279)","PD1 (CD279)"))
 #'annotateAb(df)

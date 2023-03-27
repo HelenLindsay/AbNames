@@ -15,6 +15,14 @@
 #'@importFrom tidyr separate
 #'@importFrom dplyr rename
 #'@export
+#'
+#'@author Helen Lindsay
+#'@returns df, with an additional column, by default named "TCR_long",
+#'giving the TCR name in long format to allow exact matching in the
+#'gene_aliases table.
+#'@examples
+#'df <- data.frame(Antigen = c("TCRab", "TCR-ab", "TCRa/b"))
+#'formatTCR(df, tcr = "Antigen")
 formatTCR <- function(df, tcr = "TCR", new_col = "TCR_long"){
     .stopIfColExists(df, new_col)
 
@@ -38,6 +46,7 @@ formatTCR <- function(df, tcr = "TCR", new_col = "TCR_long"){
 #'@param tcr A vector of T cell receptor antibody names
 #'@param new_col The name of the new column containing the TCR description
 #'@importFrom dplyr all_of any_of
+#'@keywords internal
 formatTCRv <- function(tcr, new_col = "TCR_long"){
 
     # Substitute Greek letters for Greek words for cases:

@@ -23,7 +23,6 @@
 #' @param ... pass keep = TRUE for keeping grouping columns for debugging
 #' @param verbose
 #' @author Helen Lindsay
-#' @keywords internal
 getCommonName <- function(x, cols = NULL, ab = "Antigen",
                           fill_col = "Antigen_std", n_matched = "n_matched",
                           ignore = TRUE, verbose = TRUE, ...){

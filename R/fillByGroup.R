@@ -14,11 +14,27 @@
 #'set to NA).
 #'@param method Either "only_na", of only missing entries should be filled,
 #' or "all", if all entries should be replaced with their group mode
+#'
+#'@author Helen Lindsay
+#'@returns df, with NA entries filled where possible by grouping and taking
+#'the most common value within each column and group.
 #'@importFrom tidyr fill
 #'@importFrom stats complete.cases
 #'@importFrom dplyr group_by ungroup n_distinct coalesce all_of
 #'@importFrom utils capture.output
 #'@export
+#'
+#'@examples
+#'
+#'df <- data.frame(A = rep(c("A", "B"), each = 3),
+#'                 B = c(NA, "C", "D", "E", NA, "E"))
+#'# Setting multiple = "mode" means that the most common value will be
+#'# used for filling, or the first if there are ties.
+#'fillByGroup(df, group = "A", fill = "B", multiple = "mode")
+#'
+#'# Setting multiple = "ignore" means that groups with multiple values
+#'# will not be filled.
+#'fillByGroup(df, group = "A", fill = "B", multiple = "ignore")
 fillByGroup <- function(df, group, fill, method = c("only_na", "all"),
                         multiple = c("stop", "mode", "ignore")){
     .stopIfColExists(df, sprintf("n%s", fill))
@@ -85,10 +101,10 @@ fillByGroup <- function(df, group, fill, method = c("only_na", "all"),
 #'
 #' Given a grouped data.frame, count values per group and return a vector with
 #' the most common value for each group.  If there are several equally common
-#' values, the first will be chosen.
+#' values, the first will be chosen.  Used by [fillByGroup()].
 #'
 #'@param df a grouped tibble
-#'@param cl Name of column to find mode
+#'@param cl Name of column to find mode (character(1)).
 #'@param new_cl Name of column to create.  If NA (default), col is modified
 #'@param gp Name(s) of columns to group by
 #'@param min_n (integer(1), default NA) Minimum number of occurrences of

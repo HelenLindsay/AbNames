@@ -18,6 +18,13 @@
 #'@param new_col (character(1), default "Ig") Name of column containing
 #'re-formatted immunoglobin names to add to df
 #'@export
+#'
+#'@author Helen Lindsay
+#'@returns df, with a new column, by default named "Ig", containing the
+#'immunoglobulin names formatted to match HGNC symbols.
+#'@examples
+#'df <- data.frame("Antigen" = c("IgG", "IgA", "IgG1", "IgG2a"))
+#'formatIg(df)
 formatIg <- function(df, ig = "Antigen", new_col = "Ig"){
     .stopIfColExists(df, new_col)
 

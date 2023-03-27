@@ -11,7 +11,7 @@
 #'
 #'@param ab (character(1)) Name of the antibody/gene to match
 #'@param by One of ALT_ID or HGNC_ID
-#'@return A table of aliases, or nothing if no aliases are found
+#'@returns A table of aliases, or nothing if no aliases are found
 #'@author Helen Lindsay
 #'@examples
 #'getAliases("CD45RA")

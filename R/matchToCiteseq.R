@@ -22,16 +22,22 @@
 #'@param check.matches Set to TRUE to check which entries were matched
 #'(default FALSE)
 #'@param ... Options passed on to getCommonName
-#'@returns If dry.run is FALSE, the data.frame x is returned with an additional
+
+#'@export
+#'@author Helen Lindsay
+#'@returns If check.matches is FALSE, the data.frame x is returned with an
+#'additional
 #'two columns "Antigen_std", containing the standardised name, and "n_matched",
 #'the number of entries used for deriving the standard name.  The minimum
 #'value of "n_matched" is 1 and means that no matches were found.
 #'
-#'If dry.run is TRUE, a grouped tibble is returned, containing rows from x
+#'If check.matches is TRUE, a grouped tibble is returned, containing rows from x
 #'grouped with rows from the citeseq data set that were matched.  This can be
 #'used for checking whether matches are correct and identifying what was matched
 #'incorrectly if they are incorrect.
-#'@export
+#'@examples
+#'df <- data.frame(Antigen = c("PD-L1", "CD3"))
+#'matchToCiteseq(df)
 matchToCiteseq <- function(x, cols = NULL, verbose = TRUE,
                            check.matches = FALSE, ...){
     # Load citeseq data set
@@ -71,7 +77,7 @@ matchToCiteseq <- function(x, cols = NULL, verbose = TRUE,
     x <- getCommonName(x, cols = keep_cols, ab = "Antigen",
                        fill_col = "Antigen_std", keep = TRUE, ...)
 
-    #### HERE
+    #### TO DO HERE
     if (isTRUE(check.matches)){
         stop("IMPLEMENT check.matches")
     }
