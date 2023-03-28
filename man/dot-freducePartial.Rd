@@ -15,6 +15,12 @@
 
 \item{...}{Extra arguments for f}
 }
+\value{
+The result of applying function f sequentially to each of cls,
+usually a data.frame.  Sequential application is key here, when we use
+[.freducePartial()] a column in cls may not exist in df until f is
+applied to the previous cls.
+}
 \description{
 Apply a function f repeatedly to different columns of a data.frame.  Assumes
 that ellipsis arguments contain (only) one vector entry and that function f

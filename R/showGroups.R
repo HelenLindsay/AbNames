@@ -12,12 +12,23 @@
 #'@param interactive (default: TRUE) Should the function wait for a
 #'command prompt to show the next group?
 #'@importFrom dplyr group_rows
+#'@importFrom methods is
 #'@author Helen Lindsay
 #'@export
-showGroups <- function(df, i = 1, n = 1, max_rows = 50, interactive = TRUE){
-    if (! "grouped_df" %in% class(df)){
-        warning("Data.frame is not grouped")
-    }
+#'@returns Prints a group (or n groups, if parameter n is set) of a grouped
+#'data.frame df.  The group order is determined by dplyr.  If interactive is
+#' TRUE, there is a console prompt to either print the next group or quit.  If
+#'interactive is FALSE, a single group is printed, with the group index
+#'specified by parameter i.
+#'@examples
+#'df <- data.frame(Col1 = rep(c("A", "B"), 2), Col2 = 1:4)
+#'df <- dplyr::group_by(df, Col1)
+#'# Print the second group.  Use interactive = TRUE to print each
+#'# group interactively
+#'showGroups(df, i = 2, interactive = FALSE)
+showGroups <- function(df, i=1, n=1, max_rows=50, interactive=TRUE){
+
+    if (! is(df, "grouped_df")){ warning("Data.frame is not grouped") }
 
     stop_interactive <- FALSE
     msg <- "Enter\nn to print the next group, or\nq to quit"
@@ -29,15 +40,15 @@ showGroups <- function(df, i = 1, n = 1, max_rows = 50, interactive = TRUE){
 
     while (isFALSE(stop_interactive)){
         # Print out group number i
-        message(sprintf(gp_info, i, n_groups, length(row_idxs[[i]])))
-        p_df <- .getGroups(df, i = i, n = n, row_idxs = row_idxs)
+        cat(sprintf(gp_info, i, n_groups, length(row_idxs[[i]])))
+        p_df <- .getGroups(df, i=i, n=n, row_idxs=row_idxs)
         print(as.data.frame(p_df[seq_len(min(max_rows, nrow(p_df))), ]))
         i <- i + 1
 
         if (! isTRUE(interactive)) break()
 
         if (i > n_groups){
-            message("\nNo more groups to show\n")
+            cat("\nNo more groups to show\n")
             break()
         }
 
@@ -60,6 +71,8 @@ showGroups <- function(df, i = 1, n = 1, max_rows = 50, interactive = TRUE){
 #' @param flt An (unquoted) expression for using with dplyr::filter
 #' @importFrom rlang enquo
 #' @keywords internal
+#' @returns A character string, length 1, containing the results of printing
+#' the first group of df that matches condition flt.
 .printGroupMatch <- function(df, flt){
     multi_df <- df %>% dplyr::filter(!!rlang::enquo(flt))
     first_group <- .getGroups(multi_df)
@@ -74,6 +87,8 @@ showGroups <- function(df, i = 1, n = 1, max_rows = 50, interactive = TRUE){
 #'
 #'@param df data.frame to print
 #'@param n number of rows to print, default 20
+#'@returns  The first n rows of df, by default 20, and a console prompt to
+#'either print the next n rows or quit.
 print_n <- function(df, n = 20){
     gp_info <- "Rows %s - %s (%s rows total)\n"
     msg <- "Enter\nn to print the next group, or\nq to quit"
@@ -84,7 +99,7 @@ print_n <- function(df, n = 20){
     for (i in seq_along(brks$starts)){
         print(i)
         cat(sprintf(gp_info, brks$starts[i], brks$ends[i],  m))
-        print(df[brks$starts[i]:brks$ends[i], , drop = FALSE])
+        print(df[brks$starts[i]:brks$ends[i], , drop=FALSE])
         choice <- readline(msg)
         if (! choice %in% c("n", "q")) readline(msg)
         if (choice == "q") break()
@@ -125,7 +140,9 @@ print_n <- function(df, n = 20){
 #'@author Helen Lindsay
 #'@importFrom dplyr group_rows
 #'@keywords internal
-.getGroups <- function(df, i = 1, n = 1, row_idxs = NULL){
+#'@returns Rows of grouped data.frame df corresponding to group i,
+#' where the grouping order is determined by dplyr.
+.getGroups <- function(df, i=1, n=1, row_idxs=NULL){
     if (is.null(row_idxs)){ row_idxs <- df %>% dplyr::group_rows() }
 
     if (i > length(row_idxs)){

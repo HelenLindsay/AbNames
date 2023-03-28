@@ -11,6 +11,10 @@ print_n(df, n = 20)
 
 \item{n}{number of rows to print, default 20}
 }
+\value{
+The first n rows of df, by default 20, and a console prompt to
+either print the next n rows or quit.
+}
 \description{
 Print a data.frame n rows at a time
 }

@@ -16,7 +16,7 @@
 #'@importFrom stringr str_replace_all
 #'@export
 replaceGreekSyms <- function(x,
-                        replace = c("sym2letter", "sym2word", "word2letter")){
+                        replace=c("sym2letter", "sym2word", "word2letter")){
     # Select replacement vector
     replace <- match.arg(replace)
     replace_to_vec <- list("sym2letter" = GREEKSYM_TO_LETTER(),
@@ -35,7 +35,7 @@ replaceGreekSyms <- function(x,
 # symbols should be replaced, and values should be NA if the original value is
 # unchanged
 # Dups: are duplicate entries allowed?
-greekToLetter <- function(x, dups = TRUE){
+greekToLetter <- function(x, dups=TRUE){
     y <- replaceGreekSyms(x, "sym2letter")
     y <- replaceGreekSyms(y, "word2letter")
     if (isTRUE(dups)){ return(y) }

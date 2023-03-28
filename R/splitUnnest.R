@@ -23,13 +23,22 @@
 #'@importFrom stringr str_squish
 #'@importFrom dplyr sym select rename all_of
 #'@export
-splitUnnest <- function(df, ab = "Antigen", split = "[\\(\\)]", new_col = NA,
-                        exclude = NA){
+#'@author Helen Lindsay
+#'@returns df, where values in column ab have been split by the delimiter
+#'specified in the split parameter, and each split value is a separate row.
+#'That is, df is split at column ab then converted to long format.
+#'@examples
+#'df <- data.frame(Antigen = c("CD279 (PD-1)", "CD3", "Mac-2 (Galectin-3)"))
+#'
+#'This uses the default delimiter - round brackets.
+#'splitUnnest(df, "Antigen", new_col="Split")
+splitUnnest <- function(df, ab="Antigen", split="[\\(\\)]", new_col=NA,
+                        exclude=NA){
 
     temp_col <- .tempColName(df)
 
     df <- dplyr::mutate(df, !!temp_col :=
-                            strsplit(!!dplyr::sym(ab), split, perl = TRUE))
+                            strsplit(!!dplyr::sym(ab), split, perl=TRUE))
 
     if (! is.na(exclude)){
         df <- dplyr::mutate(df, !!temp_col :=

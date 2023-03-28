@@ -1,24 +1,39 @@
-df <- data.frame(Antigen = c("CD235a/b", "CD235ab", "CD66a/c/e",
-                             "CD66ace", "HLA-A,B,C", "HLA-A/B/C",
-                             "HLA-A2", "HLA-ABC", "HLA-DR",
-                             "TCR alpha/beta", "TCR g/d", "TCRab"))
-
+# .separateSubunits ----
+# tests of individual splitting patterns
 test_that(".separateSubunits works correctly with default patterns", {
-    p1_res <- data.frame(Antigen = c("CD235a/b", "CD235a/b", "CD235ab",
-            "CD235ab", "CD66a/c/e", "CD66a/c/e", "CD66a/c/e", "CD66ace",
-            "CD66ace", "CD66ace", "HLA-A,B,C", "HLA-A/B/C", "HLA-A2", "HLA-ABC",
-            "HLA-DR", "TCR alpha/beta", "TCR g/d", "TCR g/d", "TCRab", "TCRab"),
-            subunit = c("CD235a", "CD235b", "CD235a", "CD235b", "CD66a",
-            "CD66c", "CD66e", "CD66a", "CD66c", "CD66e", NA, NA, NA, NA,
-            NA, NA, "TCRg", "TCRd", "TCRa", "TCRb"))
+    df <- data.frame(Antigen = c("CD235a/b", "CD235ab", "CD66a/c/e",
+                                 "CD66ace", "HLA-A,B,C", "HLA-A/B/C",
+                                 "HLA-A2", "HLA-ABC", "HLA-DR",
+                                 "TCR alpha/beta", "TCR g/d", "TCRab"))
+
+    p1 <- "^[A-Z0-9]{2,}[-\\. ]?([a-z\\/\\.]{2,6})$" # Only lowercase
+    p2 <- "^[A-Z0-9]{2,}[-\\.]([A-Z\\/,\\.]{2,6})$" # Only uppercase
+
+    p1_res <- c(rep(c("CD235a", "CD235b"), 2),
+                rep(c("CD66a", "CD66c", "CD66e"), 2), rep(NA, 6),
+                "TCRg", "TCRd", "TCRa", "TCRb")
+    p2_res <- c(rep(NA, 4), rep(c("HLA-A", "HLA-B", "HLA-C"), 2),
+                NA, sprintf("HLA-%s", c("A","B","C","D","R")), rep(NA, 3))
+
+    df_p1_res <- .separateSubunits(df, "Antigen", "TMP3", p1,
+                                   "%s%s", "TMP1", "TMP2")
+    expect_equal(df_p1_res$TMP3, p1_res)
+
+    df_p2_res <- .separateSubunits(df, "Antigen", "TMP4", p2, "%s-%s",
+                                   "TMP1", "TMP2")
+    expect_equal(df_p2_res$TMP4, p2_res)
+})
 
 
-    #    "IL-3R", "CD235ab", "TCR alpha/beta",
-    #    "TCRab", "HLA-DR", "B7-H2", "HLA-A,B,C", "HLA-A/B/C", "HLA-ABC",
-    #    "DC-SIGN", "TCR gamma/delta", "TCRgd", "TCR g/d", "IL-2Rbeta",
-    #    "DEC-205", "CD66a/c/e", "CSF-1R", "VE-cadherin", "IL-7Ra",
-    #    "IL-7Ralpha", "IL-6Ra", "IL-4Ralpha", "IL-2Rb", "CD235a/b", "IL-21R",
-    #    "CD66ace", "HLA-A2", "IL-10", "TCR a/b"))
-
-    df <- data.frame(Antigen = c(""))
+# separateSubunits ----
+test_that("separateSubunits doesn't split non-subunit genes", {
+    not_subunits <- data.frame(
+        Antigen = c("IL-3R", "B7-H2", "TCR gamma/delta",
+                    "IL-2Rbeta", "DEC-205", "CSF-1R", "VE-cadherin",
+                    "IL-7Ra", "IL-7Ralpha", "IL-6Ra", "IL-4Ralpha",
+                    "IL-2Rb", "IL-21R", "HLA-A2", "IL-10"))
+    res <- separateSubunits(not_subunits)
+    # If none of the Antigens in "not_subunits" are split,
+    # nrows shouldn't be changed
+    expect_equal(nrow(res), nrow(not_subunits))
 })

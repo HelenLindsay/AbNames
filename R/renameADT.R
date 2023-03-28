@@ -21,7 +21,7 @@
 #'@importFrom methods setGeneric
 #'@export
 #'@rdname renameADT-methods
-setGeneric("renameADT", signature = c("obj", "names"),
+setGeneric("renameADT", signature=c("obj", "names"),
            function(obj, names, ...) {
     standardGeneric("renameADT")
 })

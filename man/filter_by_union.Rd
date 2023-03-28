@@ -4,7 +4,7 @@
 \alias{filter_by_union}
 \title{Select rows matching any column present in another data.frame}
 \usage{
-filter_by_union(df, df2 = NULL, rows = NULL, by = NULL)
+filter_by_union(df, df2 = NULL, rows = NULL, by = NULL, verbose = TRUE)
 }
 \arguments{
 \item{df}{A data.frame from which to select matching rows}
@@ -14,6 +14,8 @@ filter_by_union(df, df2 = NULL, rows = NULL, by = NULL)
 \item{rows}{Row indices for subsetting, either df2 if present or df}
 
 \item{by}{= columns to select from df2}
+
+\item{verbose}{Print information about how tables are joined? (Default: TRUE)}
 }
 \description{
 Select values from a data.frame df matching any

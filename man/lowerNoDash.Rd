@@ -9,9 +9,16 @@ lowerNoDash(ab)
 \arguments{
 \item{ab}{(character(n)) A vector of strings to transform}
 }
+\value{
+The character vector ab, converted to lowercase.  NAs are returned
+in positions where entries of ab are unchanged by formatting.
+}
 \description{
 Convert a character vector to lowercase and replace - with spaces.
 Values are NA if the new value is identical to the original value.
+}
+\examples{
+lowerNoDash("Nectin-2")
 }
 \author{
 Helen Lindsay

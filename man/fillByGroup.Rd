@@ -27,8 +27,27 @@ be filled be handled?  Either "stop" (raise an error), "mode" (select
 the most common value) or "ignore" (entries with multiple possible modes are
 set to NA).}
 }
+\value{
+df, with NA entries filled where possible by grouping and taking
+the most common value within each column and group.
+}
 \description{
 Wrapper of tidyr::fill with checks for NAs in grouping values and the option
 to fill with the majority value if there is more than one value per group.
 If an error is raised, an example group that causes an error is returned
+}
+\examples{
+
+df <- data.frame(A = rep(c("A", "B"), each = 3),
+                B = c(NA, "C", "D", "E", NA, "E"))
+# Setting multiple = "mode" means that the most common value will be
+# used for filling, or the first if there are ties.
+fillByGroup(df, group = "A", fill = "B", multiple = "mode")
+
+# Setting multiple = "ignore" means that groups with multiple values
+# will not be filled.
+fillByGroup(df, group = "A", fill = "B", multiple = "ignore")
+}
+\author{
+Helen Lindsay
 }

@@ -8,9 +8,9 @@
 \usage{
 renameADT(obj, names, ...)
 
-\S4method{renameADT}{SingleCellExperiment,character}(obj, names, assay = "counts", ...)
+\S4method{renameADT}{SingleCellExperiment,character}(obj, names, assay = "ADT", ...)
 
-\S4method{renameADT}{MultiAssayExperiment,character}(obj, names, ..., assay = "counts")
+\S4method{renameADT}{MultiAssayExperiment,character}(obj, names, assay = "counts", ...)
 }
 \arguments{
 \item{obj}{An object containing ADT expression measurements}

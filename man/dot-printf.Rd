@@ -11,7 +11,18 @@
 
 \item{...}{Extra arguments for sprintf}
 }
+\value{
+Returns the character vector resulting from applying sprintf to
+"pattern" for each of the arguments in ..., but with NA arguments remaining
+NA instead of being used to fill the placeholders in "pattern".
+}
 \description{
 Wrapper for sprintf, doesn't convert NA to character
+}
+\examples{
+.printf("HELLO \%s", c("WORLD", NA))
+
+# Compare with sprintf:
+sprintf("HELLO \%s", c("WORLD", NA))
 }
 \keyword{internal}

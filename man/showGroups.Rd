@@ -18,9 +18,23 @@ showGroups(df, i = 1, n = 1, max_rows = 50, interactive = TRUE)
 \item{interactive}{(default: TRUE) Should the function wait for a
 command prompt to show the next group?}
 }
+\value{
+Prints a group (or n groups, if parameter n is set) of a grouped
+data.frame df.  The group order is determined by dplyr.  If interactive is
+TRUE, there is a console prompt to either print the next group or quit.  If
+interactive is FALSE, a single group is printed, with the group index
+specified by parameter i.
+}
 \description{
 Print first group of a grouped data.frame, then prompt user to either print
 the next group or quit.   Group order is determined by dplyr::group_rows.
+}
+\examples{
+df <- data.frame(Col1 = rep(c("A", "B"), 2), Col2 = 1:4)
+df <- dplyr::group_by(df, Col1)
+# Print the second group.  Use interactive = TRUE to print each
+# group interactively
+showGroups(df, i = 2, interactive = FALSE)
 }
 \author{
 Helen Lindsay

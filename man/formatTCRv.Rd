@@ -15,3 +15,4 @@ formatTCRv(tcr, new_col = "TCR_long")
 Used by formatTCR, accepts a vector (one column from a data.frame),
 returns a long data.frame with a new column containing the TCR description
 }
+\keyword{internal}

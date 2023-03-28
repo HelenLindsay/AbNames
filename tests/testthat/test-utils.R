@@ -33,7 +33,7 @@ test_that(".stopIfColExists is vectorised", {
                  regexp = "Column(s) A, B already|Please.*")
     expect_error(.stopIfColExists(df, c("A", "B", "E")),
                  regexp = "Column(s) A, B already|Please.*")
-    expect_equal(.stopIfColExists(df, c("E")), NULL)
+    expect_equal(.stopIfColExists(df, c("E")), TRUE)
 })
 
 

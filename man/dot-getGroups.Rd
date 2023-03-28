@@ -15,6 +15,10 @@
 
 \item{row_idxs}{(Optional, default: NULL) Indices of rows}
 }
+\value{
+Rows of grouped data.frame df corresponding to group i,
+where the grouping order is determined by dplyr.
+}
 \description{
 Useful for debugging, e.g. when trying to fill by but groups contain
 multiple values.  Group order is determined by dplyr::group_rows

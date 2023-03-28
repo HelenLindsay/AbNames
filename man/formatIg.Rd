@@ -15,6 +15,10 @@ names}
 \item{new_col}{(character(1), default "Ig") Name of column containing
 re-formatted immunoglobin names to add to df}
 }
+\value{
+df, with a new column, by default named "Ig", containing the
+immunoglobulin names formatted to match HGNC symbols.
+}
 \description{
 Adds a column to a data.frame containing immunoglobin names re-formatted to
 match HGNC symbols.
@@ -24,4 +28,11 @@ and joining regions are not implemented.  The final a/b for e.g. IgG2a is
 dropped, as the specific modification isn't in protein ontology or HGNC.
 The lambda light chain will only be matched in HGNC if a gene number is
 provided.
+}
+\examples{
+df <- data.frame("Antigen" = c("IgG", "IgA", "IgG1", "IgG2a"))
+formatIg(df)
+}
+\author{
+Helen Lindsay
 }

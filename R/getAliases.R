@@ -11,55 +11,26 @@
 #'
 #'@param ab (character(1)) Name of the antibody/gene to match
 #'@param by One of ALT_ID or HGNC_ID
+#'@param verbose Should program status messages be printed?  Default: TRUE
 #'@returns A table of aliases, or nothing if no aliases are found
 #'@author Helen Lindsay
 #'@examples
 #'getAliases("CD45RA")
 #'@export
-getAliases <- function(ab, by = c("ALT_ID", "HGNC_ID")){
-    data_env <- new.env(parent = emptyenv())
-    utils::data("gene_aliases", envir = data_env, package = "AbNames")
+getAliases <- function(ab, by=c("ALT_ID", "HGNC_ID"), verbose=TRUE){
+    data_env <- new.env(parent=emptyenv())
+    utils::data("gene_aliases", envir=data_env, package="AbNames")
     gene_aliases <- data_env[["gene_aliases"]]
 
     by <- rlang::sym(match.arg(by))
     ab_res <- gene_aliases %>%
         dplyr::filter(.data$value == ab)
-    if (nrow(ab_res) == 0){
+    if (nrow(ab_res) == 0 & isTRUE(verbose)){
         message(sprintf("%s not found in aliases table", ab))
         return()
     }
     ab_res <- ab_res %>% dplyr::pull(!!by)
     res <- gene_aliases %>%
         dplyr::filter(!!by %in% ab_res)
-    return(res)
-}
-
-
-# abAliases ----
-#' Find an antibody in a data.frame and return all aliases
-#'
-#' Filter a data frame by an expression (as expression or character) and
-#' select all rows matching the value in the filtered column.
-#' More general version of getAliases, as the filter function can use any
-#' column and any data.frame can be used e.g. abAliases(df, "value == 'CD3'").
-#'@param df  A data.frame or tibble to filter
-#'@param ex An filtering expression, as either a character or an expression
-#'@param by Name of the column to use for selecting matching entries
-#'(Default: "HGNC_ID")
-#'@author Helen Lindsay
-abAliases <- function(df, ex, by = "HGNC_ID"){
-    # Switch depending on whether ex is a string or an expression
-    enex <- rlang::enexpr(ex)
-
-    if (rlang::is_string(enex)){
-        ex <- rlang::parse_expr(ex) # Parse string into expression
-    } else {
-        ex <- enex
-    }
-
-    res <- filter_by_union(df, df %>%
-                               dplyr::filter(!! ex) %>%
-                               dplyr::select( {{ by }} ) )
-
     return(res)
 }

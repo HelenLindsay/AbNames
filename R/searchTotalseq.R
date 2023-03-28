@@ -20,7 +20,11 @@
 #'specified, defaults to catalogue number, antigen and clone.
 #'@author Helen Lindsay
 #'@export
-searchTotalseq <- function(x, cols = NULL){
+#'@returns Data.frame x with additional identifier columns from joining x
+#' with the totalseq data set.
+#'@examples
+#'searchTotalseq(data.frame(Cat_Number = c("306623", "124235", "331609")))
+searchTotalseq <- function(x, cols=NULL){
     # Which columns should be used for matching?
     if (is.null(cols)) {
         cols <- intersect(c("Cat_Number", "Antigen", "Clone"), colnames(x))
@@ -35,12 +39,12 @@ searchTotalseq <- function(x, cols = NULL){
 
     if (! any(id_cols %in% colnames(x))) { y <- utils::head(x, 0) }
 
-    x <- dplyr::anti_join(x, y, by = colnames(x)) %>%
+    x <- dplyr::anti_join(x, y, by=colnames(x)) %>%
         dplyr::select(-dplyr::any_of(id_cols))
 
     # Load totalseq data set
-    data_env <- new.env(parent = emptyenv())
-    utils::data("totalseq", envir = data_env, package = "AbNames")
+    data_env <- new.env(parent=emptyenv())
+    utils::data("totalseq", envir=data_env, package="AbNames")
     totalseq <- data_env[["totalseq"]]
 
     # Select the gene information from totalseq
@@ -57,7 +61,7 @@ searchTotalseq <- function(x, cols = NULL){
             filter_by_union(result %>% dplyr::filter(is.na(.data$Antigen))) %>%
             unique()
         result <- dplyr::rows_patch(result, ts, unmatched = "ignore",
-                                    by = fill_cols)
+                                    by=fill_cols)
     }
     return(dplyr::bind_rows(result, y))
 }

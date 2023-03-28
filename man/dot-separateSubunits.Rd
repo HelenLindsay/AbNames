@@ -21,8 +21,21 @@
 
 \item{t2}{second temporary column name}
 }
+\value{
+df containing an extra column "new_col" with the results of applying
+the regular expression "pattern" to column "ab" to identify potential
+subunits, then transforming to long format with one subunit per row.
+}
 \description{
 Separates a column at a provided pattern, separates the second second into
 individual letters and joins segments with a provided joining pattern
+}
+\examples{
+df <- data.frame(Antigen = c("CD235a/b", "HLA-A,B,C", "TCR g/d"))
+
+#This is the first pattern used by separateSubunits
+p1 <- "^[A-Z0-9]{2,}[-\\\\. ]?([a-z\\\\/\\\\.]{2,6})$"
+
+.separateSubunits(df, "Antigen", "Subunit", p1, "\%s\%s", "TEMP", "TEMP2")
 }
 \keyword{internal}

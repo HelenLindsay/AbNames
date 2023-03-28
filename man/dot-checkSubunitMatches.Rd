@@ -6,7 +6,9 @@
 Internal AbNames function for removing spurious matches caused by guessing
 subunit names.  Column names are hard-coded and expected to match the default
 pipeline.  Returns a table containing gene name matches with spurious matches
-removed.}
+removed.  For example, if Antigen "HLA-DR" was split into "HLA-D" and
+"HLA-R", and "HLA-D" was matched but "HLA-R" was not, both rows would be
+removed from the result.}
 \usage{
 .checkSubunitMatches(df, query_df)
 }
@@ -15,11 +17,17 @@ removed.}
 
 \item{query_df}{A data.frame containing potential gene/protein names, one}
 }
+\value{
+df with rows removed if the match via a subunit regular expression
+but not all of the subunits were matched.
+}
 \description{
 Check if all subunits of a multi-subunit protein are matched
 Internal AbNames function for removing spurious matches caused by guessing
 subunit names.  Column names are hard-coded and expected to match the default
 pipeline.  Returns a table containing gene name matches with spurious matches
-removed.
+removed.  For example, if Antigen "HLA-DR" was split into "HLA-D" and
+"HLA-R", and "HLA-D" was matched but "HLA-R" was not, both rows would be
+removed from the result.
 }
 \keyword{internal}

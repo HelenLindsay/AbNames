@@ -14,8 +14,3 @@ test_that("sharedSubstr correctly adds grouping column", {
     expect_equal(sharedSubstr(df, x = "words", id = "ids"),
                  cbind(df, AB_group = c(1,2,1,1,1,3,1)))
 })
-
-
-# More relevant example df
-#df <- data.frame(Antigen = c("CD274 (B7-H1, PD-L1)", "PD-L1", "B7-H1"),
-#                 ID = c(1:3))

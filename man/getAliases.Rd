@@ -4,12 +4,14 @@
 \alias{getAliases}
 \title{getAliases ----}
 \usage{
-getAliases(ab, by = c("ALT_ID", "HGNC_ID"))
+getAliases(ab, by = c("ALT_ID", "HGNC_ID"), verbose = TRUE)
 }
 \arguments{
 \item{ab}{(character(1)) Name of the antibody/gene to match}
 
 \item{by}{One of ALT_ID or HGNC_ID}
+
+\item{verbose}{Should program status messages be printed?  Default: TRUE}
 }
 \value{
 A table of aliases, or nothing if no aliases are found

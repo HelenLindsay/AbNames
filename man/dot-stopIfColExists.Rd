@@ -11,6 +11,10 @@
 
 \item{new_col}{character(n) Name of a column(s) to add to df}
 }
+\value{
+Returns TRUE invisibly if "new_col" is not already in df.
+Otherwise, raises an error and prompts the user to supply a different value.
+}
 \description{
 Warn if a column already exists in a data.frame
 }

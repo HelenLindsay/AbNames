@@ -12,18 +12,33 @@
 #' "complete.cases(x, y)".  To filter with multiple conditions use "&", e.g.
 #' "x == 1 & y == 2"
 #'
+#' A use case for this function is when we want to perform a string processing
+#' operation on only a subset of Antigens, for example, ignore isotype controls
+#' or apply special formatting to only TCR antigens.
 #'@param df A data.frame or tibble
 #'@param ex character(1) An character expression for filtering df using
 #'dplyr::filter, e.g. 'grepl("X", colname)'
-#'@param f  A function to apply to the rows where ex is TRUE and returns a
-#'data.frame
+#'@param f  A function to apply to the rows of df where ex is TRUE and that
+#'returns a data.frame
 #'@param verbose Should a warning be issued if extra rows are added after
 #'applying f? (Default: TRUE)
 #'@param ... Extra arguments for f
-#'@return df where function f has been applied only to the rows where ex is TRUE
 #'@importFrom rlang parse_expr enexpr is_string expr
 #'@export
-splitMerge <- function(df, ex, f, verbose = TRUE, ...){
+#'@returns df where function f has been applied only to the rows where
+#'ex is TRUE
+#'@examples
+#' # Create a formatting function to selectively alter Antigen column of df
+#' f <- function(df, fmt){
+#'    df$Antigen <- sprintf(fmt, df$Antigen)
+#'    return(df)
+#' }
+#'
+#'df <- data.frame(Antigen = c("CD4","HLA-abc", "Siglec-5"))
+#'
+#'Apply formatting function f to entries of df$Antigen that don't match "CD"
+#'splitMerge(df, "! grepl('CD', Antigen)", f, fmt = "%s TRIVIAL EXAMPLE")
+splitMerge <- function(df, ex, f, verbose=TRUE, ...){
 
     # Switch depending on whether ex is a string or an expression
     enex <- rlang::enexpr(ex)
@@ -47,7 +62,9 @@ splitMerge <- function(df, ex, f, verbose = TRUE, ...){
     # Apply f to filtered df and re-join
     df <- f(df, ...)
 
-    result <- suppressMessages(dplyr::full_join(df, df_not_ex)) %>%
+    result <- dplyr::full_join(df, df_not_ex,
+                               by=intersect(colnames(df),
+                                            colnames(df_not_ex))) %>%
         dplyr::select(-all_of(tmp))
 
     if (isTRUE(verbose) & ! nrow(result) == original_nrow){

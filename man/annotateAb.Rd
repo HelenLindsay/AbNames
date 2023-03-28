@@ -18,7 +18,8 @@ indicating whether an antigen is an isotype control.  Isotype controls will
 not be matched.}
 }
 \value{
-x, with additional columns
+x, with additional identifier columns including the database in
+which the matching entry was found.
 }
 \description{
 This is a wrapper for the default annotation pipeline using the functions
@@ -31,6 +32,13 @@ multiple genes were matched.
 If using this function, we recommend you check the results as the default
 matching functions may not suit every data set. In particular, check the
 results for HLA, TCR or Ig antigens.
+}
+\examples{
+# This example shows searching for alternative ways of writing the
+# same antigen.
+df <- data.frame(Antigen = c("CD279", "CD279 (PD-1)", "CD279_PD1",
+"CD279(PD-1)", "PD-1 (CD279)","PD1 (CD279)"))
+annotateAb(df)
 }
 \author{
 Helen Lindsay

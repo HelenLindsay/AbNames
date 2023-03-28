@@ -17,7 +17,7 @@ groupMode(
 \arguments{
 \item{df}{a grouped tibble}
 
-\item{cl}{Name of column to find mode}
+\item{cl}{Name of column to find mode (character(1)).}
 
 \item{gp}{Name(s) of columns to group by}
 
@@ -39,5 +39,5 @@ with NA.}
 \description{
 Given a grouped data.frame, count values per group and return a vector with
 the most common value for each group.  If there are several equally common
-values, the first will be chosen.
+values, the first will be chosen.  Used by [fillByGroup()].
 }

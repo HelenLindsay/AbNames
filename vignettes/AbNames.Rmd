@@ -558,6 +558,13 @@ Examples to discuss?
 *"DR3 (TRAMP)__Liu_2021" - tramp alias is ambiguous
 
 
+ Data for using in tests?
+ Some non-standard names, including duplicates
+adt_nms <- c("KLRG1 (MAFA)", "KLRG1", "CD3 (CD3E)", "HLA.A.B.C",
+             "HLA-A/B/C", "NKAT2", "CD66a.c.e", "CD66a_c_e",
+             "CD11a/CD18 (LFA-1)")     # NKAT2 = CD158b
+
+
 # Examples from sharedSubstr
 
 Why no match for CD158f (KIR2DL5)__Su_2020 CD158f?  because KIR2DL5 matches A and B
@@ -575,6 +582,7 @@ HLA_ABC__PomboAntunes_2021 maps to wrong symbol
 * check Cat_Number for CD257 (BAFF, BLYS) / 317213
 * Check are NeuN__Chung_2021 and Fos__Chung_2021 being grouped - wrong cat number!
 * detail showGroups / .getGroups?
+* TO DO: CDw for workshop CDs
 
 # Session Info
 

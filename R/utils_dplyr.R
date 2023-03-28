@@ -15,17 +15,37 @@
 #'@param df2 Optional, a second data frame
 #'@param rows Row indices for subsetting, either df2 if present or df
 #'@param by = columns to select from df2
+#'@param verbose Print information about how tables are joined? (Default: TRUE)
 #'@author Helen Lindsay
 #'@export
-filter_by_union <- function(df, df2 = NULL, rows = NULL, by = NULL){
-    if (! is.null(df2) & ! is.null(rows)){
+#'@returns The rows of df matching either any value in df2 (if df2 is provided
+#' and rows are not), or any value in df2[rows,] (if df2 and rows are provided),
+#' or any value in the subset df[rows, ] (if df2 is not provided).
+#'@examples
+#'# Note: CD274 and PD-L1 are aliases for the same antigen
+#'df <- data.frame(Antigen = c("CD274", "CD4", "PD-L1"),
+#'                 Clone = c("29E.2A3", NA, "29E.2A3"))
+#'
+#'# Filter df to return rows that match any column in df[1, ]
+#'filter_by_union(df, rows = 1)
+#'
+#'# If a second data.frame is provided, rows matching any column in the
+#'# second data.frame are returned.
+#'# Here, only "PD-L1" is matched as df2 doesn't contain clone information
+#'df2 <- data.frame(Antigen = "PD-L1")
+#'filter_by_union(df, df2)
+filter_by_union <- function(df, df2=NULL, rows=NULL, by=NULL, verbose=TRUE){
+
+    if (is.null(df2) & is.null(rows)){ stop("No filtering options provided!") }
+
+    if (isTRUE(verbose) & ! is.null(df2) & ! is.null(rows)){
         message("Row selection will be made from df2")
     }
 
     tmp <- .tempColName(df)
     qdf <- df
     if (! is.null(df2)) { qdf <- df2 }
-    if (! is.null(rows)) qdf <- qdf[rows, ]
+    if (! is.null(rows)) qdf <- qdf[rows, , drop=FALSE]
 
     # Check that values of by exist in qdf
     if (! is.null(by) & ! all(by %in% colnames(qdf))){
@@ -49,7 +69,7 @@ filter_by_union <- function(df, df2 = NULL, rows = NULL, by = NULL){
         }
 
         # Rename columns in qdf to match "by", set by to equal names of by
-        qdf <- qdf[, by]
+        qdf <- qdf[, by, drop=FALSE]
         colnames(qdf) <- names(by)
         by <- names(by)
     }
@@ -74,8 +94,8 @@ filter_by_union <- function(df, df2 = NULL, rows = NULL, by = NULL){
 # ignore e.g. Cat_Number == "custom_made".  Names should be column names
 # in df, if they are not they are ignored. Regex?
 #'@importFrom stats na.omit
-group_by_any <- function(df, groups, new_col = "group", ignore = NULL,
-                         verbose = FALSE){
+group_by_any <- function(df, groups, new_col="group", ignore=NULL,
+                         verbose=FALSE){
     if (length(groups) < 2){
         if (isTRUE(verbose)){
             message("With only one group, group_by_any is ",
@@ -148,7 +168,7 @@ group_by_any <- function(df, groups, new_col = "group", ignore = NULL,
 #'@author Helen Lindsay
 #'@importFrom dplyr if_all
 #'@importFrom dplyr everything
-left_join_any <- function(x, y, cols, shared = c("patch", "update")){
+left_join_any <- function(x, y, cols, shared=c("patch", "update")){
 
     update_fun <- match.arg(shared)
     update_fun <- if (update_fun == "patch"){
@@ -183,9 +203,8 @@ left_join_any <- function(x, y, cols, shared = c("patch", "update")){
             unique()
 
         new_res <- x %>%
-            dplyr::inner_join(y_subs, by = col_set,
-                              na_matches = "never", multiple = "all",
-                              relationship = "many-to-many")
+            dplyr::inner_join(y_subs, by=col_set, na_matches="never",
+                              multiple="all", relationship="many-to-many")
 
        # If columns are shared, either update or patch values in x from y
         if (length(patch_cn) > 0){
@@ -194,14 +213,14 @@ left_join_any <- function(x, y, cols, shared = c("patch", "update")){
                 dplyr::filter(if_all(everything(), complete.cases)) %>%
                 unique()
             new_res <- update_fun(new_res, y_patch,
-                                  unmatched = "ignore", by = col_set)
+                                  unmatched="ignore", by=col_set)
         }
 
         res[[i]] <- new_res
     }
 
     res <- do.call(dplyr::bind_rows, res)
-    x_aj <- dplyr::anti_join(x, res, by = setdiff(cn_x, patch_cn))
+    x_aj <- dplyr::anti_join(x, res, by=setdiff(cn_x, patch_cn))
 
     # Add the unmatched rows back in
     res <- dplyr::bind_rows(x_aj, res) %>%
@@ -223,6 +242,3 @@ rows_patch_any <- function(x, y, match_col){
     y <- y[row_order,]
 
 }
-
-
-

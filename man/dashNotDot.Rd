@@ -9,9 +9,16 @@ dashNotDot(ab)
 \arguments{
 \item{ab}{(character(n)) A vector of strings to transform}
 }
+\value{
+A character vector of the same length as the input vector ab, with
+dots (".") replaced by dashes ("-") and NA where entries are unchanged
+}
 \description{
 Convert a character vector to lowercase and replace "-" with "."
 Values are NA if the new value is identical to the original value.
+}
+\examples{
+dashNotDot(c("IL.2R", "CD4"))
 }
 \author{
 Helen Lindsay

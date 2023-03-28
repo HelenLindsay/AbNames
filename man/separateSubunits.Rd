@@ -15,6 +15,11 @@ antibody names}
 \item{new_col}{(default: subunit) Name of new column containing guesses for
 single subunit names}
 }
+\value{
+df, with a new column "subunit" containing potential individual
+subunits.  Original rows of df are replicated for each subunit, i.e. the
+returned data.frame is in long format.
+}
 \description{
 Separate names of antibodies against multi-subunit proteins
 e.g. CD235ab, CD66ace into one subunit per row.
@@ -32,6 +37,16 @@ are -, . and space, and the between subunit separators are / and .
 Subunits should be converted from Greek symbols before applying this function.
 
 At present user-supplied regex patterns are not supported
+}
+\examples{
+df <- data.frame(ID = LETTERS[1:5],
+                Antigen = c("CD235a/b", "CD235ab",
+                            "HLA-ABC", "HLA-DR", "TCR alpha/beta"))
+
+#Note that in this example, the TCR is not split as "alpha/beta" is too long
+#to match the splitting pattern.  Also note that HLA-DR is split - this
+#function doesn't check whether the results are real protein subunits.
+separateSubunits(df)
 }
 \author{
 Helen Lindsay

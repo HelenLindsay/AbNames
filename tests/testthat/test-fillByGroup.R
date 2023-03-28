@@ -31,6 +31,14 @@ test_that("groupMode checks minimum count per group", {
 })
 
 
+test_that("groupMode can correctly add a new column", {
+    df <- data.frame(Antigen=c("CD274", "CD274", "PD-L1"),
+                     Clone=rep("29E.2A3", 3))
+    res <- groupMode(df, cl="Antigen", gp="Clone", new_cl="Antigen_mode")
+    expect_equal(res$Antigen_mode, rep("CD274", 3))
+})
+
+
 test_that("fillByGroup with option=stop stops with multiple values", {
     expect_error(fillByGroup(df, c("A", "B"), "C", multiple = "stop"))
 })

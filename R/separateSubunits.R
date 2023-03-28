@@ -27,6 +27,18 @@
 #'@author Helen Lindsay
 #'@importFrom dplyr case_when coalesce
 #'@export
+#'@returns df, with a new column "subunit" containing potential individual
+#'subunits.  Original rows of df are replicated for each subunit, i.e. the
+#'returned data.frame is in long format.
+#'@examples
+#'df <- data.frame(ID = LETTERS[1:5],
+#'                 Antigen = c("CD235a/b", "CD235ab",
+#'                             "HLA-ABC", "HLA-DR", "TCR alpha/beta"))
+#'
+#'#Note that in this example, the TCR is not split as "alpha/beta" is too long
+#'#to match the splitting pattern.  Also note that HLA-DR is split - this
+#'#function doesn't check whether the results are real protein subunits.
+#'separateSubunits(df)
 separateSubunits <- function(df, ab = "Antigen", new_col = "subunit"){
     tmp <- .tempColName(df, n = 4)
 
@@ -68,6 +80,16 @@ separateSubunits <- function(df, ab = "Antigen", new_col = "subunit"){
 #'@importFrom rlang :=
 #'@importFrom dplyr all_of
 #'@keywords internal
+#'@returns df containing an extra column "new_col" with the results of applying
+#'the regular expression "pattern" to column "ab" to identify potential
+#'subunits, then transforming to long format with one subunit per row.
+#'@examples
+#'df <- data.frame(Antigen = c("CD235a/b", "HLA-A,B,C", "TCR g/d"))
+#'
+#'#This is the first pattern used by separateSubunits
+#'p1 <- "^[A-Z0-9]{2,}[-\\. ]?([a-z\\/\\.]{2,6})$"
+#'
+#'.separateSubunits(df, "Antigen", "Subunit", p1, "%s%s", "TEMP", "TEMP2")
 .separateSubunits <- function(df, ab, new_col, pattern, join_pattern, t1, t2){
     #  If there are any duplicated characters, it's probably not a subunit
     no_dup <- function(x){
@@ -105,7 +127,9 @@ separateSubunits <- function(df, ab = "Antigen", new_col = "subunit"){
 #' Internal AbNames function for removing spurious matches caused by guessing
 #' subunit names.  Column names are hard-coded and expected to match the default
 #' pipeline.  Returns a table containing gene name matches with spurious matches
-#' removed.
+#' removed.  For example, if Antigen "HLA-DR" was split into "HLA-D" and
+#' "HLA-R", and "HLA-D" was matched but "HLA-R" was not, both rows would be
+#' removed from the result.
 #'
 #'@param df A data frame containing matches of gene names in a database
 #'@param query_df A data.frame containing potential gene/protein names, one
@@ -113,6 +137,8 @@ separateSubunits <- function(df, ab = "Antigen", new_col = "subunit"){
 #'@importFrom dplyr anti_join
 #'@importFrom rlang .data
 #'@keywords internal
+#'@returns df with rows removed if the match via a subunit regular expression
+#' but not all of the subunits were matched.
 .checkSubunitMatches <- function(df, query_df){
     nms <- c("subunit", "TCR_long")
 
@@ -130,7 +156,7 @@ separateSubunits <- function(df, ab = "Antigen", new_col = "subunit"){
         dplyr::select(-dplyr::any_of(c("nmatched", "nexpected")))
 
     result <- df %>%
-        dplyr::anti_join(incomplete, by = c("ID", "name"))
+        dplyr::anti_join(incomplete, by=c("ID", "name"))
 
     return(result)
 }

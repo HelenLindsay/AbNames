@@ -5,6 +5,8 @@
 #'@param df A data.frame or tibble
 #'@param new_col character(n) Name of a column(s) to add to df
 #'@keywords internal
+#'@returns Returns TRUE invisibly if "new_col" is not already in df.
+#'Otherwise, raises an error and prompts the user to supply a different value.
 .stopIfColExists <- function(df, new_col){
     # Check if new_col(s) already exists in df, stop if so
 
@@ -16,6 +18,7 @@
         msg2 <- sprintf("Please supply a different value for %s", new_col)
         stop(msg1, msg2)
     }
+    invisible(TRUE)
 }
 
 # .tempColName ----
@@ -26,7 +29,9 @@
 #'@param n (default 1) How many temporary column names are needed?
 #'@param nm (character(1), default "TEMP") Prefix for temporary column names
 #'@keywords internal
-.tempColName <- function(df, n = 1, nm = "TEMP"){
+#'@returns Returns a name for a temporary column in df that isn't the name
+#'of an existing column.
+.tempColName <- function(df, n=1, nm="TEMP"){
     cn <- colnames(df)
     i <- 1
     temp_col <- nm
@@ -45,7 +50,7 @@
 # .gsubNA ----
 #
 # Wrapper for gsub, returns NA (or option provided) if pattern was not matched
-.gsubNA <- function(pattern, replacement, x, no_match = NA){
+.gsubNA <- function(pattern, replacement, x, no_match=NA){
     res <- gsub(pattern, replacement, x)
     return(.noDups(res, x, no_match))
 }
@@ -68,7 +73,7 @@
 #
 # Compares one vector to a reference, sets to NA if equal to the reference
 #
-.noDups <- function(x, reference, no_match = NA){
+.noDups <- function(x, reference, no_match=NA){
     x[x == reference] <- no_match
     return(x)
 }
@@ -81,6 +86,14 @@
 #'@param pattern A pattern to use with sprintf
 #'@param ... Extra arguments for sprintf
 #'@keywords internal
+#'@returns Returns the character vector resulting from applying sprintf to
+#'"pattern" for each of the arguments in ..., but with NA arguments remaining
+#'NA instead of being used to fill the placeholders in "pattern".
+#'@examples
+#'.printf("HELLO %s", c("WORLD", NA))
+#'
+#'# Compare with sprintf:
+#'sprintf("HELLO %s", c("WORLD", NA))
 .printf <- function(pattern, ...){
     dots <- list(...)
     res <- sprintf(pattern, ...)
@@ -96,6 +109,13 @@
 #' only concatenates unique values
 #'
 #'@param x Character vector for toString
+#'@returns A character vector, length 1, where elements of x are concatenated
+#'by ", ", but NAs are not included in the result.
+#'@examples
+#'.toString(c("HELLO", "WORLD", NA))
+#'
+#'# Compare results with:
+#'toString(c("HELLO", "WORLD", NA))
 .toString <- function(x){
     res <- toString(unique(x[! is.na(x)]))
     res <- dplyr::na_if(res, "")
@@ -118,6 +138,10 @@
 #' @importFrom purrr partial
 #' @importFrom magrittr freduce
 #' @keywords internal
+#' @returns The result of applying function f sequentially to each of cls,
+#' usually a data.frame.  Sequential application is key here, when we use
+#' [.freducePartial()] a column in cls may not exist in df until f is
+#' applied to the previous cls.
 .freducePartial <- function(df, f, cls, ...){
     dots <- list(...)
 
@@ -142,7 +166,7 @@
 # id - name of column to check for duplications
 rm_ambiguous <- function(df, gp, id){
     df %>% dplyr::group_by({{ gp }}) %>%
-        dplyr::mutate(n_genes = dplyr::n_distinct( {{ id }} )) %>%
+        dplyr::mutate(n_genes=dplyr::n_distinct( {{ id }} )) %>%
         dplyr::filter(.data$n_genes == 1) %>%
         dplyr::select(-.data$n_genes) %>%
         dplyr::ungroup()
@@ -153,5 +177,5 @@ rm_ambiguous <- function(df, gp, id){
 #
 # Get duplicated values from either direction
 .dups <- function(x){
-    duplicated(x) | duplicated(x, fromLast = TRUE)
+    duplicated(x) | duplicated(x, fromLast=TRUE)
 }

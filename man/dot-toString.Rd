@@ -10,7 +10,17 @@ only concatenates unique values}
 \arguments{
 \item{x}{Character vector for toString}
 }
+\value{
+A character vector, length 1, where elements of x are concatenated
+by ", ", but NAs are not included in the result.
+}
 \description{
 Wrapper for toString, doesn't convert NA to character and
 only concatenates unique values
+}
+\examples{
+.toString(c("HELLO", "WORLD", NA))
+
+# Compare results with:
+toString(c("HELLO", "WORLD", NA))
 }

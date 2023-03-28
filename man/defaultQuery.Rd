@@ -10,8 +10,15 @@ defaultQuery(ab = "Antigen")
 \item{ab}{(character(1), default "Antigen") Name of the column in df
 containing Antigen/Antibody names}
 }
+\value{
+A list of partial formatting functions, where the name the antibody
+column and all arguments except the data.frame are pre-filled.
+}
 \description{
 Default list of functions for making an antibody query table
+}
+\examples{
+function_list <- defaultQuery()
 }
 \author{
 Helen Lindsay

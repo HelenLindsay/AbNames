@@ -25,7 +25,7 @@
 #'@examples
 #'df <- data.frame("Antigen" = c("IgG", "IgA", "IgG1", "IgG2a"))
 #'formatIg(df)
-formatIg <- function(df, ig = "Antigen", new_col = "Ig"){
+formatIg <- function(df, ig="Antigen", new_col="Ig"){
     .stopIfColExists(df, new_col)
 
     df <- df %>%

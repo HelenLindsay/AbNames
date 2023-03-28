@@ -10,7 +10,8 @@ addID(
   new_col = "ID",
   warn = TRUE,
   sep = "__",
-  overwrite = TRUE
+  overwrite = TRUE,
+  verbose = TRUE
 )
 }
 \arguments{
@@ -26,9 +27,16 @@ addID(
 
 \item{overwrite}{Should new_col be regenerated if it already exists in df?
 (logical(1), default: TRUE)}
+
+\item{verbose}{Should program status messages be printed?  Default: TRUE}
 }
 \value{
 df with an extra ID column
+
+df with an additional ID column, by default named "ID", which
+uniquely identifies each row.  The ID column is created by pasting together
+the columns named in id_cols, and adding numbers if this is insufficient
+to uniquely identify rows.
 }
 \description{
 Adds an ID column to a data frame
@@ -39,6 +47,11 @@ not uniquely identify rows, adds a number to the end.  If ID column already
 exists, this function will check if the ID uniquely identifies rows and will
 do nothing if this is the case.  If the ID column exists and does not uniquely
 identify rows, it will be regenerated and overwritten.
+}
+\examples{
+df <- data.frame(Study = c("A", "B", "B"),
+                Antigen = c("CD4","CD8","CD8"))
+addID(df)
 }
 \author{
 Helen Lindsay

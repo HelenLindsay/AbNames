@@ -38,11 +38,11 @@
 #'@examples
 #'df <- data.frame(Antigen = c("PD-L1", "CD3"))
 #'matchToCiteseq(df)
-matchToCiteseq <- function(x, cols = NULL, verbose = TRUE,
-                           check.matches = FALSE, ...){
+matchToCiteseq <- function(x, cols=NULL, verbose=TRUE,
+                           check.matches=FALSE, ...){
     # Load citeseq data set
-    data_env <- new.env(parent = emptyenv())
-    utils::data("citeseq", envir = data_env, package = "AbNames")
+    data_env <- new.env(parent=emptyenv())
+    utils::data("citeseq", envir=data_env, package="AbNames")
     citeseq <- data_env[["citeseq"]]
 
     # Set up names of columns for matching
@@ -65,17 +65,19 @@ matchToCiteseq <- function(x, cols = NULL, verbose = TRUE,
     }
 
     # Report which columns are used to match new data to cite seq data
-    msg <- "Matching new data to citeseq data using columns:\n%s"
-    message(sprintf(msg, msg_cols))
+    if (isTRUE(verbose)){
+        msg <- "Matching new data to citeseq data using columns:\n%s"
+        message(sprintf(msg, msg_cols))
+    }
 
     # Add temporary ID column and add new data to citeseq data set
-    id <- .tempColName(x, nm = "ID")
+    id <- .tempColName(x, nm="ID")
     x <- x %>% dplyr::mutate(!!id := "KEEPME")
     x <- dplyr::bind_rows(x, citeseq)
 
     # If keep_cols is NULL, the default column set is used for matching
-    x <- getCommonName(x, cols = keep_cols, ab = "Antigen",
-                       fill_col = "Antigen_std", keep = TRUE, ...)
+    x <- getCommonName(x, cols=keep_cols, ab="Antigen",
+                       fill_col="Antigen_std", keep=TRUE, ...)
 
     #### TO DO HERE
     if (isTRUE(check.matches)){
@@ -92,7 +94,7 @@ matchToCiteseq <- function(x, cols = NULL, verbose = TRUE,
 
 # .matchToCiteseq_input_checks ----
 .check_matchToCiteseq_inputs <- function(x, cols, keep_cols){
-    if (! "data.frame" %in% class(x)) {
+    if (! is(x, "data.frame")) {
         stop("x should be a data.frame or tibble")
     }
 
@@ -104,11 +106,3 @@ matchToCiteseq <- function(x, cols = NULL, verbose = TRUE,
         warning("cols should match columns in cite seq data set")
     }
 }
-
-
-# Data for using in tests?
-## Some non-standard names, including duplicates
-#adt_nms <- c("KLRG1 (MAFA)", "KLRG1", "CD3 (CD3E)", "HLA.A.B.C",
-#             "HLA-A/B/C", "NKAT2", "CD66a.c.e", "CD66a_c_e",
-#             "CD11a/CD18 (LFA-1)")     # NKAT2 = CD158b
-

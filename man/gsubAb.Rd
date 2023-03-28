@@ -25,10 +25,18 @@ prefixes from}
 \item{new_col}{(character(1), default NA Name of the column to add to df.
 If NA, column ab is modified}
 }
+\value{
+df, where prefixes such as "anti-human" have been removed from column
+"ab".
+}
 \description{
 Remove a pattern from a column, either modifying in place or creating a new
 column.  The default pattern removes the prefix "anti-" or "Anti-", optionally
 followed by Human or human, then optionally a space or underscore
+}
+\examples{
+df <- data.frame(Antigen = c("anti-Human CD8", "anti-mouse CD8"))
+gsubAb(df)
 }
 \author{
 Helen Lindsay

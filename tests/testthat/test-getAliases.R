@@ -10,4 +10,7 @@ test_that("getAliases correctly switches between ALT_ID and HGNC_ID", {
                         getAliases("CD45RA", by = "HGNC_ID")$value))
 })
 
-# abAliases(df, ex, by = "HGNC_ID")
+test_that("getAliases prints a message if antigen is not found", {
+    expect_message(getAliases("BANANA"), "not found")
+    expect_no_message(getAliases("BANANA", verbose = FALSE))
+})

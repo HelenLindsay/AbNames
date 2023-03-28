@@ -10,13 +10,15 @@
 #'@importFrom dplyr n_distinct
 #'@importFrom stats complete.cases
 #'@importFrom rlang syms
+#'@returns df with an additional column containing counts for the column(s)
+#'specified by parameter "col".
 nPerGroup <- function(df, group, col){
 
     # Stop if names to be added already exist
     .stopIfColExists(df, sprintf("n%s", col))
 
     df <- splitMerge(df, complete.cases(!!!syms(group)),
-                     .addNPerGroup, group = group, cols = col)
+                     .addNPerGroup, group=group, cols=col)
     return(df)
 }
 
@@ -31,9 +33,9 @@ nPerGroup <- function(df, group, col){
     df <- df %>%
         dplyr::group_by(dplyr::across(all_of(group))) %>%
         dplyr::mutate(dplyr::across(all_of(cols),
-                                    .fns = list(ndistinct =
-                                        ~dplyr::n_distinct(.x, na.rm = TRUE)),
-                                    .names = "n{.col}")
+                                    .fns=list(ndistinct =
+                                        ~dplyr::n_distinct(.x, na.rm=TRUE)),
+                                    .names="n{.col}")
                       )
     return(df)
 }

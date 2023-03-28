@@ -33,9 +33,23 @@ Other arguments can be prefilled e.g. with purrr::partial.}
 \item{verbose}{(logical, default: TRUE) If TRUE, prints a message when
 starting}
 }
+\value{
+A tibble with columns containing the original ID, "name", the name of the
+formatting method that was applied, and "value", the result of applying the
+formatting method to the original antigen. The value "Antigen" in the name
+column contains the original antigen value, with some minor formatting such
+as converting Greek symbols to Latin characters.
+}
 \description{
 Given a data.frame containing Antigen/Antibody names, reformat
 the names into possible gene names and return the data.frame in long format.
+}
+\examples{
+df <- data.frame(Antigen = c("KLRG1 (MAFA)", "KLRG1", "CD3 (CD3E)",
+                            "HLA.A.B.C", "HLA-A/B/C", "NKAT2",
+                            "CD66a.c.e", "CD66a_c_e", "CD11a/CD18 (LFA-1)"),
+                ID = LETTERS[1:9])
+makeQueryTable(df)
 }
 \author{
 Helen Lindsay

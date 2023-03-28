@@ -11,6 +11,10 @@
 
 \item{flt}{An (unquoted) expression for using with dplyr::filter}
 }
+\value{
+A character string, length 1, containing the results of printing
+the first group of df that matches condition flt.
+}
 \description{
 Get the first group of a grouped data.frame matching a condition and format
 output for printing an error message.

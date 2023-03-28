@@ -23,7 +23,7 @@
 #'@examples
 #'df <- data.frame(Antigen = c("TCRab", "TCR-ab", "TCRa/b"))
 #'formatTCR(df, tcr = "Antigen")
-formatTCR <- function(df, tcr = "TCR", new_col = "TCR_long"){
+formatTCR <- function(df, tcr="TCR", new_col="TCR_long"){
     .stopIfColExists(df, new_col)
 
     # Operate on the column to avoid worrying about temporary column names
@@ -47,7 +47,10 @@ formatTCR <- function(df, tcr = "TCR", new_col = "TCR_long"){
 #'@param new_col The name of the new column containing the TCR description
 #'@importFrom dplyr all_of any_of
 #'@keywords internal
-formatTCRv <- function(tcr, new_col = "TCR_long"){
+#'@returns A data.frame, with column "TCR" being the original values of
+#' parameter "tcr", and a second column "TCR_long" being the reformatted names
+#' of each matching TCR subunits.
+formatTCRv <- function(tcr, new_col="TCR_long"){
 
     # Substitute Greek letters for Greek words for cases:
     # e.g. a (single letter) or "Va7-2" (preceded by V/J, followed by numbers)

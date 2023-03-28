@@ -33,8 +33,8 @@
 #'                             "CD66a.c.e", "CD66a_c_e", "CD11a/CD18 (LFA-1)"),
 #'                 ID = LETTERS[1:9])
 #'makeQueryTable(df)
-makeQueryTable <- function(df, ab = "Antigen", id = "ID",
-                           control_col = NA, fun = NA, verbose = TRUE){
+makeQueryTable <- function(df, ab="Antigen", id="ID",
+                           control_col=NA, fun=NA, verbose=TRUE){
 
     if (isTRUE(verbose)){
         message("Making query table\n")
@@ -95,7 +95,7 @@ qryToLong <- function(df, query_cols){
 #'column and all arguments except the data.frame are pre-filled.
 #'@examples
 #'function_list <- defaultQuery()
-defaultQuery <- function(ab = "Antigen"){
+defaultQuery <- function(ab="Antigen"){
 
     # Default transformation sequence for making query table ----
 
@@ -105,19 +105,19 @@ defaultQuery <- function(ab = "Antigen"){
     nc <- "Antigen_split"
     split_merge_str <- sprintf('grepl("TCR", %s)', nc)
 
-    qry <- list(purrr::partial(gsubAb, ab = !!ab), # Remove A/antis
-               purrr::partial(gsubAb, ab = !!ab, pattern = "\\s[Rr]ecombinant"),
-               purrr::partial(splitUnnest, ab = !!ab, new_col = !!nc),# Brackets
+    qry <- list(purrr::partial(gsubAb, ab=!!ab), # Remove A/antis
+               purrr::partial(gsubAb, ab=!!ab, pattern="\\s[Rr]ecombinant"),
+               purrr::partial(splitUnnest, ab=!!ab, new_col=!!nc),# Brackets
                # Commas, | or _
-               purrr::partial(splitUnnest, ab = !!nc, split = ", ?|_|\\|"),
+               purrr::partial(splitUnnest, ab=!!nc, split=", ?|_|\\|"),
                # / _ or . if at least 3 on each side and not TCR
-               purrr::partial(splitUnnest, exclude = "TCR",
-                        split = "(?<=[A-z0-9-]{3})[\\/_\\.](?=[A-z0-9-]{3,})"),
-               purrr::partial(.reformatAb, ab = !!nc),
-               purrr::partial(separateSubunits, ab = !!nc, new_col = "subunit"),
-               purrr::partial(splitMerge, ex = !!split_merge_str, f = formatTCR,
-                              tcr = "greek_letter", verbose = FALSE),
-               purrr::partial(formatIg, ig = "greek_letter")
+               purrr::partial(splitUnnest, exclude="TCR",
+                        split="(?<=[A-z0-9-]{3})[\\/_\\.](?=[A-z0-9-]{3,})"),
+               purrr::partial(.reformatAb, ab=!!nc),
+               purrr::partial(separateSubunits, ab=!!nc, new_col="subunit"),
+               purrr::partial(splitMerge, ex=!!split_merge_str, f=formatTCR,
+                              tcr="greek_letter", verbose=FALSE),
+               purrr::partial(formatIg, ig="greek_letter")
     )
 
     return(qry)
@@ -141,6 +141,7 @@ defaultQuery <- function(ab = "Antigen"){
 #'@param sep (Default: __) Delimiter to use for pasting columns to form ID
 #'@param overwrite Should new_col be regenerated if it already exists in df?
 #'(logical(1), default: TRUE)
+#'@param verbose Should program status messages be printed?  Default: TRUE
 #'@return df with an extra ID column
 #'
 #'@importFrom dplyr mutate group_by all_of
@@ -155,8 +156,8 @@ defaultQuery <- function(ab = "Antigen"){
 #'df <- data.frame(Study = c("A", "B", "B"),
 #'                 Antigen = c("CD4","CD8","CD8"))
 #'addID(df)
-addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",
-                  warn = TRUE, sep = "__", overwrite = TRUE){
+addID <- function(df, id_cols=c("Antigen", "Study"), new_col="ID",
+                  warn=TRUE, sep="__", overwrite=TRUE, verbose=TRUE){
 
     # Check id_cols exist in df
     if (! all(id_cols %in% colnames(df))){ stop("All id_cols must be in df") }
@@ -166,7 +167,7 @@ addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",
     if (new_col %in% colnames(df)){
         # If ID column already exists, check that it uniquely identifies rows
         if (! any(is.na(df[[new_col]])) &
-            length(unique(df[[new_col]])) == nrow(df)){
+            length(unique(df[[new_col]])) == nrow(df) & isTRUE(verbose)){
             message(sprintf("ID column %s already uniquely identifies rows",
                             new_col))
             return(df)
@@ -213,7 +214,12 @@ addID <- function(df, id_cols = c("Antigen", "Study"), new_col = "ID",
 #'@param new_col (character(1), default NA Name of the column to add to df.
 #'If NA, column ab is modified
 #'@author Helen Lindsay
-gsubAb <- function(df, ab = "Antigen", pattern = "[Aa]nti-([Hh]uman)?([ _]?)",
+#'@returns df, where prefixes such as "anti-human" have been removed from column
+#'"ab".
+#'@examples
+#'df <- data.frame(Antigen = c("anti-Human CD8", "anti-mouse CD8"))
+#'gsubAb(df)
+gsubAb <- function(df, ab="Antigen", pattern="[Aa]nti-([Hh]uman)?([ _]?)",
                    replacement = "", new_col = NA){
     if (is.na(new_col)) new_col <- ab
     df <- dplyr::mutate(df, !!new_col := gsub(pattern, replacement, !!sym(ab)))
@@ -241,6 +247,12 @@ gsubAb <- function(df, ab = "Antigen", pattern = "[Aa]nti-([Hh]uman)?([ _]?)",
 #'@examples
 #'upperSquish(c("CD3-A", "IL-2Rb", "CD4"))
 #'@export
+#'@author Helen Lindsay
+#'@returns A character vector of the same length as the input vector, where
+#'entries have been converted to upper case and punctuation that matches
+#'common gene name alias patterns has been removed.
+#'@examples
+#'upperSquish(c("CD3-A", "IL-2Rb"))
 upperSquish <- function(ab){
     p1 <- "(^[A-z]+[0-9]?)[-\\. ]?([A-z]+)$" # e.g. CD3-A
     p2 <- "(^[A-z]+)[-\\. ]?([A-z0-9]+)$" # e.g. IL-2Rb
@@ -279,6 +291,10 @@ lowerNoDash <- function(ab){
 #'
 #'@param ab (character(n)) A vector of strings to transform
 #'@author Helen Lindsay
+#'@returns A character vector of the same length as the input vector ab, with
+#' dots (".") replaced by dashes ("-") and NA where entries are unchanged
+#'@examples
+#'dashNotDot(c("IL.2R", "CD4"))
 #'@export
 dashNotDot <- function(ab){
     return(.gsubNA("\\.", "-", toupper(ab)))
@@ -296,7 +312,3 @@ dashNotDot <- function(ab){
                       dash_not_dot = dashNotDot(.data$greek_letter))
     return(result)
 }
-
-
-
-# TO DO: CDw for workshop CDs

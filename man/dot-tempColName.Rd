@@ -13,6 +13,10 @@
 
 \item{nm}{(character(1), default "TEMP") Prefix for temporary column names}
 }
+\value{
+Returns a name for a temporary column in df that isn't the name
+of an existing column.
+}
 \description{
 Returns a name that does not already exist in columns of a data.frame
 }

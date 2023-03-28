@@ -16,9 +16,20 @@ formatTCR(df, tcr = "TCR", new_col = "TCR_long")
 \value{
 df in long form with one subunit per row and a new column "new_col"
 containing the TCR gene description query string
+
+df, with an additional column, by default named "TCR_long",
+giving the TCR name in long format to allow exact matching in the
+gene_aliases table.
 }
 \description{
 Convert T-cell antigen names to long format used in HGNC gene descriptions,
 e.g. "T cell receptor gamma variable 24.  Greek symbols and words should be
 converted to letters before using this function
+}
+\examples{
+df <- data.frame(Antigen = c("TCRab", "TCR-ab", "TCRa/b"))
+formatTCR(df, tcr = "Antigen")
+}
+\author{
+Helen Lindsay
 }

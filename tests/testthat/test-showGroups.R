@@ -5,8 +5,8 @@ test_that("showGroups correctly displays the chosen group", {
     expect_warning(showGroups(df, interactive = FALSE))
 
     df <- dplyr::group_by(df, x)
-    expect_message(showGroups(df, i = 2, interactive = FALSE),
-                   "Group 2 of 3")
+    out <- capture_output(showGroups(df, i = 2, interactive = FALSE))
+    expect_true(grepl("Group 2 of 3", out))
 
     # Expect and error as there are only 3 groups
     expect_error(showGroups(df, i = 4, interactive = FALSE))

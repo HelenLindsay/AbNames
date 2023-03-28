@@ -21,7 +21,7 @@
 #'@importFrom dplyr across
 #'@importFrom dplyr all_of
 #'@export
-searchAliases <- function(query_df, multisubunit = c("TCR_long", "subunit")){
+searchAliases <- function(query_df, multisubunit=c("TCR_long", "subunit")){
 
     if (! all(c("ID", "name", "value") %in% colnames(query_df))){
         stop("Query data frame must contain columns name, ID, and value")
@@ -30,8 +30,8 @@ searchAliases <- function(query_df, multisubunit = c("TCR_long", "subunit")){
     official_nms <- c("HGNC_SYMBOL", "HGNC_NAME")
 
     # Load gene_aliases data set
-    data_env <- new.env(parent = emptyenv())
-    utils::data("gene_aliases", envir = data_env, package = "AbNames")
+    data_env <- new.env(parent=emptyenv())
+    utils::data("gene_aliases", envir=data_env, package="AbNames")
     gene_aliases <- data_env[["gene_aliases"]]
 
     res <- dplyr::left_join(query_df, gene_aliases) %>%

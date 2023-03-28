@@ -35,8 +35,8 @@
 #'# Setting multiple = "ignore" means that groups with multiple values
 #'# will not be filled.
 #'fillByGroup(df, group = "A", fill = "B", multiple = "ignore")
-fillByGroup <- function(df, group, fill, method = c("only_na", "all"),
-                        multiple = c("stop", "mode", "ignore")){
+fillByGroup <- function(df, group, fill, method=c("only_na", "all"),
+                        multiple=c("stop", "mode", "ignore")){
     .stopIfColExists(df, sprintf("n%s", fill))
 
     multiple <- match.arg(multiple)
@@ -99,11 +99,12 @@ fillByGroup <- function(df, group, fill, method = c("only_na", "all"),
 #
 #' Find the most common value per group
 #'
-#' Given a grouped data.frame, count values per group and return a vector with
-#' the most common value for each group.  If there are several equally common
-#' values, the first will be chosen.  Used by [fillByGroup()].
+#' Given a grouped data.frame, count values per group and return a data.frame
+#' with an additional column containing the most common value for each group.
+#' If there are several equally common values, the first will be chosen.
+#' Used by [fillByGroup()].
 #'
-#'@param df a grouped tibble
+#'@param df a data.frame or tibble
 #'@param cl Name of column to find mode (character(1)).
 #'@param new_cl Name of column to create.  If NA (default), col is modified
 #'@param gp Name(s) of columns to group by
@@ -119,13 +120,23 @@ fillByGroup <- function(df, group, fill, method = c("only_na", "all"),
 #'with NA.
 #'@importFrom dplyr n
 #'@importFrom rlang .data
-groupMode <- function(df, cl, gp, new_cl = NA, min_n = NA,
-                      keep_first = TRUE, overwrite = FALSE){
+#'@returns df with group mode values either replacing values in column "cl",
+#'or in a new column new_cl.
+#'@examples
+#'df <- data.frame(Antigen = c("CD274", "CD274", "PD-L1"),
+#'                 Clone = rep("29E.2A3", 3))
+#'groupMode(df, cl="Antigen", gp="Clone", new_cl="Antigen_mode")
+groupMode <- function(df, cl, gp, new_cl=NA, min_n=NA,
+                      keep_first=TRUE, overwrite=FALSE){
 
     n <- .tempColName(df, 1, "n")
     tmp <- .tempColName(df, 1)
 
-    if (is.na(new_cl)) { new_cl <- cl }
+    if (! is.na(new_cl)) {
+        overwrite = TRUE
+    } else {
+        new_cl <- cl
+    }
 
     # Find the mode for column cl in group gp
     df <- df %>%
@@ -166,6 +177,4 @@ groupMode <- function(df, cl, gp, new_cl = NA, min_n = NA,
         dplyr::select(-dplyr::any_of(c(tmp, n))) %>%
         dplyr::ungroup()
     return(df)
-
 }
-

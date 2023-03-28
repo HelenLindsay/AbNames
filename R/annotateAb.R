@@ -26,11 +26,11 @@
 #'df <- data.frame(Antigen = c("CD279", "CD279 (PD-1)", "CD279_PD1",
 #'"CD279(PD-1)", "PD-1 (CD279)","PD1 (CD279)"))
 #'annotateAb(df)
-annotateAb <- function(x, id_cols = NA, control_col = NA){
+annotateAb <- function(x, id_cols=NA, control_col=NA){
     if (is.na(id_cols)){ id_cols <- c("Antigen", "Study") }
     id_cols <- intersect(id_cols, colnames(x))
 
-    x <- AbNames::addID(x, id_cols = id_cols)
+    x <- AbNames::addID(x, id_cols=id_cols)
 
     if (! "Antigen" %in% colnames(x)){
         stop("x must contain a column named 'Antigen'")
@@ -39,8 +39,8 @@ annotateAb <- function(x, id_cols = NA, control_col = NA){
     query_t <- x %>% dplyr::select(all_of(
         na.omit(c("ID", "Antigen", control_col))))
 
-    query_t <- AbNames::makeQueryTable(query_t, ab = "Antigen",
-                                       control_col = control_col)
+    query_t <- AbNames::makeQueryTable(query_t, ab="Antigen",
+                                       control_col=control_col)
     if (! is.na(control_col)){
         query_t <- query_t %>%
             dplyr::select(-dplyr::all_of(control_col))
@@ -62,7 +62,7 @@ annotateAb <- function(x, id_cols = NA, control_col = NA){
         dplyr::mutate(dplyr::across(all_of(idf_cols), ~dplyr::na_if(.x, "NA")))
 
     x <- x %>%
-        dplyr::left_join(alias_results, by = "ID") %>%
+        dplyr::left_join(alias_results, by="ID") %>%
         unique()
     if (any(is.na(x[["ALT_ID"]]))){ x <- searchTotalseq(x) }
 

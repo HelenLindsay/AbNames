@@ -21,11 +21,25 @@
 #' is "Custom made" should not be used for matching.  Alternatively, set to TRUE
 #' to use the default ignore patterns.
 #' @param ... pass keep = TRUE for keeping grouping columns for debugging
-#' @param verbose
+#' @param verbose Print information about which columns are used for grouping?
+#' Default: TRUE
 #' @author Helen Lindsay
-getCommonName <- function(x, cols = NULL, ab = "Antigen",
-                          fill_col = "Antigen_std", n_matched = "n_matched",
-                          ignore = TRUE, verbose = TRUE, ...){
+#' @returns x, with additional columns fill_col (default name "Antigen_std")
+#' with the standardised Antigen name; "group" containing the grouping indices;
+#' and n_matched (default name "n_matched"), containing the number of rows
+#' that were used to generate the standard name.
+#' @examples
+#' df <- data.frame(Antigen = c("B220", "B220 (CD45R)",
+#'                              "C-kit (CD117)", "C-KIT"),
+#'                  HGNC_ID = rep(c("HGNC:9666", "HGNC:6342"), each = 2))
+#'
+#'# Here we match Antigens using HGNC_ID.  Note that we have to explicitly
+#'# specify the matching columns.  By default, HGNC_ID is not used for matching
+#'# to avoid matching isoforms.
+#'getCommonName(df, cols = "HGNC_ID")
+getCommonName <- function(x, cols=NULL, ab="Antigen",
+                          fill_col="Antigen_std", n_matched="n_matched",
+                          ignore=TRUE, verbose=TRUE, ...){
 
     .check_getCommonName(colnames(x), ab, fill_col, n_matched, cols)
 
@@ -42,19 +56,19 @@ getCommonName <- function(x, cols = NULL, ab = "Antigen",
     # (brackets are usually alternative names)
     x <- dplyr::mutate(x, !! fill_col := gsub(" ?\\(.*", "", !!sym(ab)))
 
-    tmp_grp <- .tempColName(x, nm = "group") # Don't overwrite existing "group"
+    tmp_grp <- .tempColName(x, nm="group") # Don't overwrite existing "group"
 
     if (isTRUE(verbose)){
         message(sprintf("Grouping data using columns:\n%s", toString(cols)))
     }
 
     # Group by any e.g. catalogue number or exact match to antigen
-    x <- group_by_any(x, groups = cols, new_col = tmp_grp, ignore = ignore) %>%
+    x <- group_by_any(x, groups=cols, new_col=tmp_grp, ignore=ignore) %>%
         dplyr::mutate(!!n_matched := dplyr::n())
 
     # Fill with most common value
-    x <- fillByGroup(x, group = tmp_grp, method = "all",
-                     multiple = "mode", fill = fill_col)
+    x <- fillByGroup(x, group=tmp_grp, method="all",
+                     multiple="mode", fill=fill_col)
 
     return(x)
 }
