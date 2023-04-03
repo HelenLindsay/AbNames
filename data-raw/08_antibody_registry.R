@@ -1,4 +1,4 @@
-library(tidyverse)
+library("tidyverse")
 
 # Download from antibody registry requires a login
 
@@ -21,7 +21,8 @@ ar <- ar %>%
     tidyr::separate(ab_name, into = c("Species", "ab_name"),
                     sep = " Anti-Human", fill = "left") %>%
     dplyr::mutate(across(where(is_character), stringr::str_squish)) %>%
-    tidyr::separate(ab_name, into = c("ab_name", "Clone"), sep = "[,]? ?[Cc]lone[s]? ",
+    tidyr::separate(ab_name, into = c("ab_name", "Clone"),
+                    sep = "[,]? ?[Cc]lone[s]? ",
                     remove = FALSE, extra = "merge") %>%
     dplyr::select(-defining_citation) %>%
     dplyr::mutate(Antigen = gsub(" Monoclonal.*", "", ab_name)) %>%

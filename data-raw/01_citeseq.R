@@ -89,7 +89,7 @@ citeseq_custom <- citeseq %>%
     dplyr::filter(grepl("custom", Cat_Number) | isTRUE(Custom_Antibody))
 
 
-# TO DO: CHECK FOR ERRORS NAD REMOVE "IGNORE"
+# TO DO: CHECK FOR ERRORS AND REMOVE "IGNORE"
 citeseq <- citeseq %>%
     dplyr::filter(! grepl("custom", Cat_Number) &
                       (is.na(Custom_Antibody) | ! Custom_Antibody)) %>%

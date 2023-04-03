@@ -8,3 +8,5 @@
 ^docs$
 ^pkgdown$
 ^\.github$
+^data/hgnc\.rda$
+^data/ncbi_genes\.rda$
