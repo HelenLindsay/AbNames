@@ -51,3 +51,4 @@ Depends:
 VignetteBuilder: knitr
 URL: https://github.com/HelenLindsay/AbNames
 BugReports: https://github.com/HelenLindsay/AbNames/issues
+LazyData: true

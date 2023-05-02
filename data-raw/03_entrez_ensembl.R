@@ -25,15 +25,13 @@
 # immune genes
 
 # ---------------------------------------------------------------------------
+existing <- ls()
+hgnc <- read_delim(file = "inst/extdata/hgnc.csv")
 
 # Biomart -----
 
 # Note: adding uniprotswissprot as attribute acts like a filter,
 # e.g. "ENSG00000105501" is not present in output
-
-library(tidyverse)
-library(biomaRt)
-data(hgnc)
 
 chrs <- c(1:22, "X", "Y", "MT")
 
@@ -128,8 +126,6 @@ bm <- bm %>%
 # ---------------------------------------------------------------------------
 # org.Hs.eg.db genes -----
 
-library(org.Hs.eg.db)
-
 hs <- org.Hs.eg.db
 
 # Select everything that has an Entrez gene ID
@@ -160,7 +156,6 @@ org_db <- AnnotationDbi::select(hs,
     dplyr::mutate(n_genes = n_distinct(HGNC_SYMBOL)) %>%
     dplyr::filter(n_genes == 1) %>%
     dplyr::select(-n_genes)
-
 
 # Fill in the Ensembl ID using hgnc if it is missing, require ---
 # matches between a symbol and (at least) one alias

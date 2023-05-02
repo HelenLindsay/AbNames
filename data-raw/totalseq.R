@@ -352,7 +352,6 @@ usethis::use_data(totalseq, overwrite = TRUE, compress = "bzip2")
 
 # Notes ----
 
-# Haven't overwritten but not sure
 # TCR Va24 = TRAV10 Gapin "Check MAIT", https://www.beckman.ch
 # (IGRa02 is only described sequence)
 # https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:12103

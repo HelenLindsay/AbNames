@@ -1,7 +1,6 @@
 # To do: CD98, cellmarker only lists one gene, totalseq 2
 # CELLMARKER CD98 should aggregate of SLC3A2 and SLC7A5
 # CD11b - cellmarker had two locations?
-library(tidyverse)
 
 data(gene_aliases)
 gene_aliases <- as_tibble(gene_aliases) %>%

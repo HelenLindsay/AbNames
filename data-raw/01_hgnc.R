@@ -4,23 +4,23 @@
 # table is not a subset of the protein-coding genes table.
 
 # Example of a multi-subunit protein - LFA-1 from ITGAL and ITGB2
+existing <- ls()
 
 # HGNC proteins
-#hgnc_proteins_fname <- paste(c("http://ftp.ebi.ac.uk/pub/databases/",
-#                             "genenames/hgnc/tsv/locus_types/",
-#                             "gene_with_protein_product.txt"),
-#                           collapse = "")
+hgnc_proteins_fname <- paste0("http://ftp.ebi.ac.uk/pub/databases/",
+                             "genenames/hgnc/tsv/locus_types/",
+                             "gene_with_protein_product.txt")
 #hgnc_proteins_f <- tempfile()
-#download.file(hgnc_proteins_fname, destfile = hgnc_proteins_f)
-hgnc_proteins_f <- paste0("~/Analyses/CITEseq_curation/data/",
-                          "gene_with_protein_product.txt")
+hgnc_proteins_f <- sprintf("inst/extdata/hgnc_gene_with_protein_product_%s.txt",
+                           Sys.Date())
+download.file(hgnc_proteins_fname, destfile = hgnc_proteins_f)
 
 # HGNC groups
-#hgnc_groups_fname <- paste(c("https://www.genenames.org/cgi-bin/genegroup/",
-#                             "download-all"), collapse = "")
+hgnc_groups_fname <- paste(c("https://www.genenames.org/cgi-bin/genegroup/",
+                             "download-all"), collapse = "")
 #hgnc_groups_f <- tempfile()
-#download.file(hgnc_groups_fname, destfile = hgnc_groups_f)
-hgnc_groups_f <- "~/Analyses/CITEseq_curation/data/hgnc_all_groups.csv"
+hgnc_groups_f <- sprintf("inst/extdata/hgnc_all_groups_%s.csv", Sys.Date())
+download.file(hgnc_groups_fname, destfile = hgnc_groups_f)
 
 # Select relevant columns, rename and merge tables ----
 hgnc_proteins <- readr::read_delim(hgnc_proteins_f)
@@ -115,8 +115,11 @@ hgnc <- hgnc %>%
     # Make ENTREZ ID a character for joining with other tables
     dplyr::mutate(ENTREZ_ID = as.character(ENTREZ_ID))
 
-hgnc <- as.data.frame(hgnc)
-usethis::use_data(hgnc, overwrite = TRUE, compress = "bzip2")
+write_csv(hgnc, file = "inst/extdata/hgnc.csv")
+rm(list = setdiff(ls(), c(existing, "hgnc")))
+
+#hgnc <- as.data.frame(hgnc)
+#usethis::use_data(hgnc, overwrite = TRUE, compress = "bzip2")
 
 # Possible changes:
 # Remove genes that do not have a protein ID?

@@ -10,28 +10,29 @@
 # Not all NCBI genes have a HGNC_SYMBOL or ENSEMBL_ID.
 # Could these be processed pseudogenes?
 
-# Generate long-format table from NCBI -----
+# Setup ----
 
-library(tidyverse)
-library(AbNames)
-data(hgnc)
+existing <- ls()
+hgnc <- read_delim(file = "inst/extdata/hgnc.csv")
+
+# Generate long-format table from NCBI -----
 
 # Get NCBI genes and aliases
 
-#fn <- file.path("https://ftp.ncbi.nlm.nih.gov/refseq/H_sapiens",
-#                "Homo_sapiens.gene_info.gz")
+fn <- file.path("https://ftp.ncbi.nlm.nih.gov/refseq/H_sapiens",
+                "Homo_sapiens.gene_info.gz")
 #f <- tempfile()
-#download.file(fn, destfile = f)
+f <- sprintf("inst/extdata/NCBI_Homo_sapiens.gene_info_%s.gz",
+             Sys.Date())
+download.file(fn, destfile = f)
 
-f <- "~/Analyses/CITEseq_curation/data/Homo_sapiens.gene_info.gz"
 ncbi_genes <- readr::read_delim(f, na = c("", "NA", "-"))
 
 # Keywords for filtering "Other" column
 alias_grep <- "^CD|[Aa]ntigen|MHC|HLA|(T[- ]cell)|(B[- ]cell)|surface|immunoglo"
 
 
-# Make long format NCBI table
-
+# Make long format NCBI table ----
 ncbi_genes <- ncbi_genes %>%
 
     dplyr::filter(type_of_gene == "protein-coding",
@@ -55,7 +56,7 @@ ncbi_genes <- ncbi_genes %>%
                                                     "(?<=Ensembl:)ENSG[0-9]+"),
                   HGNC_ID = map_chr(HGNC_ID, AbNames:::.toString),
                   HGNC_ID = ifelse(HGNC_ID %in% c("NA", ""), NA, HGNC_ID),
-                  ENTREZ_ID = as.character(ENTREZ_ID)) %>%
+                  ENTREZ_ID = ENTREZ_ID) %>%
 
     # Assume that antibodies of interest are against proteins with HGNC IDs
     dplyr::filter(! is.na(HGNC_ID)) %>%
@@ -101,6 +102,8 @@ ncbi_genes <- ncbi_genes %>%
     dplyr::filter(n_genes == 1) %>%
     dplyr::select(-n_genes)
 
+write_csv(ncbi_genes, file = "inst/extdata/ncbi_genes.csv")
+rm(list = setdiff(ls(), c(existing, c("hgnc", "ncbi_genes"))))
 
-ncbi_genes <- as.data.frame(ncbi_genes)
-usethis::use_data(ncbi_genes, overwrite = TRUE, compress = "bzip2")
+#ncbi_genes <- as.data.frame(ncbi_genes)
+#usethis::use_data(ncbi_genes, overwrite = TRUE, compress = "bzip2")
