@@ -2,7 +2,6 @@
 # CELLMARKER CD98 should aggregate of SLC3A2 and SLC7A5
 # CD11b - cellmarker had two locations?
 
-data(gene_aliases)
 gene_aliases <- as_tibble(gene_aliases) %>%
     dplyr::filter(! SOURCE %in% c("CELLMARKER", "CSPA"))
 
@@ -16,9 +15,13 @@ gene_aliases <- as_tibble(gene_aliases) %>%
 # Number of cell markers is not equal to number of gene (groups),
 # is there an extra , Adhesion molecules, LFA1, Adhesion molecules LFA2?
 
-# There are some errors in the uniprot IDs, e.g. P08920 for CD2 is a mouse ID
+# V1 There are some errors in the uniprot IDs, e.g. P08920 for CD2 is a mouse ID
 
 # http://bio-bigdata.hrbmu.edu.cn/CellMarker/index.jsp
+
+# Cellmarker 1.0 is incorrect for CD77 / A4GALT
+# A4GALT synthesises CD77, CD77 is not a protein
+#cellmarker_exclude <- c("CD77")
 
 
 gsubCellmarker <- function(x){
@@ -34,53 +37,48 @@ gsubCellmarker <- function(x){
 # Cellmarker
 # Sometimes family name is listed under "ENTREZ_IDS"
 
-# To do: make sure that cellmarker cellMarker col mapped to same geneSymbol/ID
+# To do: make sure that cellmarker cellMarker col mapped to same Symbol/ID
 # column is a correct, unambiguous alias
 # Is ENTREZ symbol the HGNC symbol? - No, sometimes it's previous symbol
 # or not found
 
+# Cellmarker v1
 #cellmarker_loc <- paste0("http://bio-bigdata.hrbmu.edu.cn/CellMarker/download/",
 #                         "Human_cell_markers.txt")
 
-# Cellmarker is incorrect for CD77 / A4GALT
-# A4GALT synthesises CD77, CD77 is not a protein
-
-#cellmarker_exclude <- tibble::tribble(~Antigen, ~"CD77")
-cellmarker_exclude <- c("CD77")
-
-cellmarker_fname <- "~/Analyses/CITEseq_curation/data/CellMarker_human.txt"
-#download.file(cellmarker_loc, destfile = cellmarker_fname)
+# Cellmarker 2.0
+cellmarker_loc <- paste0("http://bio-bigdata.hrbmu.edu.cn/CellMarker/",
+                         "CellMarker_download_files/file/Cell_marker_Human.xlsx")
+cellmarker_fname <- sprintf("inst/extdata/CellMarker_human_%s.xlsx", Sys.Date())
+download.file(cellmarker_loc, destfile = cellmarker_fname)
 
 
-cellmarker <- readr::read_delim(cellmarker_fname) %>%
-    dplyr::select(cellName, cellMarker, geneSymbol,
-                  geneID, proteinName, proteinID) %>%
-    dplyr::filter(if_all(c(geneID, proteinID), ~! is.na(.x)),
-                  # "x family" isn't useful as an ID
-                  ! grepl("family", geneID)) %>%
+
+cellmarker <- readxl::read_xlsx(cellmarker_fname) %>%
+    dplyr::select(cell_name, marker, Symbol, GeneID, UNIPROTID) %>%
+    dplyr::filter(if_all(c(GeneID, UNIPROTID), ~! is.na(.x))) %>%
     unique() %>%
     # Separate protein complexes with | instead of [a, b, c]
-    dplyr::mutate(across(c(geneSymbol, geneID, proteinName, proteinID),
+    dplyr::mutate(across(c(Symbol, GeneID, proteinName, UNIPROTID),
                          ~ gsubCellmarker(.x))) %>%
-    dplyr::mutate(across(c(cellMarker, geneSymbol, geneID,
-                           proteinName, proteinID), ~strsplit(.x, ", "))) %>%
+    dplyr::mutate(across(c(cellMarker, Symbol, GeneID,
+                           proteinName, UNIPROTID), ~strsplit(.x, ", "))) %>%
 
     # If there is not 1 marker per gene, something is wrong
-    dplyr::filter(lengths(cellMarker) == lengths(geneSymbol) &
-                      lengths(cellMarker) == lengths(proteinID) &
-                      lengths(geneSymbol) == lengths(geneID) &
-                      lengths(proteinID) == lengths(proteinName)) %>%
+    dplyr::filter(lengths(cellMarker) == lengths(Symbol) &
+                      lengths(cellMarker) == lengths(UNIPROTID) &
+                      lengths(Symbol) == lengths(GeneID) &
+                      lengths(UNIPROTID) == lengths(proteinName)) %>%
     # One row per gene
-    tidyr::unnest(cols = c(cellMarker, geneSymbol, geneID,
-                           proteinName, proteinID)) %>%
+    tidyr::unnest(cols = c(cellMarker, Symbol, GeneID,
+                           proteinName, UNIPROTID)) %>%
     dplyr::rename(Antigen = cellMarker,
-                  ENTREZ_ID = geneID,
-                  ENTREZ_SYMBOL = geneSymbol,
-                  UNIPROT_ID = proteinID) %>%
+                  ENTREZ_ID = GeneID,
+                  ENTREZ_SYMBOL = Symbol,
+                  UNIPROT_ID = UNIPROTID) %>%
     dplyr::mutate(SOURCE = "CELLMARKER") %>%
     dplyr::mutate(across(c(ENTREZ_SYMBOL, ENTREZ_ID,
-                           proteinName, UNIPROT_ID), ~na_if(., "NA"))) %>%
-    dplyr::filter(! Antigen %in% cellmarker_exclude)
+                           proteinName, UNIPROT_ID), ~na_if(., "NA")))
 
 # Patch missing IDs or UNIPROT IDs that differ from HGNC IDs ----
 ga_patch <- gene_aliases %>%

@@ -116,7 +116,7 @@ hgnc <- hgnc %>%
     dplyr::mutate(ENTREZ_ID = as.character(ENTREZ_ID))
 
 write_csv(hgnc, file = "inst/extdata/hgnc.csv")
-rm(list = setdiff(ls(), c(existing, "hgnc")))
+rm(list = setdiff(ls(), c(existing, "hgnc", "existing")))
 
 #hgnc <- as.data.frame(hgnc)
 #usethis::use_data(hgnc, overwrite = TRUE, compress = "bzip2")

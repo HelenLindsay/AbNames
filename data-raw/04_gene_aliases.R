@@ -6,11 +6,8 @@
 # ARMC9 / ENSG00000135931 for isotype control
 # Antigen with e.g. CD3.1 - not safe to remove dot if both sides are number
 
-
-
 # Ensembl can map same gene to multiple HGNC symbols, e.g. ENSG00000276085
 # to CCL3L1 / CCL3L3.  HGNC maps to different ENSEMBL IDs,
-
 
 # Genes in NCBI not org_db are where ENTREZ_ID is mapped to a novel gene or
 # scaffold.
@@ -38,13 +35,7 @@
 
 # Setup -----
 
-library(tidyverse)
-library(readxl)
-library(AbNames)
-
-source("data-raw/hgnc.R")
-source("data-raw/ncbi.R")
-source("data-raw/entrez_ensembl.R")
+existing = ls()
 
 # --------------------------------------------------------------------
 # Make HGNC/ENSEMBL IDs from HGNC consistent with Ensembl -----
@@ -97,7 +88,6 @@ temp <- hgnc %>%
 hgnc <- hgnc %>% anti_join(temp)
 temp <- full_join(temp, multi_gene)
 hgnc <- hgnc %>% bind_rows(temp)
-
 
 # ---------------------------------------------------------------------------
 # Select the aliases that aren't already present in hgnc -----
@@ -177,5 +167,8 @@ hgnc <- hgnc %>%
     ungroup() %>%
     unique()
 
-gene_aliases <- as.data.frame(hgnc)
-usethis::use_data(gene_aliases, overwrite = TRUE, compress = "bzip2")
+write_csv(as.data.frame(hgnc), file = "inst/extdata/gene_aliases.csv")
+rm(list = setdiff(ls(), c("existing","gene_aliases")))
+
+#gene_aliases <- as.data.frame(hgnc)
+#usethis::use_data(gene_aliases, overwrite = TRUE, compress = "bzip2")

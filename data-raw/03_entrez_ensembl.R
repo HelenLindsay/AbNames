@@ -25,9 +25,6 @@
 # immune genes
 
 # ---------------------------------------------------------------------------
-existing <- ls()
-hgnc <- read_delim(file = "inst/extdata/hgnc.csv")
-
 # Biomart -----
 
 # Note: adding uniprotswissprot as attribute acts like a filter,
@@ -76,7 +73,7 @@ if (! all(ens_to_sp$ENSEMBL_ID %in% bm$ENSEMBL_ID)){
 
 # Rows will be gained as one gene may have multiple UNIPROT IDs
 bm <- bm %>%
-    dplyr::full_join(ens_to_sp) %>%
+    dplyr::full_join(ens_to_sp, relationship = "many-to-many") %>%
     # Only select genes with a HGNC_ID in the hgnc data set
     dplyr::semi_join(hgnc, by = "HGNC_ID")
 
@@ -177,7 +174,6 @@ org_db <- org_db %>%
     dplyr::rows_patch(hgnc_patch,
                       by = c("HGNC_SYMBOL", "ENTREZ_ID"),
                       unmatched = "ignore")
-
 
 #table(is.na(org_db$ENSEMBL_ID))
 # FALSE   TRUE

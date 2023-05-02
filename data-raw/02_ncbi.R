@@ -12,9 +12,6 @@
 
 # Setup ----
 
-existing <- ls()
-hgnc <- read_delim(file = "inst/extdata/hgnc.csv")
-
 # Generate long-format table from NCBI -----
 
 # Get NCBI genes and aliases
@@ -103,7 +100,7 @@ ncbi_genes <- ncbi_genes %>%
     dplyr::select(-n_genes)
 
 write_csv(ncbi_genes, file = "inst/extdata/ncbi_genes.csv")
-rm(list = setdiff(ls(), c(existing, c("hgnc", "ncbi_genes"))))
+rm(list = setdiff(ls(), c(existing, c("hgnc", "ncbi_genes", "existing"))))
 
 #ncbi_genes <- as.data.frame(ncbi_genes)
 #usethis::use_data(ncbi_genes, overwrite = TRUE, compress = "bzip2")

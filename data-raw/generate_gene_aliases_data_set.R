@@ -2,6 +2,9 @@ library("tidyverse")
 library("AbNames")
 library("biomaRt")
 library("org.Hs.eg.db")
+library("readxl")
+
+existing <- ls()
 
 source("data-raw/01_hgnc.R")
 source("data-raw/02_ncbi.R")
