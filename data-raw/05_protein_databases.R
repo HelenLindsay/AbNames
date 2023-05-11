@@ -1,12 +1,17 @@
-# To do: CD98, cellmarker only lists one gene, totalseq 2
-# CELLMARKER CD98 should aggregate of SLC3A2 and SLC7A5
+# To do:
+# If symbol is both type PREVIOUS_NAME and PREVIOUS_SYMBOL, use PREVIOUS_SYMBOL
+# If BIOMART symbol_type is NA, still aggregate
+# If BIOTYPE is known and is not protein_coding, remove?
+# Group by HGNC_ID, ENSEMBL_ID, UNIPROT_ID, HGNC_SYMBOL, value,
+# fill BIOTYPE, symbol_type
+# then aggregate source
 
 gene_aliases <- as_tibble(gene_aliases) %>%
     dplyr::filter(! SOURCE %in% c("CELLMARKER", "CSPA"))
 
 # Cell marker database ---------------------------------------------
 
-# Notes cellmarker v1
+# Notes cellmarker v1 ----
 
 # Note: Isoform name may be mapped to gene name, e.g. CD45RO -> PTPRC
 # Some antigens have no annotation information, e.g. CD45.1
@@ -26,7 +31,10 @@ gene_aliases <- as_tibble(gene_aliases) %>%
 #cellmarker_loc <- paste0("http://bio-bigdata.hrbmu.edu.cn/CellMarker/download/",
 #                         "Human_cell_markers.txt")
 
-# Notes cellmarker v2
+# Notes cellmarker v2 ----
+# Symbol / Entrez wrong from CD16
+# value / Symbol wrong for SEP9 / spt8
+
 # Cellmarker v2.0 maps one marker name to one gene
 # Entrez ID is sometimes incorrect, e.g. pointing to a pseudogene
 
@@ -34,7 +42,8 @@ gene_aliases <- as_tibble(gene_aliases) %>%
 # column is a correct, unambiguous alias
 # Is ENTREZ symbol the HGNC symbol? - No, sometimes it's previous symbol
 # or not found
-
+# To do: CD98, cellmarker only lists one gene, totalseq 2
+# CELLMARKER CD98 should aggregate of SLC3A2 and SLC7A5
 
 # Cellmarker 2.0
 cellmarker_loc <- paste0("http://bio-bigdata.hrbmu.edu.cn/CellMarker/",
@@ -49,7 +58,7 @@ cellmarker <- readxl::read_xlsx(cellmarker_fname) %>%
     unique() %>%
     dplyr::rename(value = marker,
                   ENTREZ_ID = GeneID,
-                  SYMBOL = Symbol, # DON"T KNOW YET IF IT IS CORRECT
+                  SYMBOL = Symbol, # At this point don't know if it is correct
                   UNIPROT_ID = UNIPROTID) %>%
     dplyr::mutate(SOURCE = "CELLMARKER") %>%
     dplyr::mutate(UNIPROT_ID = na_if(UNIPROT_ID, "NA")) %>%
@@ -57,27 +66,18 @@ cellmarker <- readxl::read_xlsx(cellmarker_fname) %>%
     # trust primary sources first
     dplyr::filter(! value %in% gene_aliases$value)
 
-# Use org.db to check gene type and remove entries with inconsistant
-# entrez ids
+# Use org.db to check gene type, remove entries with inconsistent entrez ids
 org_db <- AnnotationDbi::select(hs,
                                 keys = pull(cellmarker, ENTREZ_ID),
                                 keytype = "ENTREZID",
                                 columns = c("SYMBOL","GENETYPE")) %>%
-    dplyr::rename(ENTREZ_ID = ENTREZID)
+    dplyr::rename(ENTREZ_ID = ENTREZID) %>%
+    unique()
 
-
-
-# CHECK IF ANTIGEN/SYMBOL/ENTREZ_ID COMB IS CONSISTENT
-
-
-
-
-
-
-# Patch UNIPROT IDs ----
-ga_patch <- gene_aliases %>%
-    dplyr::select(any_of(colnames(cellmarker))) %>%
-    dplyr::filter()
+cellmarker <- cellmarker %>%
+    dplyr::semi_join(org_db, by = c("SYMBOL", "ENTREZ_ID")) %>%
+    dplyr::left_join(org_db) %>%
+    dplyr::filter(is.na(GENETYPE) | GENETYPE == "protein-coding")
 
 
 
@@ -196,13 +196,13 @@ gene_aliases <- gene_aliases %>%
 # Does not appear to contain protein complex names
 
 # Table of validated surfaceome proteins
-#cspa_loc <- "http://wlab.ethz.ch/cspa/data/S2_File.xlsx"
-#cspa_fname <- "~/Analyses/CITEseq_curation/data/cspa.xlsx"
-#download.file(cspa_loc, destfile = cspa_fname)
+
+cspa_loc <- "http://wlab.ethz.ch/cspa/data/S2_File.xlsx"
+cspa_fname <- sprintf("inst/extdata/cspa_%s.xlsx", Sys.Date())
+download.file(cspa_loc, destfile = cspa_fname)
 
 # Sheet A has human proteins and entrez IDs
-cspa <- #readxl::read_xlsx(cspa_fname) %>%
-    readxl::read_xlsx("~/Analyses/CITEseq_curation/data/cspa.xlsx") %>%
+cspa <- readxl::read_xlsx(cspa_fname) %>%
     dplyr::select(UP_Protein_name, CD, ENTREZ_gene_ID,
                   `ENTREZ gene symbol`, ID_link) %>%
     dplyr::rename(UNIPROT_NAME = UP_Protein_name,
@@ -212,30 +212,37 @@ cspa <- #readxl::read_xlsx(cspa_fname) %>%
                   Antigen = CD) %>%
     dplyr::mutate(SOURCE = "CSPA",
                   Antigen = na_if(Antigen, "no"),
-                  across(c(ENTREZ_SYMBOL, ENTREZ_ID), ~na_if(.x, "0")),
-                  ENTREZ_ID = as.character(ENTREZ_ID)) %>%
+                  ENTREZ_ID = as.character(ENTREZ_ID),
+                  across(c(ENTREZ_SYMBOL, ENTREZ_ID), ~na_if(.x, "0"))) %>%
     # No gene symbol
     dplyr::filter(! is.na(ENTREZ_SYMBOL)) %>%
+
     # Join by exact match to "value" in gene_aliases table
     # (either official symbol or alias)
     dplyr::inner_join(gene_aliases %>%
                           dplyr::select(HGNC_SYMBOL, HGNC_ID, ENSEMBL_ID,
                                         ENTREZ_ID, value) %>%
                           unique(),
-                      by = c("ENTREZ_SYMBOL" = "value", "ENTREZ_ID")) %>%
-    # Know from join that ENTREZ_SYMBOL must match an existing symbol or alias
-    tidyr::pivot_longer(c(Antigen, UNIPROT_NAME), names_to = "symbol_type") %>%
-    dplyr::filter(! (value %in% gene_aliases$value | is.na(value))) %>%
-    dplyr::select(dplyr::any_of(colnames(gene_aliases)))
+                      by = c("ENTREZ_SYMBOL" = "value", "ENTREZ_ID"),
+                      relationship = "many-to-many") %>%
 
+    # If the ENTREZ_SYMBOL is not the official symbol, list as an alias
+    dplyr::mutate(ENTREZ_SYMBOL =
+                      ifelse(ENTREZ_SYMBOL == HGNC_SYMBOL,
+                             NA, ENTREZ_SYMBOL)) %>%
+
+    # Know from join that ENTREZ_SYMBOL must match an existing symbol or alias
+    tidyr::pivot_longer(c(Antigen, UNIPROT_NAME, ENTREZ_SYMBOL),
+                        names_to = "symbol_type") %>%
+    dplyr::filter(! (value %in% gene_aliases$value | is.na(value)))
 
 # Check for inconsistencies -----
 
 # Some HGNC_ID / UNIPROT_ID combinations differ.
 # Can be because gene_aliases UNIPROT_ID is NA, or because ID is out of date
+# (all agree on HGNC_SYMBOL and ENTREZ_ID by construction)
 aj <- cspa %>%
     dplyr::anti_join(gene_aliases, by = c("HGNC_ID", "ENTREZ_ID", "UNIPROT_ID"))
-
 
 # Add to aliases table, save
 gene_aliases <- gene_aliases %>%
