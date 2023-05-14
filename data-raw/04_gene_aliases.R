@@ -44,13 +44,16 @@ existing = ls()
 # - ENSEMBL / HGNC disagree -> use ENSEMBL ID from ENSEMBL
 # - ENSEMBL has additional matches -> keep all protein-coding
 
+# I don't remember why I filtered ens_patch for protein_coding but not
+# multi_gene
+
 # Manually checked 15/06/22, usually disagreements are because
 # HGNC ENSEMBL_ID is obsolete
 
 bm_ids <- dplyr::select(bm, ENSEMBL_ID, HGNC_ID, HGNC_SYMBOL, BIOTYPE) %>%
     unique()
 
-# 15 genes differ in HGNC_ID / ENSEMBL_ID combination
+# Genes that differ in HGNC_ID / ENSEMBL_ID combination
 bm_ens_diff <- dplyr::anti_join(bm_ids, hgnc_ids,
                                 by = c("HGNC_ID", "ENSEMBL_ID"))
 
@@ -100,7 +103,6 @@ bm_novel <- bm %>%
     dplyr::semi_join(hgnc, by = c("HGNC_SYMBOL", "ENSEMBL_ID"))
 
 org_db_novel <- org_db %>%
-    dplyr::mutate(symbol_type = "ALIAS") %>%
     dplyr::anti_join(hgnc, by = c("HGNC_SYMBOL", "value")) %>%
     # Only want genes for which there is a HGNC / ENSEMBL /ENTREZ comb in HGNC
     dplyr::semi_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID, ENTREZ_ID))
@@ -135,6 +137,10 @@ bm_novel <- dplyr::rows_update(bm_novel, hgnc_patch,
 
 # --------------------------------------------------------------------------
 
+
+
+# --------------------------------------------------------------------------
+
 # Add novel aliases -----
 
 # Add novel aliases from biomaRt and NCBI
@@ -146,6 +152,23 @@ hgnc <- hgnc %>%
     # Fill HGNC IDs (missing from org_db)
     dplyr::group_by(ENSEMBL_ID, HGNC_SYMBOL, ENTREZ_ID) %>%
     tidyr::fill(HGNC_ID, HGNC_NAME, UNIPROT_ID, .direction = "updown") %>%
+
+    # Set missing symbol_type to "ALIAS", make "protein-coding" consistent
+    dplyr::mutate(symbol_type =
+                      ifelse(is.na(symbol_type), "ALIAS", symbol_type),
+                  BIOTYPE = ifelse(BIOTYPE == "protein_coding",
+                                   "protein-coding", BIOTYPE)) %>%
+
+
+    # To do:
+    # If symbol is both type PREVIOUS_NAME and PREVIOUS_SYMBOL, use PREVIOUS_SYMBOL
+    # If BIOTYPE is known and is not protein_coding, remove?
+    # Group by HGNC_ID, ENSEMBL_ID, UNIPROT_ID, HGNC_SYMBOL, value,
+    # fill BIOTYPE, symbol_type
+    # then aggregate source
+
+
+
 
     # New values may come from more than one source, aggregate
     dplyr::group_by(HGNC_ID, ENSEMBL_ID, UNIPROT_ID, HGNC_SYMBOL, ENTREZ_ID,

@@ -88,7 +88,6 @@ bm_patch <- bm %>%
     dplyr::semi_join(hgnc, by = c("ENSEMBL_ID", "HGNC_ID")) %>%
     # But symbol is incorrect
     dplyr::anti_join(hgnc, by = c("ENSEMBL_ID", "HGNC_SYMBOL", "HGNC_ID"))
-# length(unique(bm_patch$ENSEMBL_ID)) 66 genes
 
 # Remove these rows from biomart
 bm <- bm %>% anti_join(bm_patch)

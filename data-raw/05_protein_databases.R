@@ -1,11 +1,3 @@
-# To do:
-# If symbol is both type PREVIOUS_NAME and PREVIOUS_SYMBOL, use PREVIOUS_SYMBOL
-# If BIOMART symbol_type is NA, still aggregate
-# If BIOTYPE is known and is not protein_coding, remove?
-# Group by HGNC_ID, ENSEMBL_ID, UNIPROT_ID, HGNC_SYMBOL, value,
-# fill BIOTYPE, symbol_type
-# then aggregate source
-
 gene_aliases <- as_tibble(gene_aliases) %>%
     dplyr::filter(! SOURCE %in% c("CELLMARKER", "CSPA"))
 
