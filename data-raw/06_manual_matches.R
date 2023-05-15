@@ -1,40 +1,6 @@
-library("tidyverse")
-library("AbNames")
-
-data(totalseq)
-data(gene_aliases)
-
-# Add ALT_ID to totalseq data set -----
-
-original_nrow <- nrow(totalseq)
-
-mm_fname <- system.file("extdata", "rols_ontology.csv", package = "AbNames")
-mm <- read_delim(mm_fname) %>%
+mm <- read_csv("inst/extdata/rols_ontology.csv") %>%
     dplyr::mutate(across(where(is_character), stringr::str_squish))
 mm_ids <- mm %>% dplyr::select(Antigen, Clone, HGNC_ID, HGNC_SYMBOL, ALT_ID)
-
-# We do not want to join by HGNC_ID as e.g. TRA-1-60-R matches PODXL but is not
-# in the totalseq table
-totalseq <- totalseq %>%
-    left_join_any(mm_ids, cols = c("Antigen", "Clone"), shared = "update") %>%
-    dplyr::mutate(ALT_ID = dplyr::coalesce(ALT_ID, HGNC_ID))
-
-new_nrow <- nrow(totalseq)
-
-# Check that totalseq did not gain rows during merge
-original_nrow == new_nrow
-
-
-totalseq <- as.data.frame(totalseq)
-usethis::use_data(totalseq, overwrite = TRUE, compress = "bzip2")
-
-# Manual check that all totalseq genes have a match
-# totalseq %>%
-# dplyr::filter(is.na(HGNC_ID), grepl("[Hh]uman", Reactivity)) %>%
-# select(Antigen, Clone) %>%
-# filter(! (Antigen %in% mm$Antigen |
-# Clone %in% mm$Clone | Antigen %in% gene_aliases$value)) %>%
-# unique() %>% arrange(Antigen) %>% data.frame()
 
 # Add ALT_ID to gene aliases data set -----
 
@@ -55,7 +21,7 @@ gene_aliases <- gene_aliases %>%
                   SOURCE = dplyr::coalesce(`SOURCE.y`, `SOURCE.x`)) %>%
     dplyr::select(-`SOURCE.x`, -`SOURCE.y`)
 
-# Recreate gene_aliases data set
+# Create gene_aliases data set
 gene_aliases <- as.data.frame(gene_aliases)
 usethis::use_data(gene_aliases, overwrite = TRUE, compress = "bzip2")
 

@@ -165,6 +165,7 @@ table(is.na(org_db$ENSEMBL_ID))
 
 # Patch Ensembl ID by symbol / Entrez ID
 hgnc_patch <- hgnc %>%
+    dplyr::mutate(ENTREZ_ID = as.character(ENTREZ_ID)) %>%
     dplyr::filter(! is.na(ENSEMBL_ID)) %>%
     dplyr::select(HGNC_SYMBOL, ENSEMBL_ID, ENTREZ_ID) %>%
     unique()

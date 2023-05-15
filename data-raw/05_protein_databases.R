@@ -1,3 +1,5 @@
+# CD16 alias for CD16a
+
 gene_aliases <- as_tibble(gene_aliases) %>%
     dplyr::filter(! SOURCE %in% c("CELLMARKER", "CSPA"))
 
@@ -43,136 +45,35 @@ cellmarker_loc <- paste0("http://bio-bigdata.hrbmu.edu.cn/CellMarker/",
 cellmarker_fname <- sprintf("inst/extdata/CellMarker_human_%s.xlsx", Sys.Date())
 download.file(cellmarker_loc, destfile = cellmarker_fname)
 
-
 cellmarker <- readxl::read_xlsx(cellmarker_fname) %>%
     dplyr::filter(Genetype == "protein_coding") %>%
     dplyr::select(marker, Symbol, GeneID, UNIPROTID) %>%
     unique() %>%
     dplyr::rename(value = marker,
                   ENTREZ_ID = GeneID,
-                  SYMBOL = Symbol, # At this point don't know if it is correct
+                  HGNC_SYMBOL = Symbol, # Don't know if it is correct yet
                   UNIPROT_ID = UNIPROTID) %>%
-    dplyr::mutate(SOURCE = "CELLMARKER") %>%
+    dplyr::mutate(SOURCE = "CELLMARKER",
+                  symbol_type = "ALIAS",
+                  BIOTYPE = "protein-coding") %>%
     dplyr::mutate(UNIPROT_ID = na_if(UNIPROT_ID, "NA")) %>%
     # As CELLMARKER aggregates markers from other sources
     # trust primary sources first
-    dplyr::filter(! value %in% gene_aliases$value)
+    dplyr::filter(! value %in% gene_aliases$value) %>%
+    dplyr::semi_join(gene_aliases, by = c("HGNC_SYMBOL", "ENTREZ_ID"))
 
-# Use org.db to check gene type, remove entries with inconsistent entrez ids
-org_db <- AnnotationDbi::select(hs,
-                                keys = pull(cellmarker, ENTREZ_ID),
-                                keytype = "ENTREZID",
-                                columns = c("SYMBOL","GENETYPE")) %>%
-    dplyr::rename(ENTREZ_ID = ENTREZID) %>%
+# Add HGNC_ID and ENSEML_ID
+ga_patch <- gene_aliases %>%
+    dplyr::select(HGNC_ID, ENSEMBL_ID, HGNC_SYMBOL, ENTREZ_ID) %>%
     unique()
 
 cellmarker <- cellmarker %>%
-    dplyr::semi_join(org_db, by = c("SYMBOL", "ENTREZ_ID")) %>%
-    dplyr::left_join(org_db) %>%
-    dplyr::filter(is.na(GENETYPE) | GENETYPE == "protein-coding")
-
-
-
-# Match by antigen for filling NA
-ga_coalesce <- ga_patch[match(cellmarker$Antigen, ga_patch$Antigen), ]
-
-# Remove Antigen for updating UNIPROT ID
-ga_patch <- ga_patch %>%
-    dplyr::select(-Antigen) %>%
-    dplyr::filter(complete.cases(UNIPROT_ID, ENTREZ_ID)) %>%
-    unique()
-
-cellmarker <- cellmarker %>%
-    # Fill NA values
-    dplyr::coalesce(ga_coalesce) %>%
-
-    # Filter again, some cellNames include an NA in a list of markers
-    # (some aren't protein-coding, some would have an ENTREZ ID)
-    dplyr::filter(if_all(c(ENTREZ_ID, UNIPROT_ID), ~! is.na(.x))) %>%
-    dplyr::mutate(across(everything(), ~stringr::str_squish(.x))) %>%
-
-    # Update UNIPROT IDs, matching by ENTREZ_ID
-    dplyr::rows_update(ga_patch, by = "ENTREZ_ID", unmatched = "ignore") %>%
-
-    # Split the protein complexes
-    dplyr::mutate(across(c(ENTREZ_SYMBOL, ENTREZ_ID, proteinName, UNIPROT_ID),
-                         ~strsplit(.x, "\\|"))) %>%
-    tidyr::unnest(cols = c(ENTREZ_SYMBOL,
-                           ENTREZ_ID,
-                           proteinName,
-                           UNIPROT_ID)) %>%
-    # Not useful if antigen already exists
-    dplyr::filter(! Antigen == ENTREZ_SYMBOL,
-                  ! Antigen %in% gene_aliases$value)
-
-# There are 13 markers that don't match HGNC_SYMBOL / ENTREZ_ID combo
-# Removing, but probably safe to keep them
-cellmarker <- cellmarker %>%
-    dplyr::semi_join(gene_aliases,
-                     by = c("ENTREZ_SYMBOL" = "HGNC_SYMBOL", "ENTREZ_ID")) %>%
-    dplyr::rename(HGNC_SYMBOL = ENTREZ_SYMBOL) %>%
-
-    # Add HGNC_IDs and ENSEMBL_IDs
-    dplyr::left_join(gene_aliases %>%
-                         dplyr::select("HGNC_SYMBOL",
-                                       "HGNC_ID",
-                                       "ENSEMBL_ID") %>%
-                         unique()) %>%
-
-    # Re-aggregate the protein complexes
-    unique() %>%
-    dplyr::group_by(Antigen, cellName) %>%
-    dplyr::mutate(across(c(HGNC_ID, HGNC_SYMBOL, ENSEMBL_ID, ENTREZ_ID,
-                           proteinName, UNIPROT_ID),
-                         ~ paste(.x, collapse = "|"))) %>%
-    dplyr::ungroup() %>%
-    dplyr::select(-cellName) %>%
-    unique() %>%
-
-    # Protein names will be added as an alias if they don't already exist
-    dplyr::mutate(proteinName = ifelse(proteinName == HGNC_SYMBOL,
-                                       NA, proteinName),
-                  proteinName = ifelse(proteinName %in% gene_aliases$value,
-                                       NA, proteinName)) %>%
-
-    # Pivot longer for merging with aliases
-    dplyr::rename(CELLMARKER_ANTIGEN = Antigen,
-                  CELLMARKER_PROTEIN = proteinName) %>%
-    tidyr::pivot_longer(cols = c("CELLMARKER_ANTIGEN", "CELLMARKER_PROTEIN"),
-                        names_to = "symbol_type", values_to = "value") %>%
-    # Aggregated protein names probably aren't useful
-    dplyr::filter(! is.na(value), ! grepl("\\|", value))
+    dplyr::left_join(ga_patch, relationship = "many-to-one") %>%
+    dplyr::filter(! is.na(HGNC_ID))
 
 # Add to aliases table, save
 gene_aliases <- gene_aliases %>%
     dplyr::bind_rows(cellmarker)
-
-
-# note still contains multiple antigen to same gene e.g. CD45 isoforms
-
-# Exploration ----
-# cellmarker %>% dplyr::select(-cellName) %>% unique()
-# 11,231 Antigens, 1,250 don't match (exactly) via symbol
-# (excluding families, etc)
-# Why?
-# Because it's long form
-# e.g. "Calcitonin and Related Receptor Antagonists"
-# Because it's not very specific:
-# Stage Specific Embryonic Antigens
-# Because it's an RNA - C1orf61
-# Because it matches a previous symbol
-# Because the antigen is the official symbol but there is no gene info
-# Because it's a pseudogene! EGFEM1P
-
-# Demonstration of row shift error in UNIPROT_IDs
-#missing <- anti_join(cellmarker %>% dplyr::mutate(row_n = dplyr::row_number()),
-#                     gene_aliases, by = c("ENTREZ_ID", "UNIPROT_ID"))
-#x <- missing$row_n - seq_along(missing$row_n)
-#rle(x)$lengths
-
-# Notes:
-# Possible to get e.g. CD32, CD16, CD3 from other source?
-# Haven't checked if individual genes are filtered from protein complexes
 
 # Cell surface protein atlas ---------------------------------------
 
@@ -240,5 +141,8 @@ aj <- cspa %>%
 gene_aliases <- gene_aliases %>%
     dplyr::bind_rows(cspa)
 
-gene_aliases <- as.data.frame(gene_aliases)
-usethis::use_data(gene_aliases, overwrite = TRUE, compress = "bzip2")
+write_csv(as.data.frame(hgnc), file = "inst/extdata/gene_aliases.csv")
+rm(list = setdiff(ls(), c("existing","gene_aliases")))
+
+#gene_aliases <- as.data.frame(gene_aliases)
+#usethis::use_data(gene_aliases, overwrite = TRUE, compress = "bzip2")

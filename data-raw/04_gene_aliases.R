@@ -1,3 +1,5 @@
+# CD97 matches ADRE5 / HGNC:1711
+
 # Notes -----
 
 # PROBLEMS:
@@ -37,6 +39,7 @@
 
 existing = ls()
 
+hgnc <- dplyr::mutate(hgnc, ENTREZ_ID = as.character(ENTREZ_ID))
 # --------------------------------------------------------------------
 # Make HGNC/ENSEMBL IDs from HGNC consistent with Ensembl -----
 
@@ -89,7 +92,7 @@ temp <- hgnc %>%
     dplyr::select(-BIOTYPE, -ENSEMBL_ID)
 
 hgnc <- hgnc %>% anti_join(temp)
-temp <- full_join(temp, multi_gene)
+temp <- full_join(temp, multi_gene, relationship = "many-to-many")
 hgnc <- hgnc %>% bind_rows(temp)
 
 # ---------------------------------------------------------------------------
@@ -111,8 +114,9 @@ org_db_novel <- org_db %>%
 # vs alias. Assume that HGNC annotations are correct, as HGNC is the
 # naming consortium.  Remove entries where the value is the same
 # (Regardless of what type of symbol it is considered to be)
-ncbi_novel <- ncbi_genes %>%
-    dplyr::anti_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID, value))
+ncbi_novel <- ncbi %>%
+    dplyr::anti_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID, value)) %>%
+    dplyr::select(-HGNC_NAME)
 
 
 # UNIPROT IDs can differ.
@@ -136,8 +140,18 @@ bm_novel <- dplyr::rows_update(bm_novel, hgnc_patch,
     unique()
 
 # --------------------------------------------------------------------------
+# Within HGNC, some aliases differ only in symbol type.
+# Prefer symbol over name and current over previous
 
-
+symbol_order <- c("HGNC_SYMBOL", "HGNC_NAME",
+                  "PREVIOUS_SYMBOL", "PREVIOUS_NAME",
+                  "ALIAS", "ALIAS_NAME")
+hgnc <- hgnc %>%
+    mutate(symbol_type = factor(symbol_type, levels = symbol_order)) %>%
+    dplyr::group_by(across(-symbol_type)) %>%
+    dplyr::slice(1) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(symbol_type = as.character(symbol_type))
 
 # --------------------------------------------------------------------------
 
@@ -146,12 +160,12 @@ bm_novel <- dplyr::rows_update(bm_novel, hgnc_patch,
 # Add novel aliases from biomaRt and NCBI
 # (Note - have previously checked that HGNC_ID / ENSEMBL_ID combinations
 # are correct)
-hgnc <- hgnc %>%
+gene_aliases <- hgnc %>%
     dplyr::bind_rows(bm_novel, ncbi_novel, org_db_novel) %>%
 
     # Fill HGNC IDs (missing from org_db)
     dplyr::group_by(ENSEMBL_ID, HGNC_SYMBOL, ENTREZ_ID) %>%
-    tidyr::fill(HGNC_ID, HGNC_NAME, UNIPROT_ID, .direction = "updown") %>%
+    tidyr::fill(HGNC_ID, UNIPROT_ID, .direction = "updown") %>%
 
     # Set missing symbol_type to "ALIAS", make "protein-coding" consistent
     dplyr::mutate(symbol_type =
@@ -159,27 +173,20 @@ hgnc <- hgnc %>%
                   BIOTYPE = ifelse(BIOTYPE == "protein_coding",
                                    "protein-coding", BIOTYPE)) %>%
 
-
-    # To do:
-    # If symbol is both type PREVIOUS_NAME and PREVIOUS_SYMBOL, use PREVIOUS_SYMBOL
-    # If BIOTYPE is known and is not protein_coding, remove?
-    # Group by HGNC_ID, ENSEMBL_ID, UNIPROT_ID, HGNC_SYMBOL, value,
-    # fill BIOTYPE, symbol_type
-    # then aggregate source
-
-
-
+    # Remove lncRNAs (SIGLEC5 and GOLGA8M, both also have proteins)
+    dplyr::filter(! BIOTYPE == "lncRNA") %>%
 
     # New values may come from more than one source, aggregate
-    dplyr::group_by(HGNC_ID, ENSEMBL_ID, UNIPROT_ID, HGNC_SYMBOL, ENTREZ_ID,
-                    BIOTYPE, symbol_type, value) %>%
+    dplyr::group_by(across(-SOURCE)) %>%
     dplyr::summarise(SOURCE = toString(SOURCE), .groups = "keep") %>%
 
-    # Check if values are unambiguous
-    # (newly added aliases may create new ambiguities, only 3 are ambiguous)
+    # Ensure that aliases are unambiguous
+    # (newly added aliases may create new ambiguities)
     dplyr::group_by(value) %>%
     dplyr::mutate(n_genes = n_distinct(HGNC_ID)) %>%
-    dplyr::filter(n_genes == 1 | SOURCE == "HGNC") %>%
+    # To check which aliases are ambiguous:
+    #dplyr::filter(n_genes > 1 & ! any(symbol_type == "HGNC_SYMBOL"))
+    dplyr::filter(n_genes == 1 | symbol_type ==  c("HGNC_SYMBOL")) %>%
     dplyr::select(-n_genes) %>%
 
     # Aggregate the protein IDs

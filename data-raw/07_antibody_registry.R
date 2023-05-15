@@ -2,16 +2,15 @@ library("tidyverse")
 
 # Download from antibody registry requires a login
 
-ar_all <- "~/Analyses/CITEseq_curation/data/antibody_registry.csv"
-ar_human <- paste0("~/Analyses/CITEseq_curation/data/",
-                   "antibody_registry_human_monoclonal.csv")
+ar_all <- "inst/extdata/antibody_registry_2023-05-15.csv"
+ar_human <- "inst/extdata/antibody_registry_human_monoclonal_2023-05-15.csv"
 ar <- read_delim(ar_all) %>%
     dplyr::filter(grepl("Anti-Human", ab_name),
                   grepl("Monoclonal", ab_name),
                   ! grepl("Fluorescein|PE Conju", ab_name),
                   grepl("[Cc]lone", ab_name))
 
-readr::write_delim(ar, file = ar_human)
+readr::write_csv(ar, file = ar_human)
 
 ar <- ar %>%
     # Fix formatting errors

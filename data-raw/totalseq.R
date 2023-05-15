@@ -320,6 +320,34 @@ totalseq <- totalseq %>%
                          ~stringi::stri_trans_general(.x,
                                      id="Any-Latin;Greek-Latin;Latin-ASCII")))
 
+# Add ALT_ID from manual matches to the totalseq data set -----
+
+original_nrow <- nrow(totalseq)
+
+mm <- read_csv("inst/extdata/rols_ontology.csv") %>%
+    dplyr::mutate(across(where(is_character), stringr::str_squish))
+mm_ids <- mm %>% dplyr::select(Antigen, Clone, HGNC_ID, HGNC_SYMBOL, ALT_ID)
+
+# Manual check that all totalseq genes have a match, needs gene_aliases
+#totalseq %>%
+#   dplyr::filter(is.na(HGNC_ID), grepl("[Hh]uman", Reactivity)) %>%
+#   dplyr::select(Antigen, Clone) %>%
+#   filter(! (Antigen %in% mm$Antigen |
+#                 Clone %in% mm$Clone |
+#                 Antigen %in% gene_aliases$value)) %>%
+#   unique() %>% arrange(Antigen) %>% data.frame()
+
+# We do not want to join by HGNC_ID as e.g. TRA-1-60-R matches PODXL but is not
+# in the totalseq table
+totalseq <- totalseq %>%
+    AbNames:::left_join_any(mm_ids, cols = c("Antigen", "Clone"),
+                            shared = "update") %>%
+    dplyr::mutate(ALT_ID = dplyr::coalesce(ALT_ID, HGNC_ID))
+
+new_nrow <- nrow(totalseq)
+
+# Check that totalseq did not gain rows during merge
+original_nrow == new_nrow
 
 # Create totalseq data set ----
 totalseq <- as.data.frame(totalseq)
