@@ -114,7 +114,7 @@ org_db_novel <- org_db %>%
 # vs alias. Assume that HGNC annotations are correct, as HGNC is the
 # naming consortium.  Remove entries where the value is the same
 # (Regardless of what type of symbol it is considered to be)
-ncbi_novel <- ncbi %>%
+ncbi_novel <- ncbi_genes %>%
     dplyr::anti_join(hgnc %>% dplyr::select(HGNC_ID, ENSEMBL_ID, value)) %>%
     dplyr::select(-HGNC_NAME)
 

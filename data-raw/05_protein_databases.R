@@ -141,8 +141,5 @@ aj <- cspa %>%
 gene_aliases <- gene_aliases %>%
     dplyr::bind_rows(cspa)
 
-write_csv(as.data.frame(hgnc), file = "inst/extdata/gene_aliases.csv")
+write_csv(as.data.frame(gene_aliases), file = "inst/extdata/gene_aliases.csv")
 rm(list = setdiff(ls(), c("existing","gene_aliases")))
-
-#gene_aliases <- as.data.frame(gene_aliases)
-#usethis::use_data(gene_aliases, overwrite = TRUE, compress = "bzip2")

@@ -7,7 +7,7 @@ mm_ids <- mm %>% dplyr::select(Antigen, Clone, HGNC_ID, HGNC_SYMBOL, ALT_ID)
 # (for regenerating)
 gene_aliases <- gene_aliases %>%
     dplyr::filter(! SOURCE == "MANUAL_LOOKUP") %>%
-    dplyr::select(-ALT_ID)
+    dplyr::select(-any_of("ALT_ID"))
 
 mm_ids <- mm_ids %>%
     dplyr::select(-Clone) %>%
