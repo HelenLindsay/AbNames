@@ -52,6 +52,7 @@ searchTotalseq <- function(x, cols=NULL){
         dplyr::select(dplyr::all_of(c("Antigen", cols, id_cols)))
 
     result <- left_join_any(x, ts, cols)
+    result <- dplyr::bind_rows(result, y)
 
     # If Antigen is missing but Cat_Number or Clone is matched, patch Antigen
     fill_cols <- intersect(cols, c("Cat_Number", "Clone"))
@@ -62,8 +63,6 @@ searchTotalseq <- function(x, cols=NULL){
         result <- dplyr::rows_patch(result, ts, unmatched = "ignore",
                                     by=fill_cols)
     }
-
-    result <- dplyr::bind_rows(result, y)
 
     # For entries matched by Cat_Number or Clone, fill any matching Antigens
     result <- result %>%
