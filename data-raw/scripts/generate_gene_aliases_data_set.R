@@ -3,7 +3,7 @@ library("AbNames")
 library("readxl")
 
 existing <- ls()
-downloads <- "data-raw/downloads"
+downloads <- "../raw_data"
 
 source("data-raw/01_hgnc.R")
 source("data-raw/02_ncbi.R")

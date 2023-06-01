@@ -18,8 +18,8 @@
 
 fn <- file.path("https://ftp.ncbi.nlm.nih.gov/refseq/H_sapiens",
                 "Homo_sapiens.gene_info.gz")
-f <- sprintf("inst/extdata/NCBI_Homo_sapiens.gene_info_%s.gz",
-             Sys.Date())
+f <- sprintf("%s/NCBI_Homo_sapiens.gene_info_%s.gz",
+             downloads, Sys.Date())
 if (! file.exists(f)){
     download.file(fn, destfile = f)
 }
@@ -101,7 +101,7 @@ ncbi_genes <- ncbi_genes %>%
     dplyr::select(-n_genes) %>%
     dplyr::ungroup()
 
-write_csv(ncbi_genes, file = "inst/extdata/ncbi_genes.csv")
+write_csv(ncbi_genes, file = sprintf("%s/ncbi_genes.csv", downloads))
 rm(list = setdiff(ls(), c(existing, c("hgnc", "ncbi_genes", "existing"))))
 
 #ncbi_genes <- as.data.frame(ncbi_genes)

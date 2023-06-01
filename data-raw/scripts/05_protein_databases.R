@@ -42,7 +42,7 @@ gene_aliases <- as_tibble(gene_aliases) %>%
 # Cellmarker 2.0
 cellmarker_loc <- paste0("http://bio-bigdata.hrbmu.edu.cn/CellMarker/",
                          "CellMarker_download_files/file/Cell_marker_Human.xlsx")
-cellmarker_fname <- sprintf("inst/extdata/CellMarker_human_%s.xlsx", Sys.Date())
+cellmarker_fname <- sprintf("%s/CellMarker_human_%s.xlsx", downloads, Sys.Date())
 download.file(cellmarker_loc, destfile = cellmarker_fname)
 
 cellmarker <- readxl::read_xlsx(cellmarker_fname) %>%
@@ -91,7 +91,7 @@ gene_aliases <- gene_aliases %>%
 # Table of validated surfaceome proteins
 
 cspa_loc <- "http://wlab.ethz.ch/cspa/data/S2_File.xlsx"
-cspa_fname <- sprintf("inst/extdata/cspa_%s.xlsx", Sys.Date())
+cspa_fname <- sprintf("%s/cspa_%s.xlsx", downloads, Sys.Date())
 download.file(cspa_loc, destfile = cspa_fname)
 
 # Sheet A has human proteins and entrez IDs
@@ -141,5 +141,6 @@ aj <- cspa %>%
 gene_aliases <- gene_aliases %>%
     dplyr::bind_rows(cspa)
 
-write_csv(as.data.frame(gene_aliases), file = "inst/extdata/gene_aliases.csv")
+write_csv(as.data.frame(gene_aliases),
+          file = sprintf("%s/gene_aliases.csv", downloads))
 rm(list = setdiff(ls(), c("existing","gene_aliases")))

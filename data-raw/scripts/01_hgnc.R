@@ -10,8 +10,8 @@ existing <- ls()
 hgnc_proteins_fname <- paste0("http://ftp.ebi.ac.uk/pub/databases/",
                              "genenames/hgnc/tsv/locus_types/",
                              "gene_with_protein_product.txt")
-hgnc_proteins_f <- sprintf("inst/extdata/hgnc_gene_with_protein_product_%s.txt",
-                           Sys.Date())
+hgnc_proteins_f <- sprintf("%s/hgnc_gene_with_protein_product_%s.txt",
+                           downloads, Sys.Date())
 if (! file.exists(hgnc_proteins_f)){
     download.file(hgnc_proteins_fname, destfile = hgnc_proteins_f)
 }
@@ -19,7 +19,7 @@ if (! file.exists(hgnc_proteins_f)){
 # HGNC groups
 hgnc_groups_fname <- paste(c("https://www.genenames.org/cgi-bin/genegroup/",
                              "download-all"), collapse = "")
-hgnc_groups_f <- sprintf("inst/extdata/hgnc_all_groups_%s.csv", Sys.Date())
+hgnc_groups_f <- sprintf("%s/hgnc_all_groups_%s.csv", downloads, Sys.Date())
 if (! file.exists(hgnc_groups_f)){
     download.file(hgnc_groups_fname, destfile = hgnc_groups_f)
 }
@@ -118,7 +118,7 @@ hgnc <- hgnc %>%
     dplyr::mutate(ENTREZ_ID = as.character(ENTREZ_ID)) %>%
     dplyr::ungroup()
 
-write_csv(hgnc, file = "inst/extdata/hgnc.csv")
+write_csv(hgnc, file = sprintf("%s/hgnc.csv", downloads))
 rm(list = setdiff(ls(), c(existing, "hgnc", "existing")))
 
 #hgnc <- as.data.frame(hgnc)

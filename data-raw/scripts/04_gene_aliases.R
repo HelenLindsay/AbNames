@@ -197,7 +197,7 @@ gene_aliases <- hgnc %>%
     ungroup() %>%
     unique()
 
-write_csv(as.data.frame(hgnc), file = "inst/extdata/gene_aliases.csv")
+write_csv(as.data.frame(hgnc), file = sprintf("%s/gene_aliases.csv", downloads))
 rm(list = setdiff(ls(), c("existing","gene_aliases")))
 
 #gene_aliases <- as.data.frame(hgnc)
