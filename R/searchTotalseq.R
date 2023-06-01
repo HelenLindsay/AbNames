@@ -57,7 +57,7 @@ searchTotalseq <- function(x, cols=NULL){
     # If Antigen is missing but Cat_Number or Clone is matched, patch Antigen
     fill_cols <- intersect(cols, c("Cat_Number", "Clone"))
     if (any(is.na(result$Antigen)) & length(fill_cols) >= 1){
-        result <- result %>%
+        ts <- ts %>%
             filter_by_union(result %>% dplyr::filter(is.na(.data$Antigen))) %>%
             unique()
         result <- dplyr::rows_patch(result, ts, unmatched = "ignore",
