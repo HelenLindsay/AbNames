@@ -20,6 +20,10 @@
 #' grouping. For example, entries where the catalogue number
 #' is "Custom made" should not be used for matching.  Alternatively, set to TRUE
 #' to use the default ignore patterns.
+#' @param id Name of column containing ID, will be "KEEPME" for the query data
+#' if called via matchToCiteseq.  If present, citeseq data will be subset after
+#' matching to include only one row per Antigen/Study combination before
+#' standardising names.
 #' @param ... pass keep = TRUE for keeping grouping columns for debugging
 #' @param verbose Print information about which columns are used for grouping?
 #' Default: TRUE
@@ -39,7 +43,7 @@
 #'getCommonName(df, cols = "HGNC_ID")
 getCommonName <- function(x, cols=NULL, ab="Antigen",
                           fill_col="Antigen_std", n_matched="n_matched",
-                          ignore=TRUE, verbose=TRUE, ...){
+                          ignore=TRUE, id=NULL, verbose=TRUE, ...){
 
     .check_getCommonName(colnames(x), ab, fill_col, n_matched, cols)
 
@@ -63,8 +67,20 @@ getCommonName <- function(x, cols=NULL, ab="Antigen",
     }
 
     # Group by any e.g. catalogue number or exact match to antigen
-    x <- group_by_any(x, groups=cols, new_col=tmp_grp, ignore=ignore) %>%
-        dplyr::mutate(!!n_matched := dplyr::n())
+    x <- group_by_any(x, groups=cols, new_col=tmp_grp, ignore=ignore)
+
+    # Make sure that one Antigen is only counted once per study
+    if (! is.null(ID)){
+        query <- x %>% dplyr::filter(.data[[id]] == "KEEPME")
+        x <- x %>%
+            dplyr::filter(.data[[id]] != "KEEPME") %>%
+            dplyr::group_by(.data[[tmp_grp]], .data$Study) %>%
+            dplyr::slice(1) %>%
+            dplyr::bind_rows(query) %>%
+            dplyr::group_by(.data[[tmp_grp]])
+    }
+
+    x <- x %>% dplyr::mutate(!!n_matched := dplyr::n())
 
     # Fill with most common value
     x <- fillByGroup(x, group=tmp_grp, method="all",
@@ -81,7 +97,7 @@ getCommonName <- function(x, cols=NULL, ab="Antigen",
     }
 
     msg <- "Column %s already exists in data.frame"
-    if (fill_col %in% col_nms){ stop(sprintf(msg, fill_col))}
+    if (fill_col %in% col_nms){ stop(sprintf(msg, fill_col)) }
 
     if (n_matched %in% col_nms){ stop(sprintf(msg, n_matched)) }
 

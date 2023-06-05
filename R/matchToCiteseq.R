@@ -76,8 +76,8 @@ matchToCiteseq <- function(x, cols=NULL, verbose=TRUE,
     x <- dplyr::bind_rows(x, citeseq)
 
     # If keep_cols is NULL, the default column set is used for matching
-    x <- getCommonName(x, cols=keep_cols, ab="Antigen",
-                       fill_col="Antigen_std", keep=TRUE, ...)
+    x <- getCommonName(x, cols=keep_cols, ab="Antigen", fill_col="Antigen_std",
+                       keep=TRUE, id=id, ...)
 
     #### TO DO HERE
     if (isTRUE(check.matches)){
